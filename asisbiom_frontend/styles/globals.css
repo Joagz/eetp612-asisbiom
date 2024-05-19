@@ -3,31 +3,37 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
+  --foreground-rgb: 255, 255, 255;
+  --background-start-hex: #052971;
+  --background-end-hex: #042894;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  background: var(--background-end-hex);
+  height: 100%;
+  overflow-x: hidden;
+}
+
+.bg-img-default {
+  background-image: url("/eetp612.png");
+  opacity: 40%;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 70%;
+  z-index: -1000;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
+  }
+}
+@media only screen and (max-width: 1024px) {
+  .card {
+    position: relative;
+    flex: 0 0 100% !important;
+    height: 100% !important;
   }
 }
