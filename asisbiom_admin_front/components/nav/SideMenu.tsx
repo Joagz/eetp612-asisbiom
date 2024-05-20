@@ -16,6 +16,7 @@ export function SideMenu({}: Props) {
       </DropdownBtn>
       <NavButton href="/">Resúmenes</NavButton>
       <NavButton href="/">Inasistencias</NavButton>
+      <NavButton href="/info">Acerca de</NavButton>
     </div>
   );
 }
