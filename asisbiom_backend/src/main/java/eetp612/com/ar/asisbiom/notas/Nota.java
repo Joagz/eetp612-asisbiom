@@ -33,7 +33,7 @@ public class Nota {
     private Integer id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "alumno_id", table = "alumnos")
+    @JoinColumn(name = "alumno_id")
     private Alumno alumno;
 
     @Column(name = "nivel_urgencia")

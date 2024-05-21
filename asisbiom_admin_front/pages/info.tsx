@@ -1,6 +1,19 @@
 import { Open_Sans } from "next/font/google";
-import { AppBar, IconButton, Link, Toolbar, Typography } from "@mui/material";
-import { MenuRounded } from "@mui/icons-material";
+import {
+  AppBar,
+  IconButton,
+  Link,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Toolbar,
+  Typography,
+} from "@mui/material";
+import { MenuRounded, PictureAsPdf } from "@mui/icons-material";
 import { useState } from "react";
 import {
   Caption,
@@ -9,6 +22,7 @@ import {
   Paragraph,
   SideMenu,
   Subtitle,
+  TableDocument,
   Title,
 } from "@/components";
 import { NavBar } from "@/components/nav/NavBar";
@@ -77,10 +91,27 @@ export default function Info() {
           además de mejorar la comunicación del equipo directivo con el
           alumnado, teniendo en cuenta todas las variables posibles.
         </Paragraph>
-        <Paragraph>
-          Podés consultar el siguiente documento, en el cual se presenta{" "}
-          <Link href="">más información acerca del proyecto</Link>.
-        </Paragraph>
+        <TableContainer>
+          <Table className="w-full" size="small">
+            <TableHead>
+              <TableRow>
+                <TableCell>
+                  <Paragraph>Documento</Paragraph>
+                </TableCell>
+                <TableCell>
+                  <Paragraph>Info.</Paragraph>
+                </TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              <TableDocument
+                name={"ASISBIOM v1.0"}
+                info={"Documentación principal del proyecto"}
+                link={"https://www.google.com"}
+              />
+            </TableBody>
+          </Table>
+        </TableContainer>
       </article>
       <aside className="flex-1 w-full p-4 flex flex-col gap-4">
         <div className="h-20"></div>

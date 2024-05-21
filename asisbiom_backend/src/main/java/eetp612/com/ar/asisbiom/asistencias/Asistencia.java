@@ -36,7 +36,7 @@ public class Asistencia {
     private Integer id;
 
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinColumn(name = "alumno_id", table = "alumnos")
+    @JoinColumn(name = "alumno_id")
     private Alumno alumno;
 
     @JsonFormat(pattern = "HH:mm:ss")
@@ -58,5 +58,8 @@ public class Asistencia {
 
     @Column(name = "razon_retiro")
     private String razonRetiro;
+
+    @Column(name = "dia")
+    private int dia;
 
 }

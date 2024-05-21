@@ -18,7 +18,7 @@ export const MainLayout = ({ title, children }: Props) => {
       <NavBar menuOpen={menuOpen} setMenuOpen={setMenuOpen}></NavBar>
       <main
         className={`${
-          menuOpen && "pl-[17.5em]"
+          menuOpen && "lg:pl-[17.5em]"
         } flex justify-start items-start p-4 w-full lg:flex-row flex-col`}
       >
         {children}
