@@ -5,9 +5,12 @@
  */
 package eetp612.com.ar.asisbiom.asistencias;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Date;
+
+import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -41,14 +44,15 @@ public class Asistencia {
 
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_entrada")
-    private LocalDate horarioEntrada;
+    private LocalTime horarioEntrada;
 
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_salida")
-    private LocalDate horarioSalida;
+    private LocalTime horarioSalida;
 
+    @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fecha")
-    private Date fecha = Date.from(Instant.now());
+    private String fecha;
 
     @Column(name = "tardanza")
     private Boolean tardanza;

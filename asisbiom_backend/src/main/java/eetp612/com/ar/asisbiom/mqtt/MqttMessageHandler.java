@@ -4,10 +4,9 @@
  */
 package eetp612.com.ar.asisbiom.mqtt;
 
+import java.text.SimpleDateFormat;
 import java.time.Instant;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.chrono.ChronoLocalDate;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -43,7 +42,7 @@ public class MqttMessageHandler implements MessageHandler {
     @Autowired
     private HorarioRepository horarioRepository;
 
-    // TODO: IMPLEMENTAR 
+    // TODO: IMPLEMENTAR
     private void retirar(Alumno alumno) {
     }
 
@@ -65,7 +64,7 @@ public class MqttMessageHandler implements MessageHandler {
                 alumno.getDivision(), DateUtils.getDay());
 
         // Filtrar aquellos horarios que sean anteriores a la hora actual
-        horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(ChronoLocalDate.from(LocalTime.now())))
+        horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(LocalTime.now()))
                 .collect(Collectors.toList());
 
         // Si no hay horarios, volver.
@@ -86,13 +85,17 @@ public class MqttMessageHandler implements MessageHandler {
         Horario horario = horarios.get(0);
         boolean tardanza = false;
 
-        if (horario.getHorarioEntrada().isBefore(ChronoLocalDate.from(LocalTime.now()))) {
+        if (horario.getHorarioEntrada().isBefore(LocalTime.now())) {
             tardanza = true;
         }
 
+        Date fecha = Date.from(Instant.now());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+        String fechaFinal = format.format(fecha);
+
         newAsistencia.setAlumno(alumno);
-        newAsistencia.setFecha(Date.from(Instant.now()));
-        newAsistencia.setHorarioEntrada(LocalDate.now());
+        newAsistencia.setFecha(fechaFinal);
+        newAsistencia.setHorarioEntrada(LocalTime.now());
         newAsistencia.setTardanza(tardanza);
         newAsistencia.setRetirado(false);
 

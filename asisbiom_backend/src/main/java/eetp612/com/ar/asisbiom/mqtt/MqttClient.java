@@ -18,19 +18,20 @@ import lombok.ToString;
 @Data
 @ToString
 @Entity
-@Table(name = "mqtt_clients")
+@Table(name = "sensor_registry")
 public class MqttClient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    private String ip;
+
     // Id del sensor figurando en el servidor MQTT
     @Column(name = "id_sensor")
     private String sensorId;
 
     // Ejemplo: "TALLERES"
-    @Column(name = "ubicacion")
     private String ubicacion;
 
 }

@@ -1,6 +1,8 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Adafruit_Fingerprint.h>
+#include <Preferences.h>
+
 
 // Variables Globales
 static int latestId = NULL;  // Se usara para guardar la id en el sensor de huella
@@ -18,14 +20,23 @@ static const char *REGMODE = "mode_register";
 
 static const char *ssid = "Flia Premet";           // LUEGO CAMBIAR!!!
 static const char *password = "eljoaqui";          // LUEGO CAMBIAR!!!
+
 static const char *mqttServer = "192.168.100.50";  // IP DEL SERVIDOR MQTT
+
+static const char *mqttPwd = "12345";
+static const char *mqttUser = "ROOT";  
+
 static const int mqttPort = 1880;                  // PUERTO DEL SERVIDOR MQTT
+
+static const char* SENSOR_ID = "ABCD1234";
+
 
 // Credenciales (pueden ser cualquiera por ahora)
 static const char *mqttUser = "fingerprint_device";
 static const char *mqttPassword = "12345";
 
-
+// EEPROM memory
+Preferences pref;
 // Wifi
 WiFiClient espClient;
 // MQTT
@@ -198,6 +209,73 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   ;
 }
 
+int getFingerprintID() {
+  uint8_t p = finger.getImage();
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.println("No finger detected");
+      return -1;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return -1;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      return -1;
+    default:
+      Serial.println("Unknown error");
+      return -1;
+  }
+
+  // OK success!
+
+  p = finger.image2Tz();
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return -1;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return -1;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return -1;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return -1;
+    default:
+      Serial.println("Unknown error");
+      return -1;
+  }
+
+  // OK converted!
+  p = finger.fingerSearch();
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Found a print match!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return -1;
+  } else if (p == FINGERPRINT_NOTFOUND) {
+    Serial.println("Did not find a match");
+    return -1;
+  } else {
+    Serial.println("Unknown error");
+    return -1;
+  }
+
+  // found a match!
+  Serial.print("Found ID #");
+  Serial.print(finger.fingerID);
+  Serial.print(" with confidence of ");
+  Serial.println(finger.confidence);
+
+  return finger.fingerID;
+}
 void setup() {
 
   pinMode(REGMODE_PIN, INPUT_PULLUP);
@@ -267,75 +345,6 @@ void setup() {
   }
 }
 
-int getFingerprintID() {
-  uint8_t p = finger.getImage();
-  switch (p) {
-    case FINGERPRINT_OK:
-      Serial.println("Image taken");
-      break;
-    case FINGERPRINT_NOFINGER:
-      Serial.println("No finger detected");
-      return -1;
-    case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
-      return -1;
-    case FINGERPRINT_IMAGEFAIL:
-      Serial.println("Imaging error");
-      return -1;
-    default:
-      Serial.println("Unknown error");
-      return -1;
-  }
-
-  // OK success!
-
-  p = finger.image2Tz();
-  switch (p) {
-    case FINGERPRINT_OK:
-      Serial.println("Image converted");
-      break;
-    case FINGERPRINT_IMAGEMESS:
-      Serial.println("Image too messy");
-      return -1;
-    case FINGERPRINT_PACKETRECIEVEERR:
-      Serial.println("Communication error");
-      return -1;
-    case FINGERPRINT_FEATUREFAIL:
-      Serial.println("Could not find fingerprint features");
-      return -1;
-    case FINGERPRINT_INVALIDIMAGE:
-      Serial.println("Could not find fingerprint features");
-      return -1;
-    default:
-      Serial.println("Unknown error");
-      return -1;
-  }
-
-  // OK converted!
-  p = finger.fingerSearch();
-  if (p == FINGERPRINT_OK) {
-    Serial.println("Found a print match!");
-  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
-    Serial.println("Communication error");
-    return -1;
-  } else if (p == FINGERPRINT_NOTFOUND) {
-    Serial.println("Did not find a match");
-    return -1;
-  } else {
-    Serial.println("Unknown error");
-    return -1;
-  }
-
-  // found a match!
-  Serial.print("Found ID #");
-  Serial.print(finger.fingerID);
-  Serial.print(" with confidence of ");
-  Serial.println(finger.confidence);
-
-  return finger.fingerID;
-}
-
-
 void loop() {
   while (!client.connected()) {
     Serial.println("Conectando a MQTT...");
@@ -348,29 +357,4 @@ void loop() {
     }
   }
 
-  if (digitalRead(REGMODE_PIN) == LOW) {
-    Serial.println("Esperando una huella para registrar...");
-    client.publish(MQTT_SYSINFO, REGMODE);
-
-    // Esperar a que se active el modo "autenticar"
-    while (digitalRead(AUTHMODE_PIN) != LOW) {
-      client.loop();
-    }
-  } else {
-    client.publish(MQTT_SYSINFO, AUTHMODE);
-
-    Serial.println("Esperando una huella para leer...");
-    int id = getFingerprintID();
-
-    if (id == -1) {
-      Serial.println("No hay huella...");
-      return;
-    }
-
-    char buf[10] = { '\0' };
-    sprintf(buf, "%d", id);
-    client.publish(MQTT_GENERAL, buf);
-    while (digitalRead(AUTHMODE_PIN) != LOW && digitalRead(REGMODE_PIN) == LOW)
-      ;
-  }
 }

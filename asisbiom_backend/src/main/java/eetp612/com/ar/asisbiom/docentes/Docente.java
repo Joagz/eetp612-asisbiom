@@ -1,12 +1,9 @@
-
-/*
- * Autor: Joaquín Gómez 
- * EETP N.612 "Eudocio de los Santos Giménez", Coronda, Santa Fe
- */
-package eetp612.com.ar.asisbiom.alumnos;
+package eetp612.com.ar.asisbiom.docentes;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -17,9 +14,8 @@ import lombok.ToString;
 @Data
 @ToString
 @Entity
-@Table(name = "alumnos")
-public class Alumno {
-
+@Table(name = "personal_docente")
+public class Docente {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -27,20 +23,15 @@ public class Alumno {
     @Column(name = "nombre_completo")
     private String nombreCompleto;
 
-    @Column(name = "curso")
-    private Integer curso;
-
-    @Column(name = "division")
-    private Character division;
-
-    @Column(name = "turno")
-    private Integer turno;
-
     @Column(name = "telefono")
     private String telefono;
 
     @Column(name = "correo_electronico")
     private String correoElectronico;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "cargo")
+    private CargoDocente cargoDocente;
 
     @Column(name = "dni")
     private String dni;

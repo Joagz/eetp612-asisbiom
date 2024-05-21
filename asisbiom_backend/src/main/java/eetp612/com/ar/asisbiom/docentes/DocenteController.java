@@ -3,7 +3,7 @@
  * Autor: Joaquín Gómez 
  * EETP N.612 "Eudocio de los Santos Giménez", Coronda, Santa Fe
  */
-package eetp612.com.ar.asisbiom.alumnos;
+package eetp612.com.ar.asisbiom.docentes;
 
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,32 +15,30 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
-
 @RestController
-@RequestMapping("/api/alumno")
-public class AlumnoController {
+@RequestMapping("/api/docente")
+public class DocenteController {
 
     @Autowired
-    private AlumnoRepository alumnoRepository;
+    private DocenteRepository docenteRepository;
 
-    // @ExceptionHandler(value = { Exception.class })
-    // public ResponseEntity<?> catchAll() {
-    // return ResponseEntity.internalServerError().body("Ocurrió un error al
-    // procesar la solicitud. Lo sentimos.");
-    // }
-
-    @GetMapping
-    public List<Alumno> findAll() {
-        return alumnoRepository.findAll();
+    @ExceptionHandler(value = { Exception.class })
+    public ResponseEntity<?> catchAll() {
+        return ResponseEntity.internalServerError().body("Ocurrió un error al procesar la solicitud. Lo sentimos.");
     }
 
-    @GetMapping("/{curso}/{div}")
-    public List<Alumno> getByCursoDiv(@PathVariable("curso") Integer curso, @PathVariable("div") Character div) {
-        return alumnoRepository.findByCursoAndDivision(curso, div);
+    @GetMapping
+    public List<Docente> findAll() {
+        return docenteRepository.findAll();
+    }
+
+    @GetMapping("/cargos/{cargo}")
+    public List<Docente> getMethodName(@PathVariable("cargo") CargoDocente cargo) {
+        return docenteRepository.findByCargoDocente(cargo);
     }
 
     @GetMapping("/search")
@@ -50,25 +48,25 @@ public class AlumnoController {
             @RequestParam(name = "nombre_completo", required = false) String nombre_completo) {
 
         if (id != null) {
-            Optional<Alumno> found = alumnoRepository.findById(id);
+            Optional<Docente> found = docenteRepository.findById(id);
 
             if (found.isPresent())
                 return new ResponseEntity<>(found.get(), HttpStatus.OK);
         } else if (dni != null) {
-            List<Alumno> found = alumnoRepository.findByDni(dni);
+            List<Docente> found = docenteRepository.findByDni(dni);
 
             if (!found.isEmpty())
                 return new ResponseEntity<>(found.get(0), HttpStatus.OK);
 
         } else {
-            List<Alumno> found = alumnoRepository.findByNombreCompleto(nombre_completo);
+            List<Docente> found = docenteRepository.findByNombreCompleto(nombre_completo);
 
             if (!found.isEmpty())
                 return new ResponseEntity<>(found.get(0), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
-    }
 
-    
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+
+    }
 
 }

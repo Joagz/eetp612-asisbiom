@@ -5,7 +5,7 @@
  */
 package eetp612.com.ar.asisbiom.horarios;
 
-import java.time.LocalDate;
+import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -36,11 +36,11 @@ public class Horario {
 
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_entrada")
-    private LocalDate horarioEntrada;
+    private LocalTime horarioEntrada;
 
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_salida")
-    private LocalDate horarioSalida;
+    private LocalTime horarioSalida;
 
     @Column(name = "clase")
     private Integer clase;

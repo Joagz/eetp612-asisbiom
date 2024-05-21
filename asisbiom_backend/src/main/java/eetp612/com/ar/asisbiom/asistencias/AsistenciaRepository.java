@@ -5,6 +5,7 @@
  */
 package eetp612.com.ar.asisbiom.asistencias;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -15,5 +16,8 @@ public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer>
     List<Asistencia> findByAlumno(Alumno alumno);
 
     List<Asistencia> findByAlumnoAndDiaOrderByIdDesc(Alumno alumno, int dia);
+
+    List<Asistencia> findByAlumnoAndFecha(Alumno alumno, String fecha);
+
 
 }

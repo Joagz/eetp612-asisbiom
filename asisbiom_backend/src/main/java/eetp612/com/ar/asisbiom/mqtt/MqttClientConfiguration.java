@@ -33,7 +33,7 @@ public class MqttClientConfiguration {
 
         return IntegrationFlow
                 .from(new MqttPahoMessageDrivenChannelAdapter("asisbiom-backend-mqttclient", mqttPahoClientFactory,
-                        "sensor-data-out"))
+                        "sensor_registry"))
                 .handle(messageHandler)
                 .get();
     }

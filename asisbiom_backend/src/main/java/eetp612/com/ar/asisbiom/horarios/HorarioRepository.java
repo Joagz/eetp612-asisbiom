@@ -12,6 +12,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface HorarioRepository extends JpaRepository<Horario, Integer> {
     List<Horario> findByCurso(Integer curso);
 
+    List<Horario> findByCursoAndDivision(Integer curso, char division);
+
     List<Horario> findByCursoAndDivisionAndDiaOrderByDiaAsc(Integer curso, char division, int dia);
 
     List<Horario> findByDiaOrderByDiaAsc(int dia);
