@@ -42,8 +42,8 @@ public class Asistencia {
     private LocalTime horarioEntrada;
 
     @JsonFormat(pattern = "HH:mm:ss")
-    @Column(name = "horario_salida")
-    private LocalTime horarioSalida;
+    @Column(name = "horario_retiro")
+    private LocalTime horarioRetiro;
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fecha")

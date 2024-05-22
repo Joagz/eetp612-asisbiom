@@ -98,7 +98,7 @@ public class MqttMessageHandler implements MessageHandler {
         newAsistencia.setHorarioEntrada(LocalTime.now());
         newAsistencia.setTardanza(tardanza);
         newAsistencia.setRetirado(false);
-
+        
         asistenciaRepository.save(newAsistencia);
     }
 

@@ -31,7 +31,7 @@ public class MqttClientUtils {
      * "id_sensor+retiro+1+HH:mm:ss+dd:MM:yyyy"
      * 
      * En general:
-     * "[id_sensor]+[razón]+[id_alumno]+HH:mm:ss+dd:MM:yyyy"
+     * "[id_sensor]+[accion]+[id_alumno]+HH:mm:ss+dd:MM:yyyy"
      * 
      * donde id_sensor es la identificación del sensor dentro del servidor, asignada
      * en su microcontrolador.

@@ -5,7 +5,11 @@ import axios from "axios";
 type Props = {};
 
 const InicioSensores = (props: Props) => {
-  const [sensors, setSensors] = useState<any[]>([]);
+  const [sensors, setSensors] = useState<any[]>([{
+    id: 1,
+    sensorId: "Sensor 1",
+    ubicacion: "Sensor en la entrada"
+  }]);
 
   useMemo(() => {
     axios
