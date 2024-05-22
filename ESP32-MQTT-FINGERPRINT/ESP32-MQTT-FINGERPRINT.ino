@@ -18,22 +18,17 @@ static const char *MQTT_GENERAL = "general";
 static const char *AUTHMODE = "mode_auth";
 static const char *REGMODE = "mode_register";
 
-static const char *ssid = "Flia Premet";           // LUEGO CAMBIAR!!!
-static const char *password = "eljoaqui";          // LUEGO CAMBIAR!!!
+static const char *ssid = "Proyecto PLC";           // LUEGO CAMBIAR!!!
+static const char *password = "58389539";          // LUEGO CAMBIAR!!!
 
 static const char *mqttServer = "192.168.100.50";  // IP DEL SERVIDOR MQTT
 
-static const char *mqttPwd = "12345";
+static const char *mqttPassword = "12345";
 static const char *mqttUser = "ROOT";  
 
 static const int mqttPort = 1880;                  // PUERTO DEL SERVIDOR MQTT
 
 static const char* SENSOR_ID = "ABCD1234";
-
-
-// Credenciales (pueden ser cualquiera por ahora)
-static const char *mqttUser = "fingerprint_device";
-static const char *mqttPassword = "12345";
 
 // EEPROM memory
 Preferences pref;

@@ -5,7 +5,6 @@
  */
 package eetp612.com.ar.asisbiom.asistencias;
 
-import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
