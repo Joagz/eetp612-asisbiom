@@ -7,6 +7,7 @@ package eetp612.com.ar.asisbiom.asistencias;
 
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -49,15 +50,11 @@ public class AsistenciaController {
             @PathVariable("div") Character div) {
         List<Alumno> alumnos = alumnoRepository.findByCursoAndDivision(curso, div);
         List<AlumnoJoinAsistencia> listado = new LinkedList<>();
-
-        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-        Date temp = Date.from(Instant.now());
-        String fecha = format.format(temp);
-
+        
         for (Alumno alumno : alumnos) {
             System.out.println(alumno);
             AlumnoJoinAsistencia alumnoJoinAsistencia = new AlumnoJoinAsistencia(alumno, new ArrayList<>());
-            asistenciaRepository.findByAlumnoAndFecha(alumno, fecha)
+            asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now())
                     .forEach(asistencia -> alumnoJoinAsistencia.asistencias.add(asistencia));
             listado.add(alumnoJoinAsistencia);
         }

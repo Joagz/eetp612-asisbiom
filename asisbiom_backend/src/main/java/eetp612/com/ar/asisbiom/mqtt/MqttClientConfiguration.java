@@ -13,6 +13,10 @@ import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
 
+import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
+import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
+import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+
 @Configuration
 public class MqttClientConfiguration {
 

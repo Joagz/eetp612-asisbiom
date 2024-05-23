@@ -5,6 +5,7 @@
  */
 package eetp612.com.ar.asisbiom.asistencias;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -47,7 +48,7 @@ public class Asistencia {
 
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fecha")
-    private String fecha;
+    private LocalDate fecha;
 
     @Column(name = "tardanza")
     private Boolean tardanza;
@@ -57,8 +58,5 @@ public class Asistencia {
 
     @Column(name = "razon_retiro")
     private String razonRetiro;
-
-    @Column(name = "dia")
-    private int dia;
 
 }

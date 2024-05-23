@@ -36,13 +36,21 @@ public class ConteoAsistencia {
     @Column(name = "inasistencias")
     private Float inasistencias;
 
-    @Column(name = "trimestre")
-    private Integer trimestre;
-
     @Column(name = "tardanzas")
     private Integer tardanzas;
 
     @Column(name = "retiros")
     private Integer retiros;
 
+    public ConteoAsistencia(Alumno alumno) {
+        this.alumno = alumno;
+        this.inasistencias = 0f;
+        this.retiros = 0;
+        this.tardanzas = 0;
+    }
+
+    public ConteoAsistencia() {
+    }
+
+    
 }

@@ -5,18 +5,17 @@
  */
 package eetp612.com.ar.asisbiom.asistencias;
 
+import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
 
+@Repository
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer> {
     List<Asistencia> findByAlumno(Alumno alumno);
 
-    List<Asistencia> findByAlumnoAndDiaOrderByIdDesc(Alumno alumno, int dia);
-
-    List<Asistencia> findByAlumnoAndFecha(Alumno alumno, String fecha);
-
-
+    List<Asistencia> findByAlumnoAndFecha(Alumno alumno, LocalDate fecha);
 }

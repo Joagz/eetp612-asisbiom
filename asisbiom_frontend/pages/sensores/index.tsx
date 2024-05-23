@@ -5,15 +5,11 @@ import axios from "axios";
 type Props = {};
 
 const InicioSensores = (props: Props) => {
-  const [sensors, setSensors] = useState<any[]>([{
-    id: 1,
-    sensorId: "Sensor 1",
-    ubicacion: "Sensor en la entrada"
-  }]);
+  const [sensors, setSensors] = useState<any[]>([]);
 
   useMemo(() => {
     axios
-      .get("http://localhost:8089/api/sensor")
+      .get(`${process.env.NEXT_PUBBLIC_API_URL}/api/sensor`)
       .then((res) => setSensors(res.data));
   }, []);
 
