@@ -1,6 +1,5 @@
 import { Card, CardContainer, PrincipalLayout } from "@/components";
 
-
 export default function Home() {
   return (
     <PrincipalLayout justify="start" title={"Inicio"}>
@@ -9,12 +8,14 @@ export default function Home() {
         <p>Sistema de Asistencia Biométrica</p>
       </div>
       <div className="flex flex-1 w-full">
-        <CardContainer>
-        <Card href="/sensores" title={"Sensores"} info={"Ver sensores disponibles en la institución."} />
-        <Card href="/alumnos" title={"Alumnos"} info={"Listado de alumnos por curso, división y turno."} />
+        <CardContainer cols={1}>
+          <Card
+            href="/sensores"
+            title={"Sensores"}
+            info={"Ver sensores disponibles en la institución."}
+          />
         </CardContainer>
       </div>
     </PrincipalLayout>
   );
 }
-

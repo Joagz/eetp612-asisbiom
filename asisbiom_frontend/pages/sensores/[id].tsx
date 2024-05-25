@@ -7,6 +7,9 @@ const SensorById = () => {
     const router = useRouter();
     const sensorId = router.query.id;
 
+    
+
+
 
     return (
         <PrincipalLayout title={`Sensor ${sensorId}`}>
