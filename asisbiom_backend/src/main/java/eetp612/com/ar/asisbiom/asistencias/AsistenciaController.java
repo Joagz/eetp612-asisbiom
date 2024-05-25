@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
 import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
+import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import lombok.Data;
 
 @Data
@@ -39,14 +40,18 @@ public class AsistenciaController {
     private AsistenciaRepository asistenciaRepository;
 
     @Autowired
+    private CursoRepository cursoRepository;
+
+    @Autowired
     private AlumnoRepository alumnoRepository;
 
     @GetMapping("/{curso}/{div}")
     public List<AlumnoJoinAsistencia> getAsistencias(@PathVariable("curso") Integer curso,
             @PathVariable("div") Character div) {
-        List<Alumno> alumnos = alumnoRepository.findByCursoAndDivision(curso, div);
+        List<Alumno> alumnos = alumnoRepository
+                .findByCurso(cursoRepository.findByCursoAndDivisionOrderByCursoAsc(curso, div).get(0));
         List<AlumnoJoinAsistencia> listado = new LinkedList<>();
-        
+
         for (Alumno alumno : alumnos) {
             System.out.println(alumno);
             AlumnoJoinAsistencia alumnoJoinAsistencia = new AlumnoJoinAsistencia(alumno, new ArrayList<>());

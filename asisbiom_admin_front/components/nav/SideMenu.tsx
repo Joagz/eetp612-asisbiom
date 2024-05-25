@@ -4,9 +4,10 @@ type Props = {};
 
 export function SideMenu({}: Props) {
   return (
-    <div className="w-[15em] h-screen relative bg-white shadow-lg border flex flex-col">
+    <div className="w-[15em] h-screen relative bg-white shadow-lg border flex flex-col z-50">
       <NavButton href="/">Inicio</NavButton>
       <DropdownBtn title="Alumnos">
+        <NavButton href="/alumnos/registrar">Registrar</NavButton>
         <DropdownBtn href="/alumnos/manana" title="Turno Mañana">
           <NavButton href="/alumnos/manana/4/A">4to A</NavButton>
         </DropdownBtn>

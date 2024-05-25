@@ -12,8 +12,8 @@ type Props = {
 export const NavBar = ({menuOpen, setMenuOpen}: Props) => {
 
   return (
-    <nav className="fixed top-0 left-0 z-50 flex flex-col w-full">
-      <AppBar color="primary" className="relative">
+    <nav className="fixed top-0 left-0 flex flex-col w-full lg:z-0 z-50">
+      <AppBar color="primary" className="relative z-50">
         <Toolbar variant="dense">
           <IconButton edge="start" onClick={() => setMenuOpen(!menuOpen)}>
             <MenuRounded className="text-white" />

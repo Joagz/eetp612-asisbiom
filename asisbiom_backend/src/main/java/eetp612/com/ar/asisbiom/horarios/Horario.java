@@ -9,11 +9,15 @@ import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
+import eetp612.com.ar.asisbiom.cursos.Curso;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 import lombok.ToString;
@@ -28,11 +32,9 @@ public class Horario {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "curso")
-    private Integer curso;
-
-    @Column(name = "division")
-    private Character division;
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "id_curso")
+    private Curso curso;
 
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_entrada")
@@ -47,8 +49,5 @@ public class Horario {
 
     @Column(name = "dia")
     private Integer dia;
-
-    @Column(name = "turno")
-    private Integer turno;
 
 }

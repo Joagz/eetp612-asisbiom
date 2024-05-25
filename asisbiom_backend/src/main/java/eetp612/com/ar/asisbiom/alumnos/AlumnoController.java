@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import eetp612.com.ar.asisbiom.mqtt.MqttService;
 import eetp612.com.ar.asisbiom.asistencias.Asistencia;
 import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
+import eetp612.com.ar.asisbiom.cursos.Curso;
+import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import eetp612.com.ar.asisbiom.docentes.Docente;
 import eetp612.com.ar.asisbiom.docentes.DocenteRepository;
 import eetp612.com.ar.asisbiom.general.DateUtils;
@@ -21,6 +23,8 @@ import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -31,6 +35,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+
+record AlumnosCurso(
+        Curso curso,
+        List<Alumno> alumnos) {
+}
 
 @RestController
 @RequestMapping("/api/alumno")
@@ -51,6 +61,9 @@ public class AlumnoController {
     @Autowired
     private HorarioRepository horarioRepository;
 
+    @Autowired
+    private CursoRepository cursoRepository;
+
     // @ExceptionHandler(value = { Exception.class })
     // public ResponseEntity<?> catchAll() {
     // return ResponseEntity.internalServerError().body("Ocurrió un error al
@@ -64,7 +77,27 @@ public class AlumnoController {
 
     @GetMapping("/{curso}/{div}")
     public List<Alumno> getByCursoDiv(@PathVariable("curso") Integer curso, @PathVariable("div") Character div) {
-        return alumnoRepository.findByCursoAndDivision(curso, div);
+        List<Curso> cursos = cursoRepository.findByCursoAndDivisionOrderByCursoAsc(curso, div);
+        return alumnoRepository.findByCurso(cursos.get(0));
+    }
+
+    @GetMapping("/list-cursos")
+    public List<AlumnosCurso> alumnosByCurso() {
+        List<AlumnosCurso> alumnosCursos = new ArrayList<>();
+        List<Curso> cursos = cursoRepository.findAll();
+        cursos.sort(new Comparator<Curso>() {
+            @Override
+            public int compare(Curso arg0, Curso arg1) {
+                return arg0.getCurso() - arg1.getCurso();
+            };
+        });
+
+        cursos.forEach(curso -> {
+            List<Alumno> alumnos = alumnoRepository.findByCurso(curso);
+            alumnosCursos.add(new AlumnosCurso(curso, alumnos));
+        });
+
+        return alumnosCursos;
     }
 
     @GetMapping("/search")
@@ -90,7 +123,28 @@ public class AlumnoController {
             if (!found.isEmpty())
                 return new ResponseEntity<>(found.get(0), HttpStatus.OK);
         }
-        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @GetMapping("/latestid")
+    public Integer getLatestId() {
+        List<Alumno> alumnos = alumnoRepository.findAll();
+
+        alumnos.sort(new Comparator<Alumno>() {
+            @Override
+            public int compare(Alumno arg0, Alumno arg1) {
+                return arg1.getId() - arg0.getId();
+            };
+        });
+
+        return alumnos.get(0).getId();
+    }
+
+    @PostMapping("/registrar")
+    public ResponseEntity<?> register(@RequestBody AlumnoDto alumnoDto) {
+        Alumno alumno = alumnoDto.toAlumno();
+        alumnoRepository.save(alumno);
+        return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 
     @PostMapping("/retirar/{idDocente}/{idAlumno}")
@@ -111,9 +165,10 @@ public class AlumnoController {
         Alumno alumno = foundAlumno.get();
 
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
-        asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null).collect(Collectors.toList());
-        List<Horario> horarioDeHoy = horarioRepository.findByCursoAndDivisionAndDiaOrderByDiaAsc(alumno.getCurso(),
-                alumno.getDivision(), DateUtils.getDay());
+        asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null)
+                .collect(Collectors.toList());
+        List<Horario> horarioDeHoy = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
+                DateUtils.getDay());
 
         if (asistencias.isEmpty()) {
             return ResponseEntity.status(404)

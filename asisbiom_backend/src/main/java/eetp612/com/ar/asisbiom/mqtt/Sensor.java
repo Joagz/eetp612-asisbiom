@@ -19,7 +19,7 @@ import lombok.ToString;
 @ToString
 @Entity
 @Table(name = "sensor_registry")
-public class MqttClient {
+public class Sensor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

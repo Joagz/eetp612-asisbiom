@@ -8,6 +8,7 @@ package eetp612.com.ar.asisbiom.horarios;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 
 import java.util.List;
@@ -23,6 +24,9 @@ public class HorarioController {
     @Autowired
     private HorarioRepository horarioRepository;
 
+    @Autowired
+    private CursoRepository cursoRepository;
+
     @GetMapping
     public List<Horario> findAll() {
         return horarioRepository.findAll();
@@ -30,7 +34,7 @@ public class HorarioController {
 
     @GetMapping("/{curso}/{div}")
     public List<Horario> horariosCursoDiv(@PathVariable("curso") Integer curso, @PathVariable("div") Character div) {
-        return horarioRepository.findByCursoAndDivision(curso, div);
+        return horarioRepository.findByCurso(cursoRepository.findByCursoAndDivisionOrderByCursoAsc(curso, div).get(0));
     }
 
     @GetMapping("/hoy")
@@ -40,7 +44,8 @@ public class HorarioController {
 
     @GetMapping("/hoy/{curso}/{div}")
     public List<Horario> horariosHoyCursoDiv(@PathVariable("curso") Integer curso, @PathVariable("div") Character div) {
-        return horarioRepository.findByCursoAndDivisionAndDiaOrderByDiaAsc(curso, div, DateUtils.getDay());
+        return horarioRepository.findByCursoAndDiaOrderByDiaAsc(
+                cursoRepository.findByCursoAndDivisionOrderByCursoAsc(curso, div).get(0), DateUtils.getDay());
     }
 
 }

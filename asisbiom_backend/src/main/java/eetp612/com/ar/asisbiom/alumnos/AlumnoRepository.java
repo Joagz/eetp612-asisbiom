@@ -10,17 +10,15 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import eetp612.com.ar.asisbiom.cursos.Curso;
+
 @Repository
 public interface AlumnoRepository extends JpaRepository<Alumno, Integer> {
 
-    List<Alumno> findByCursoAndDivision(int curso, char division);
+    List<Alumno> findByCurso(Curso curso);
 
     List<Alumno> findByDni(String dni);
 
     List<Alumno> findByNombreCompleto(String nombreCompleto);
-
-    List<Alumno> findByTurno(Integer turno);
-
-    List<Alumno> findByTurnoAndCurso(Integer turno, Integer curso);
 
 }

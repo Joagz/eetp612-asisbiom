@@ -128,8 +128,7 @@ public class MqttService {
 
         Asistencia newAsistencia = new Asistencia();
         // Conseguir listado de horarios por curso, division y día de la semana
-        List<Horario> horarios = horarioRepository.findByCursoAndDivisionAndDiaOrderByDiaAsc(alumno.getCurso(),
-                alumno.getDivision(), DateUtils.getDay());
+        List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), DateUtils.getDay());
 
         // Filtrar aquellos horarios que sean anteriores a la hora actual
         horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(LocalTime.now()))
@@ -137,8 +136,7 @@ public class MqttService {
 
         // Si no hay horarios, volver.
         if (horarios.isEmpty()) {
-            System.out.println("ERROR: No se asiste al alumno, no hay horarios para " + alumno.getCurso() + " '"
-                    + alumno.getDivision() + "' en este turno.");
+            System.out.println("ERROR: No se asiste al alumno, no hay horarios para este turno.");
             return MqttResponse.ERROR_NO_HORARIO;
         }
 

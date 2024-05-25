@@ -10,13 +10,13 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import eetp612.com.ar.asisbiom.cursos.Curso;
+
 @Repository
 public interface HorarioRepository extends JpaRepository<Horario, Integer> {
-    List<Horario> findByCurso(Integer curso);
+    List<Horario> findByCurso(Curso curso);
 
-    List<Horario> findByCursoAndDivision(Integer curso, char division);
-
-    List<Horario> findByCursoAndDivisionAndDiaOrderByDiaAsc(Integer curso, char division, int dia);
+    List<Horario> findByCursoAndDiaOrderByDiaAsc(Curso curso, int dia);
 
     List<Horario> findByDiaOrderByDiaAsc(int dia);
 
