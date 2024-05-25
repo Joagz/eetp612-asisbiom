@@ -1,0 +1,84 @@
+import mqtt, { IClientOptions } from "mqtt";
+import { list } from "postcss";
+import { useEffect } from "react";
+
+const options: IClientOptions = {
+  keepalive: 30,
+  clientId: process.env.NEXT_PUBLIC_MQTT_SERVER_URI,
+  protocolId: "MQTT",
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: "errors",
+    payload: Buffer.from("Connection Closed abnormally..!"),
+    qos: 0,
+    retain: false,
+  },
+  rejectUnauthorized: false,
+};
+
+export enum SensorActions {
+  AUTH,
+  REGISTER,
+  CONFIRM,
+}
+
+export type MqttDataPacket = {
+  id_sensor: string;
+  accion: SensorActions;
+  id_alumno: number;
+};
+
+let _client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);
+
+function checkClient() {
+  if (_client == null) {
+    console.log("El cliente no fue inicializado! por favor usar 'useMqtt'");
+    return false;
+  }
+  return true;
+}
+
+function publish(packet: MqttDataPacket) {
+  if (!checkClient()) return;
+
+  const finalPacket: string =
+    packet.id_sensor + "+" + packet.accion + "+" + packet.id_alumno;
+
+  if (process.env.NEXT_PUBLIC_MQTT_TOPICS_SENSOR_IN)
+    _client.publish(
+      process.env.NEXT_PUBLIC_MQTT_TOPICS_SENSOR_IN,
+      Buffer.from(finalPacket)
+    );
+  else
+    console.log(
+      "ERROR AL PUBLICAR AL SERVIDOR MQTT. (MQTT_TOPICS_SENSOR_IN no está definido en '.env')"
+    );
+}
+
+function listenToSensor() {
+  if (!checkClient()) return;
+
+  if (process.env.NEXT_PUBLIC_MQTT_TOPICS_SENSOR_OUT)
+    _client.subscribe(process.env.NEXT_PUBLIC_MQTT_TOPICS_SENSOR_OUT);
+  else
+    console.log(
+      "ERROR AL SUSCRIBIRSE AL ESCUCHAR EL SENSOR. (MQTT_TOPICS_SENSOR_OUT no está definido en '.env')"
+    );
+}
+
+_client.on("connect", () => {
+  console.log("Ciente conectado");
+  listenToSensor();
+});
+
+_client.on("error", (err: any) => {
+  console.log(err);
+});
+
+export function useMqtt() {
+  if (!checkClient()) return;
+  return { publish };
+}

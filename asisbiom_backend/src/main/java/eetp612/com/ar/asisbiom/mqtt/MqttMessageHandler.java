@@ -25,6 +25,11 @@ public class MqttMessageHandler implements MessageHandler {
     @Autowired
     private MqttService mqttService;
 
+    // TODO
+    public void sendMessage(String message){
+
+    }
+
     public void handleMessage(Message<?> message) throws MessagingException {
         MqttSensorMessage parsed = mqttService.parse(message);
 

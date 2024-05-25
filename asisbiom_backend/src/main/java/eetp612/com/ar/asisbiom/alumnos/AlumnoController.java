@@ -142,7 +142,11 @@ public class AlumnoController {
 
     @PostMapping("/registrar")
     public ResponseEntity<?> register(@RequestBody AlumnoDto alumnoDto) {
-        Alumno alumno = alumnoDto.toAlumno();
+        Optional<Curso> found = cursoRepository.findById(alumnoDto.curso());
+        if (!found.isPresent())
+            return new ResponseEntity<>("Curso no encontrado.", HttpStatus.BAD_REQUEST);
+
+        Alumno alumno = alumnoDto.toAlumno(found.get());
         alumnoRepository.save(alumno);
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }

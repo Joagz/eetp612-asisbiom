@@ -33,6 +33,7 @@ function useMqtt({
     topicHandlers.forEach((th) => {
       client?.subscribe(th.topic);
     });
+    
     client?.on("message", (topic: string, rawPayload: any, packet: any) => {
       const th = topicHandlers.find((t) => t.topic === topic);
       let payload;

@@ -1,7 +1,14 @@
 #define mqttServer "192.168.100.50"
 #define mqttPassword "12345"
-#define mqttUser "ROOT"
-#define mqttPort 1880
+#define mqttUser "FP_SENSOR"
+#define mqttPort 1888
+
+#define MQTT_TOPIC_SENSOR_IN "mqtt_sensor_in"
+#define MQTT_TOPIC_SENSOR_OUT "mqtt_sensor_out"
+
+#define MQTT_ACTION_AUTH 0
+#define MQTT_ACTION_REGISTER 1
+#define MQTT_ACTION_CONFIRM 2
 
 void callback_for_idinfo(char *topic, unsigned char *payload, unsigned int length);
 

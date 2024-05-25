@@ -18,7 +18,7 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-
+import { MqttDataPacket, SensorActions, useMqtt } from "@/hooks";
 /*
     nombreCompleto
     dni
@@ -40,19 +40,16 @@ interface AlumnoData {
   nombreCompleto: string;
   dni: string;
 }
-
 interface Curso {
   curso: number;
   turno: number;
   division: string;
 }
-
 interface AlumnoFormData {
   nombreCompleto: string;
   dni: string;
   curso: Curso;
 }
-
 interface SensorData {
   id: number;
   ip: string;
@@ -63,6 +60,7 @@ interface SensorData {
 const registrar = () => {
   const [sensores, setSensores] = useState<SensorData[]>([]);
   const [listado, setListado] = useState<AlumnosCursoData[]>([]);
+  const mqttClient = useMqtt();
 
   useMemo(() => {
     axios
@@ -82,11 +80,28 @@ const registrar = () => {
     register,
     formState: { errors },
     control,
+    handleSubmit,
   } = useForm();
 
-  const submit: any = (data: AlumnoFormData) => {
-    console.log(data);
-  };
+  function onSubmit(data: any) {
+    axios
+      .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
+        nombreCompleto: data.nombreCompleto,
+        dni: data.dni,
+        curso: data.curso,
+      })
+      .then((response) => {
+        const dataPacket: MqttDataPacket = {
+          accion: SensorActions.REGISTER,
+          id_alumno: response.data.id,
+          id_sensor: data.sensor,
+        };
+
+        console.log(dataPacket);
+
+        mqttClient?.publish(dataPacket);
+      });
+  }
 
   return (
     <MainLayout title={"Registrar alumno"}>
@@ -95,7 +110,7 @@ const registrar = () => {
           <div className="h-5"></div>
           <Form
             control={control}
-            onSubmit={submit}
+            onSubmit={handleSubmit(onSubmit)}
             className="p-4 border rounded-md w-full flex flex-col gap-4"
           >
             <Overline>Nuevo alumno</Overline>
@@ -106,7 +121,12 @@ const registrar = () => {
 
             <FormControl fullWidth>
               <InputLabel id="sensor-select-label">Sensor</InputLabel>
-              <Select label="Sensor" labelId="sensor-select-label">
+              <Select
+                {...register("sensor", { required: true })}
+                label="Sensor"
+                labelId="sensor-select-label"
+                value={1}
+              >
                 {sensores.map((sensor) => (
                   <MenuItem value={sensor.id}>
                     <div className="flex flex-col gap-1">
@@ -149,8 +169,14 @@ const registrar = () => {
               <InputLabel size="small" id="curso-select-label">
                 Curso
               </InputLabel>
-              <Select size="small" label="Curso" labelId="curso-select-label">
-              <MenuItem disabled>Turno Mañana</MenuItem>
+              <Select
+                {...register("curso", { required: true })}
+                size="small"
+                label="Curso"
+                labelId="curso-select-label"
+                value={1}
+              >
+                <MenuItem disabled>Turno Mañana</MenuItem>
                 {listado
                   .filter((obj) => obj.curso.turno == 1)
                   .map((obj) => {

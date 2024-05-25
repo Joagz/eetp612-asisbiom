@@ -4,13 +4,13 @@ import eetp612.com.ar.asisbiom.cursos.Curso;
 
 public record AlumnoDto(
         String nombreCompleto,
-        Curso curso,
+        Integer curso,
         char division,
         int turno,
         String dni) {
-    public Alumno toAlumno() {
+    public Alumno toAlumno(Curso curso) {
         Alumno alumno = new Alumno();
-        alumno.setCurso(this.curso());
+        alumno.setCurso(curso);
         alumno.setDni(this.dni());
         alumno.setNombreCompleto(this.nombreCompleto());
         return alumno;

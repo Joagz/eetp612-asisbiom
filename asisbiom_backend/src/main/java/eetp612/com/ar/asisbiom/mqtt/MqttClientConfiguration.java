@@ -12,19 +12,22 @@ import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.integration.mqtt.core.DefaultMqttPahoClientFactory;
 import org.springframework.integration.mqtt.core.MqttPahoClientFactory;
 import org.springframework.integration.mqtt.inbound.MqttPahoMessageDrivenChannelAdapter;
-
-import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
-import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
-import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+import org.springframework.integration.mqtt.support.DefaultPahoMessageConverter;
+import org.springframework.messaging.converter.MessageConverter;
 
 @Configuration
 public class MqttClientConfiguration {
 
     @Bean
+    public MessageConverter mqttMessageConverter() {
+        return new DefaultPahoMessageConverter();
+    }
+
+    @Bean
     public MqttPahoClientFactory mqttClientFactory() {
         DefaultMqttPahoClientFactory factory = new DefaultMqttPahoClientFactory();
         MqttConnectOptions options = new MqttConnectOptions();
-        options.setServerURIs(new String[] { "tcp://localhost:1880" });
+        options.setServerURIs(new String[] { "tcp://localhost:1888" });
         options.setUserName("asisbiom-backend");
         options.setPassword("test-pwd".toCharArray());
         factory.setConnectionOptions(options);
