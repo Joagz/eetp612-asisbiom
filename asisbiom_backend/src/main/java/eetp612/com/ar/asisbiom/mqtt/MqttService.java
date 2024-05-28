@@ -11,6 +11,10 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.eclipse.paho.client.mqttv3.IMqttClient;
+import org.eclipse.paho.client.mqttv3.MqttClient;
+import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
+import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
@@ -40,6 +44,26 @@ public class MqttService {
 
     @Autowired
     private ConteoRepository conteoRepository;
+
+    private MqttSensorEngine engine;
+
+    public MqttService() throws MqttException {
+        IMqttClient publisher = new MqttClient("tcp://localhost:1887", "test");
+        MqttConnectOptions options = new MqttConnectOptions();
+        options.setAutomaticReconnect(true);
+        options.setCleanSession(true);
+        options.setConnectionTimeout(10);
+        publisher.connect(options);
+
+        engine = new MqttSensorEngine(publisher);
+    }
+
+    public void sendMessage(MqttSensorMessage message) throws Exception {
+        String msgString = message.getSensorId() + "+" + message.getAccion() + "+" + message.getIdAlumno();
+        engine.setMessage(msgString);
+        engine.call();
+        System.out.println(msgString);
+    }
 
     /*
      * En el servidor MQTT los sensores envían datos de tiempo a través de un canal.
@@ -88,7 +112,7 @@ public class MqttService {
         }
 
         parsedMessage.setSensorId(parsed.get(0));
-        parsedMessage.setAction(parsed.get(1));
+        parsedMessage.setAccion(Integer.parseInt(parsed.get(1)));
         parsedMessage.setIdAlumno(Integer.parseInt(parsed.get(2)));
 
         return parsedMessage;
@@ -128,7 +152,8 @@ public class MqttService {
 
         Asistencia newAsistencia = new Asistencia();
         // Conseguir listado de horarios por curso, division y día de la semana
-        List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), DateUtils.getDay());
+        List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
+                DateUtils.getDay());
 
         // Filtrar aquellos horarios que sean anteriores a la hora actual
         horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(LocalTime.now()))

@@ -13,6 +13,7 @@ public class MqttSensorMessage {
     
     private String sensorId;
     private Integer idAlumno;
-    private String action;
+    private Integer accion;
+    // Podríamos incluir algo que ayude a verificar la integridad del mensaje
 
 }

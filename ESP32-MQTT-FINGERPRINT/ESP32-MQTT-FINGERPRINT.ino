@@ -27,19 +27,38 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&sensorSerial);
 
 HTTPClient http;
 
+void callback_debug(char *topic, byte *payload, unsigned int length) {
+  Serial.print("Nuevo Mensaje [");
+  Serial.print(topic);
+  Serial.print("]: ");
+
+  // Print the payload as hexadecimal values
+  for (int i = 0; i < length; i++) {
+    Serial.print("0x");
+    if (payload[i] < 0x10) {
+      Serial.print("0");
+    }
+    Serial.print(payload[i], HEX);
+    Serial.print(" ");
+  }
+  Serial.println();
+}
+
 void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   Serial.print("Nuevo Mensaje [");
   Serial.print(topic);
   Serial.print("] ");
 
-  char *values[3];
+  char values[3][8] = { { '\0' }, { '\0' }, { '\0' } };
 
-  for (int i = 0, k = 0; i < length; i++) {
-    if (payload[i] == '+') {
+  for (int i = 0, k = 0, j = 0; i < length; i++) {
+    if ((char)payload[i] == 0x2B) {
       k++;
-      continue;
+      j = 0;
+    } else {
+      values[k][j] = (char)payload[i];
+      j++;
     }
-    values[k][i] = payload[i];
   }
 
   Serial.print("id_sensor: ");
@@ -55,69 +74,77 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
       ;
 }
 
-void connectMqtt() {
-  if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
-    Serial.println("Conectado a servidor MQTT");
-  } else {
-    // server.handleClient();
-    Serial.println("No se pudo conectar al servidor MQTT");
-    Serial.print("IP: ");
-    Serial.println(mqttServer);
-  }
-}
 void setup() {
   Serial.begin(115200);
   while (!Serial) {
     delay(100);
   }
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback_for_idinfo);
 
   initFingerprint(finger);
 
   WiFi.mode(WIFI_STA);
 
-  WiFiManager wiFiManager;
+  // WiFiManager wiFiManager;
 
-  wiFiManager.resetSettings();
+  // wiFiManager.resetSettings();
 
-  bool res;
+  // bool res;
 
-  res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
+  // res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
 
-  if (!res) {
-    Serial.println("Falla al conectar! reiniciando...");
-    delay(2000);
-    ESP.restart();
+  // if (!res) {
+  //   Serial.println("Falla al conectar! reiniciando...");
+  //   delay(2000);
+  //   ESP.restart();
+  // }
+
+  // Serial.println("");
+  // Serial.println("WiFi conectado");
+  // Serial.println("IP asignada: ");
+  // Serial.println(WiFi.localIP());
+
+  // // Testeando el cliente http
+  // http.begin(SERVER_ADDR);
+  // int httpResponseCode = http.GET();
+
+  // if (httpResponseCode > 0) {
+  //   Serial.println("Conectado al backend correctamente");
+  // } else {
+  //   Serial.print("Error: ");
+  //   Serial.println(httpResponseCode);
+  // }
+  // http.end();
+
+  WiFi.begin("Flia Premet", "eljoaqui");
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
+  }
+  Serial.println("Connected to the WiFi network");
+
+  client.setServer(mqttServer, mqttPort);
+  client.setCallback(callback_for_idinfo);
+  // client.setCallback(callback_debug);
+
+  while (!client.connected()) {
+    Serial.println("Connecting to MQTT...");
+
+    if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
+
+      Serial.println("connected");
+
+    } else {
+
+      Serial.print("failed with state ");
+      Serial.print(client.state());
+      delay(2000);
+    }
   }
 
-  Serial.println("");
-  Serial.println("WiFi conectado");
-  Serial.println("IP asignada: ");
-  Serial.println(WiFi.localIP());
-
-  // Testeando el cliente http
-  http.begin(SERVER_ADDR);
-  int httpResponseCode = http.GET();
-
-  if (httpResponseCode > 0) {
-    Serial.println("Conectado al backend correctamente");
-  } else {
-    Serial.print("Error: ");
-    Serial.println(httpResponseCode);
-  }
-  http.end();
+  client.subscribe(MQTT_TOPIC_SENSOR_IN);
 }
 
-
-
 void loop() {
-  while (!client.connected()) {
-    Serial.println("Intentando reconectar al servidor MQTT...");
-    delay(100);
-    connectMqtt();
-    client.subscribe(MQTT_TOPIC_SENSOR_IN);
-  }
-  client.publish(MQTT_TOPIC_SENSOR_OUT, "Hola!");
-  delay(1000);
+  client.loop();
 }

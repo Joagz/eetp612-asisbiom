@@ -10,12 +10,6 @@ const options: IClientOptions = {
   clean: true,
   reconnectPeriod: 1000,
   connectTimeout: 30 * 1000,
-  will: {
-    topic: "errors",
-    payload: Buffer.from("Connection Closed abnormally..!"),
-    qos: 0,
-    retain: false,
-  },
   rejectUnauthorized: false,
 };
 
@@ -26,9 +20,9 @@ export enum SensorActions {
 }
 
 export type MqttDataPacket = {
-  id_sensor: string;
+  sensorId: string;
   accion: SensorActions;
-  id_alumno: number;
+  idAlumno: number;
 };
 
 let _client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);
@@ -45,7 +39,7 @@ function publish(packet: MqttDataPacket) {
   if (!checkClient()) return;
 
   const finalPacket: string =
-    packet.id_sensor + "+" + packet.accion + "+" + packet.id_alumno;
+    packet.sensorId + "+" + packet.accion + "+" + packet.idAlumno;
 
   if (process.env.NEXT_PUBLIC_MQTT_TOPICS_SENSOR_IN)
     _client.publish(

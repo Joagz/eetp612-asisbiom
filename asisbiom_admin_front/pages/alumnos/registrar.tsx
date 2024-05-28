@@ -1,6 +1,6 @@
 import { Form, useForm } from "react-hook-form";
 import axios from "axios";
-import { MainLayout, Overline, Paragraph, Title } from "@/components";
+import { MainLayout, Overline, Paragraph } from "@/components";
 import {
   Button,
   FormControl,
@@ -45,11 +45,6 @@ interface Curso {
   turno: number;
   division: string;
 }
-interface AlumnoFormData {
-  nombreCompleto: string;
-  dni: string;
-  curso: Curso;
-}
 interface SensorData {
   id: number;
   ip: string;
@@ -91,15 +86,25 @@ const registrar = () => {
         curso: data.curso,
       })
       .then((response) => {
-        const dataPacket: MqttDataPacket = {
-          accion: SensorActions.REGISTER,
-          id_alumno: response.data.id,
-          id_sensor: data.sensor,
-        };
+        axios
+          .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`)
+          .then((res) => {
+            const dataPacket: MqttDataPacket = {
+              accion: SensorActions.REGISTER,
+              idAlumno: response.data.id,
+              sensorId: res.data.sensorId,
+            };
 
-        console.log(dataPacket);
-
-        mqttClient?.publish(dataPacket);
+            console.log(dataPacket);
+            axios
+              .post(
+                `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
+                dataPacket
+              )
+              .then((res) => {
+                console.log(res.data);
+              });
+          });
       });
   }
 

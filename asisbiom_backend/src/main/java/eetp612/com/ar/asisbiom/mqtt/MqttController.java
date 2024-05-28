@@ -24,22 +24,25 @@ public class MqttController {
 
     @Autowired
     private MqttRepository mqttRepository;
-    
+
     @Autowired
-    private MqttMessageSender mqttMessageSender;
+    private MqttService mqttService;
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getBySensorId(@PathVariable String id) {
-        if (!mqttRepository.findBySensorId(id).isEmpty())
-            return ResponseEntity.ok().body(mqttRepository.findBySensorId(id).get(0));
+    public ResponseEntity<?> getBySensorId(@PathVariable Integer id) {
+        if (mqttRepository.findById(id).isPresent())
+            return ResponseEntity.ok().body(mqttRepository.findById(id).get());
         return ResponseEntity.notFound().build();
     }
 
-    // TODO
     @PostMapping("/send-message")
-    public String sendMessageToMqtt(@RequestBody String message) {
-        mqttMessageSender.sendMessage("sensor_registry", message);
-        return "Message sent successfully!";
+    public ResponseEntity<?> sendMessageToMqtt(@RequestBody MqttSensorMessage message) {
+        try {
+            mqttService.sendMessage(message);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("No se pudo enviar!");
+        }
+        return ResponseEntity.ok().body(message);
     }
 
     @GetMapping
