@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 @RestController
 @RequestMapping("/api/sensor")
 public class MqttController {
@@ -45,10 +44,15 @@ public class MqttController {
         return ResponseEntity.ok().body(message);
     }
 
+    @PostMapping("")
+    public ResponseEntity<?> create(@RequestBody Sensor sensor) {
+        Sensor saved = mqttRepository.save(sensor);
+        return ResponseEntity.ok().body(saved);
+    }
+
     @GetMapping
     public List<Sensor> findAll() {
         return mqttRepository.findAll();
     }
-    
 
 }

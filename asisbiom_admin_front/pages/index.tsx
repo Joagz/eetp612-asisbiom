@@ -10,6 +10,16 @@ export default function Home() {
         <div className="h-20"></div>
         <Overline>EETP N°612 "Eudocio de los Santos Giménez"</Overline>
         <Title>Sistema de Asistencias Biométrico</Title>
+      
+        {/* Agregar info de la escuela:
+        Total alumnos
+        Total profesores
+        
+        Informacion de directivos
+        Informacion de contacto
+        etc... */}
+
+
       </article>
     </MainLayout>
   );

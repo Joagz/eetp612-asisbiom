@@ -179,7 +179,7 @@ const registrar = () => {
                 size="small"
                 label="Curso"
                 labelId="curso-select-label"
-                value={1}
+                defaultValue={1}
               >
                 <MenuItem disabled>Turno Mañana</MenuItem>
                 {listado

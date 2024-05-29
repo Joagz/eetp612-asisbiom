@@ -11,6 +11,7 @@
 #define SENSOR_ID "ABC123"
 
 // Credenciales del A.P. creado por el ESP32
+
 static const char *WIFI_SSID_DEFAULT = "fingerprint_sensor";
 static const char *WIFI_PWD_DEFAULT = "1675230706";
 
@@ -70,8 +71,10 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
 
   if (strcmp(values[0], SENSOR_ID) == 0)
     // Codigo para registrar huella
-    while (!enrollFingerprint(atoi(values[2]), finger))
-      ;
+    Serial.print("REGISTRAR ALUMNO CON ID: ");
+    Serial.println(values[2]);
+    // while (!enrollFingerprint(atoi(values[2]), finger))
+    //   ;
 }
 
 void setup() {
@@ -80,48 +83,48 @@ void setup() {
     delay(100);
   }
 
-  initFingerprint(finger);
+  // initFingerprint(finger);
 
   WiFi.mode(WIFI_STA);
 
-  // WiFiManager wiFiManager;
+  WiFiManager wiFiManager;
 
-  // wiFiManager.resetSettings();
+  wiFiManager.resetSettings();
 
-  // bool res;
+  bool res;
 
-  // res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
+  res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
 
-  // if (!res) {
-  //   Serial.println("Falla al conectar! reiniciando...");
-  //   delay(2000);
-  //   ESP.restart();
-  // }
-
-  // Serial.println("");
-  // Serial.println("WiFi conectado");
-  // Serial.println("IP asignada: ");
-  // Serial.println(WiFi.localIP());
-
-  // // Testeando el cliente http
-  // http.begin(SERVER_ADDR);
-  // int httpResponseCode = http.GET();
-
-  // if (httpResponseCode > 0) {
-  //   Serial.println("Conectado al backend correctamente");
-  // } else {
-  //   Serial.print("Error: ");
-  //   Serial.println(httpResponseCode);
-  // }
-  // http.end();
-
-  WiFi.begin("Flia Premet", "eljoaqui");
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.println("Connecting to WiFi..");
+  if (!res) {
+    Serial.println("Falla al conectar! reiniciando...");
+    delay(2000);
+    ESP.restart();
   }
-  Serial.println("Connected to the WiFi network");
+
+  Serial.println("");
+  Serial.println("WiFi conectado");
+  Serial.println("IP asignada: ");
+  Serial.println(WiFi.localIP());
+
+  // Testeando el cliente http
+  http.begin(SERVER_ADDR);
+  int httpResponseCode = http.GET();
+
+  if (httpResponseCode > 0) {
+    Serial.println("Conectado al backend correctamente");
+  } else {
+    Serial.print("Error: ");
+    Serial.println(httpResponseCode);
+  }
+  http.end();
+
+  // WiFi.begin("", "");
+
+  // while (WiFi.status() != WL_CONNECTED) {
+  //   delay(500);
+  //   Serial.println("Connecting to WiFi..");
+  // }
+  // Serial.println("Connected to the WiFi network");
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback_for_idinfo);
