@@ -6,6 +6,7 @@ package eetp612.com.ar.asisbiom.mqtt;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -66,6 +67,36 @@ public class MqttService {
     }
 
     /*
+     * Primer Trimestre: del 18 de marzo al 31 de mayo (11 semanas). Segundo
+     * Trimestre: del 3 de junio al 30 de agosto (11 semanas). Tercer Trimestre: del
+     * 2 de septiembre al 22 de noviembre (12 semanas).
+     */
+    private int getActualTrimestre() {
+        LocalDate now = LocalDate.now();
+        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
+        String _1t = "31 05 " + LocalDate.now().getYear();
+        String _2t = "30 08 " + LocalDate.now().getYear();
+        String _3t = "22 11 " + LocalDate.now().getYear();
+
+        System.out.println(_1t);
+        System.out.println(_2t);
+        System.out.println(_3t);
+
+        LocalDate _1tDate = LocalDate.parse(_1t, dtf);
+        LocalDate _2tDate = LocalDate.parse(_2t, dtf);
+        LocalDate _3tDate = LocalDate.parse(_3t, dtf);
+
+        if (now.isBefore(_1tDate))
+            return 1;
+        if (now.isBefore(_2tDate))
+            return 2;
+        if (now.isBefore(_3tDate))
+            return 3;
+
+        return 0;
+    }
+
+    /*
      * En el servidor MQTT los sensores envían datos de tiempo a través de un canal.
      * Los mensajes deberán seguir este formato dentro del mismo:
      * 
@@ -121,11 +152,10 @@ public class MqttService {
 
     public MqttResponse retirar(Alumno alumno, Asistencia asistencia) {
 
-        List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
+        List<ConteoAsistencia> found = conteoRepository.findByAlumnoAndTrimestre(alumno, getActualTrimestre());
 
         if (found.isEmpty()) {
-            ConteoAsistencia newConteo = new ConteoAsistencia(alumno);
-            found.add(conteoRepository.save(newConteo));
+            return null;
         }
 
         ConteoAsistencia conteo = found.get(0);
@@ -179,7 +209,7 @@ public class MqttService {
         if (horario.getHorarioEntrada().isBefore(LocalTime.now())) {
             tardanza = true;
         }
-
+        
         newAsistencia.setAlumno(alumno);
         newAsistencia.setFecha(LocalDate.now());
         newAsistencia.setHorarioEntrada(LocalTime.now());

@@ -17,3 +17,9 @@ body {
     text-wrap: balance;
   }
 }
+
+.bg-eetp {
+  background-image: url("/eetp.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}

@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import eetp612.com.ar.asisbiom.mqtt.MqttService;
+import eetp612.com.ar.asisbiom.stats.StatsService;
 import eetp612.com.ar.asisbiom.asistencias.Asistencia;
 import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
@@ -68,6 +69,9 @@ public class AlumnoController {
 
     @Autowired
     private CursoRepository cursoRepository;
+
+    @Autowired
+    private StatsService statsService;
 
     // @ExceptionHandler(value = { Exception.class })
     // public ResponseEntity<?> catchAll() {
@@ -153,7 +157,8 @@ public class AlumnoController {
 
         Alumno alumno = alumnoDto.toAlumno(found.get());
         alumnoRepository.save(alumno);
-        conteoRepository.save(new ConteoAsistencia(alumno));
+        conteoRepository.save(new ConteoAsistencia(alumno, 1));
+        statsService.addAlumno();
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 
@@ -211,6 +216,7 @@ public class AlumnoController {
                 case ERROR_NO_HORARIO:
                     return ResponseEntity.internalServerError().body("No hay un horario para este alumno hoy.");
                 case OK:
+                    statsService.addAlumnoToPresentes();
                     return ResponseEntity.ok().body("Asistencia registrada exitosamente.");
                 case RETIRAR:
                     return ResponseEntity.status(200).header("Accept-confirm", "confirm-retirar")

@@ -16,7 +16,7 @@ export function DropdownBtn({ children, title, href }: Props) {
       <Button
         size="small"
         color="inherit"
-        className="flex justify-between px-3 text-gray-500 w-full"
+        className="flex py-2 justify-between px-3 text-gray-500 w-full"
         onClick={() => setMenuButton(!menuButton)}
         endIcon={!menuButton ? <ArrowDropDown /> : <ArrowDropUp />}
       >

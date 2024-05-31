@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import {
   Table,
   TableBody,
@@ -42,7 +42,7 @@ const Listado = () => {
       inasistencias: [1, 2, 0],
     },
   ];
-  
+
   const [datosFiltrados, setDatosFiltrados] = useState<any>(datos);
 
   function setFilter() {
@@ -59,11 +59,11 @@ const Listado = () => {
 
   return (
     <MainLayout title="Alumnos - Listado">
-      <article className="flex flex-col w-full">
+      <article className="flex flex-col w-full px-6">
         <div className="h-20"></div>
-        <div className="flex justify-start gap-1 flex-wrap">
+        <div className="flex justify-start gap-4 flex-wrap">
           <TextField
-            className="flex-1 min-w-[200px]"
+            className="flex-1 min-w-[200px] max-w-[300px]"
             label="Nombre y Apellido"
             variant="outlined"
             value={filtroNombre}
@@ -71,7 +71,7 @@ const Listado = () => {
             style={{ marginBottom: "10px", width: "300px" }}
           />
           <TextField
-            className="flex-1 min-w-[200px]"
+            className="flex-1 min-w-[200px] max-w-[300px]"
             label="DNI"
             variant="outlined"
             value={filtroDni}
@@ -81,7 +81,7 @@ const Listado = () => {
           <FormControl>
             <InputLabel id="curso-input">Curso</InputLabel>
             <Select
-              className="flex-1 min-w-[200px]"
+              className="flex-1 min-w-[200px] max-w-[300px]"
               label="Curso"
               id="curso-input"
               variant="outlined"
@@ -100,7 +100,7 @@ const Listado = () => {
           <FormControl>
             <InputLabel id="division-input">División</InputLabel>
             <Select
-              className="flex-1 min-w-[200px]"
+              className="flex-1 min-w-[200px] max-w-[300px]"
               label="División"
               id="division-input"
               variant="outlined"
@@ -116,14 +116,14 @@ const Listado = () => {
             </Select>
           </FormControl>
           <Button
-            className="flex-1 h-[61.750px] min-w-[200px]"
+            className="flex-1 h-[61.750px] max-w-[300px] min-w-[200px]"
             onClick={() => setFilter()}
             variant="contained"
           >
             Buscar
           </Button>{" "}
         </div>
-
+        <br />
         <TableContainer component={Paper} variant="outlined">
           <Table size="small">
             <TableHead>

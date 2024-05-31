@@ -1,25 +1,147 @@
 import { Open_Sans } from "next/font/google";
-import { MainLayout, Overline, Title } from "@/components";
-
-const open_sans = Open_Sans({ subsets: ["latin"], weight: "variable" });
+import { MainLayout, Overline, Paragraph, Title } from "@/components";
+import { Card, CardContent, Paper } from "@mui/material";
+import {
+  AppRegistrationRounded,
+  ChecklistRounded,
+  Man,
+  People,
+  SchoolRounded,
+} from "@mui/icons-material";
+import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function Home() {
+  const [cantidades, setCantidades] = useState<{
+    cant_personal: string;
+    cant_alumnos: string;
+  }>({} as any);
+
+  const [alumnosPresentes, setAlumnosPresentes] = useState<number>(0);
+
+  useEffect(() => {
+    axios
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades`)
+      .then((res) => {
+        setCantidades({
+          cant_personal: res.data.cantidadPersonal + "",
+          cant_alumnos: res.data.cantidadAlumnos + "",
+        });
+      });
+
+    axios
+      .get(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades/diaria`
+      )
+      .then((res) => {
+        setAlumnosPresentes(res.data.cantidadAlumnos);
+      });
+  }, []);
+
   return (
     <MainLayout title="Inicio">
-      <article className="flex flex-col">
-        <div className="h-20"></div>
-        <Overline>EETP N°612 "Eudocio de los Santos Giménez"</Overline>
-        <Title>Sistema de Asistencias Biométrico</Title>
-      
-        {/* Agregar info de la escuela:
-        Total alumnos
-        Total profesores
-        
-        Informacion de directivos
-        Informacion de contacto
-        etc... */}
+      <article className="py-10 flex flex-col w-full items-center gap-8">
+        <div className="flex-col bg-eetp relative text-white gap-8 py-12 w-full flex justify-center items-center">
+          <div className="z-10 bg-black opacity-30 absolute left-0 top-0 w-full h-full"></div>
+          <div className="z-10 flex flex-col items-center">
+            <Overline>Sistema de Asistencias Biométrico</Overline>
+            <Title className="text-center font-bold">
+              EETP N°612 "Eudocio de los Santos Giménez"
+            </Title>
+          </div>
+          <div className="z-10 flex flex-wrap gap-6 justify-center items-center mx-4">
+            <Card component={Paper} className="w-full">
+              <CardContent className="flex flex-col justify-center gap-2">
+                <Overline>Equipo Directivo</Overline>
+                <Paragraph>
+                  <b>Director: </b>Héctor José Yasparra
+                </Paragraph>
+                <Paragraph>
+                  <b>Vicedirectores: </b>Sebastián Pisatti, Ricardo Restaldi
+                </Paragraph>
+                <Paragraph>
+                  <b>Secretaria: </b>Micaela Maradona
+                </Paragraph>
+                <Paragraph>
+                  <b>Prosecretarias: </b>Florencia Toneatti, Agostina Chiapello
+                </Paragraph>
+                <Paragraph>
+                  <b>Preceptoras: </b>Lorena De Oracio, Cecilia Gomez, Antonela
+                  Bortolotto, Natalí Arcando Romano
+                </Paragraph>
+                <br />
+                <Overline>Información</Overline>
+                <Paragraph>
+                  <b>Provincia:</b> Santa Fe
+                </Paragraph>
+                <Paragraph>
+                  <b>Ciudad:</b> Coronda
+                </Paragraph>
+                <Paragraph>
+                  <b>Modalidad:</b> TEIE ("Técnico en Equipos de Instalaciones
+                  Eléctricas")
+                </Paragraph>
+                <Paragraph>
+                  <b>Dirección:</b> Juan de Garay esquina Italia
+                </Paragraph>
+                <Paragraph>
+                  <b>Tipo de Turno:</b> Doble
+                </Paragraph>
+                <Paragraph>
+                  <b>Teléfono:</b> 0342-4910134
+                </Paragraph>
+                <Paragraph>
+                  <b>Correo:</b> eetp.612coronda@gmail.com
+                </Paragraph>
+              </CardContent>
+            </Card>
+            <Card component={Paper} className="w-24">
+              <CardContent className="flex flex-col justify-center items-center">
+                <People></People>
+                <Overline>{cantidades.cant_alumnos}</Overline>
+                <Paragraph>Alumnos</Paragraph>
+              </CardContent>
+            </Card>
+            <Card component={Paper} className="w-24">
+              <CardContent className="flex flex-col justify-center items-center">
+                <People></People>
+                <Overline>{alumnosPresentes}</Overline>
+                <Paragraph>Presentes</Paragraph>
+              </CardContent>
+            </Card>
+            <Card component={Paper} className="w-24">
+              <CardContent className="flex flex-col justify-center items-center">
+                <Man></Man>
+                <Overline>{cantidades.cant_personal}</Overline>
+                <Paragraph>Personal</Paragraph>
+              </CardContent>
+            </Card>
+          </div>{" "}
+        </div>
 
-
+        <div className="px-12 lg:flex-row flex-col flex flex-wrap w-full justify-center gap-7 items-center">
+          <a
+            href="/alumnos"
+            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
+          >
+            <SchoolRounded></SchoolRounded>
+            <Overline>Alumnos/Cursos</Overline>
+          </a>
+          <a
+            href="/alumnos/diario"
+            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
+          >
+            <ChecklistRounded></ChecklistRounded>
+            <Overline>Asistencia diaria</Overline>
+          </a>
+          <a
+            href="/alumnos/registrar"
+            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
+          >
+            <AppRegistrationRounded></AppRegistrationRounded>
+            <Overline>Registrar alumno</Overline>
+          </a>
+        </div>
       </article>
     </MainLayout>
   );

@@ -40,11 +40,6 @@ interface AlumnoData {
   nombreCompleto: string;
   dni: string;
 }
-interface Curso {
-  curso: number;
-  turno: number;
-  division: string;
-}
 interface SensorData {
   id: number;
   ip: string;
@@ -110,7 +105,7 @@ const registrar = () => {
   return (
     <MainLayout title={"Registrar alumno"}>
       <section className="flex flex-wrap w-full gap-4">
-        <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
+        <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
           <div className="h-5"></div>
           <Form
             control={control}

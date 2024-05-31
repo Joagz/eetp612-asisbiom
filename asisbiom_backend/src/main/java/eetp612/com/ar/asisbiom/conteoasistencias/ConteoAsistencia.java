@@ -45,16 +45,19 @@ public class ConteoAsistencia {
     @Column(name = "dias_habiles")
     private Long diasHabiles;
 
-    public ConteoAsistencia(Alumno alumno) {
+    @Column(name = "trimestre")
+    private Integer trimestre;
+
+    public ConteoAsistencia(Alumno alumno, Integer trimestre) {
         this.alumno = alumno;
         this.inasistencias = 0f;
         this.retiros = 0;
         this.tardanzas = 0;
         this.diasHabiles = 0l;
+        this.trimestre = trimestre;
     }
 
     public ConteoAsistencia() {
     }
 
-    
 }

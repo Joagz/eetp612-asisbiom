@@ -11,6 +11,9 @@ import org.springframework.web.bind.annotation.RestController;
 import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
+import eetp612.com.ar.asisbiom.stats.Stats;
+import eetp612.com.ar.asisbiom.stats.StatsConfigs;
+import eetp612.com.ar.asisbiom.stats.StatsRepository;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -27,6 +30,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @RestController
 @RequestMapping("/api/estadistica")
@@ -41,9 +45,22 @@ public class ConteoController {
     @Autowired
     private CursoRepository cursoRepository;
 
+    @Autowired
+    private StatsRepository statsRepository;
+
     @GetMapping("")
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok().body(conteoRepository.findAll());
+    }
+
+    @GetMapping("/cantidades")
+    public ResponseEntity<?> getRecuento() {
+        return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_CANTIDADES).get());
+    }
+
+    @GetMapping("/cantidades/diaria")
+    public ResponseEntity<?> getRecuentoDiario() {
+        return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_DIARIA).get());
     }
 
     @GetMapping("/descarga/{cursoId}")

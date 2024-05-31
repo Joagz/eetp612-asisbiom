@@ -19,7 +19,7 @@ export const MainLayout = ({ title, children }: Props) => {
       <main
         className={`${
           menuOpen && "lg:pl-[17.5em]"
-        } flex justify-start items-start p-4 w-full lg:flex-row flex-col`}
+        } flex justify-start items-start w-full lg:flex-row flex-col`}
       >
         {children}
       </main>

@@ -49,5 +49,8 @@ public class Horario {
 
     @Column(name = "dia")
     private Integer dia;
+    
+    @Column(name = "valor_inasistencia")
+    private Integer valorInasistencia;
 
 }
