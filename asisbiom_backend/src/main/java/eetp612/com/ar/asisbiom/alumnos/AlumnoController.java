@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import eetp612.com.ar.asisbiom.mqtt.MqttService;
 import eetp612.com.ar.asisbiom.asistencias.Asistencia;
 import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
+import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
+import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import eetp612.com.ar.asisbiom.docentes.Docente;
@@ -51,6 +53,9 @@ public class AlumnoController {
 
     @Autowired
     private MqttService mqttService;
+
+    @Autowired
+    private ConteoRepository conteoRepository;
 
     @Autowired
     private DocenteRepository docenteRepository;
@@ -148,6 +153,7 @@ public class AlumnoController {
 
         Alumno alumno = alumnoDto.toAlumno(found.get());
         alumnoRepository.save(alumno);
+        conteoRepository.save(new ConteoAsistencia(alumno));
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 

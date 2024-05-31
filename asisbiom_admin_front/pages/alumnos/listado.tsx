@@ -12,6 +12,8 @@ import {
   MenuItem,
   Button,
   Grid,
+  InputLabel,
+  FormControl,
 } from "@mui/material";
 import { MainLayout } from "@/components";
 
@@ -40,6 +42,7 @@ const Listado = () => {
       inasistencias: [1, 2, 0],
     },
   ];
+  
   const [datosFiltrados, setDatosFiltrados] = useState<any>(datos);
 
   function setFilter() {
@@ -61,7 +64,7 @@ const Listado = () => {
         <div className="flex justify-start gap-1 flex-wrap">
           <TextField
             className="flex-1 min-w-[200px]"
-            label="Filtrar por nombre"
+            label="Nombre y Apellido"
             variant="outlined"
             value={filtroNombre}
             onChange={(e) => setFiltroNombre(e.target.value)}
@@ -69,47 +72,55 @@ const Listado = () => {
           />
           <TextField
             className="flex-1 min-w-[200px]"
-            label="Filtrar por DNI"
+            label="DNI"
             variant="outlined"
             value={filtroDni}
             onChange={(e) => setFiltroDni(e.target.value)}
             style={{ marginBottom: "10px", width: "300px" }}
           />
-          <Select
-            className="flex-1 min-w-[200px]"
-            label="Curso"
-            variant="outlined"
-            value={filtroCurso}
-            onChange={(e) => setFiltroCurso(e.target.value)}
-            style={{ marginBottom: "10px", width: "300px" }}
-          >
-            <MenuItem value={"1"}>1ero</MenuItem>
-            <MenuItem value={"2"}>2do</MenuItem>
-            <MenuItem value={"3"}>3ero</MenuItem>
-            <MenuItem value={"4"}>4to</MenuItem>
-            <MenuItem value={"5"}>5to</MenuItem>
-            <MenuItem value={"6"}>6to</MenuItem>
-          </Select>
-          <Select
-            className="flex-1 min-w-[200px]"
-            label="División"
-            variant="outlined"
-            value={filtroDivision}
-            onChange={(e) => setFiltroDivision(e.target.value)}
-            style={{ marginBottom: "10px", width: "300px" }}
-          >
-            <MenuItem value={"A"}>A</MenuItem>
-            <MenuItem value={"B"}>B</MenuItem>
-            <MenuItem value={"C"}>C</MenuItem>
-            <MenuItem value={"D"}>D</MenuItem>
-            <MenuItem value={"E"}>E</MenuItem>
-          </Select>
+          <FormControl>
+            <InputLabel id="curso-input">Curso</InputLabel>
+            <Select
+              className="flex-1 min-w-[200px]"
+              label="Curso"
+              id="curso-input"
+              variant="outlined"
+              value={filtroCurso}
+              onChange={(e) => setFiltroCurso(e.target.value)}
+              style={{ marginBottom: "10px", width: "300px" }}
+            >
+              <MenuItem value={"1"}>1ero</MenuItem>
+              <MenuItem value={"2"}>2do</MenuItem>
+              <MenuItem value={"3"}>3ero</MenuItem>
+              <MenuItem value={"4"}>4to</MenuItem>
+              <MenuItem value={"5"}>5to</MenuItem>
+              <MenuItem value={"6"}>6to</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl>
+            <InputLabel id="division-input">División</InputLabel>
+            <Select
+              className="flex-1 min-w-[200px]"
+              label="División"
+              id="division-input"
+              variant="outlined"
+              value={filtroDivision}
+              onChange={(e) => setFiltroDivision(e.target.value)}
+              style={{ marginBottom: "10px", width: "300px" }}
+            >
+              <MenuItem value={"A"}>A</MenuItem>
+              <MenuItem value={"B"}>B</MenuItem>
+              <MenuItem value={"C"}>C</MenuItem>
+              <MenuItem value={"D"}>D</MenuItem>
+              <MenuItem value={"E"}>E</MenuItem>
+            </Select>
+          </FormControl>
           <Button
             className="flex-1 h-[61.750px] min-w-[200px]"
             onClick={() => setFilter()}
             variant="contained"
           >
-            Filtrar
+            Buscar
           </Button>{" "}
         </div>
 
@@ -138,11 +149,11 @@ const Listado = () => {
               </TableRow>
             </TableHead>
             <TableBody>
-              {datosFiltrados.map((fila, index) => (
+              {datosFiltrados.map((fila: any, index: any) => (
                 <TableRow key={index}>
-                  <TableCell>{fila.curso}</TableCell>{" "}
+                  <TableCell>{fila.curso}</TableCell>
                   {/* Reemplaza con el dato del curso */}
-                  <TableCell>{fila.division}</TableCell>{" "}
+                  <TableCell>{fila.division}</TableCell>
                   {/* Reemplaza con el dato de la división */}
                   <TableCell>{fila.nombre}</TableCell>
                   <TableCell>{fila.dni}</TableCell>

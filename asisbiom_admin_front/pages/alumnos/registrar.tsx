@@ -55,7 +55,6 @@ interface SensorData {
 const registrar = () => {
   const [sensores, setSensores] = useState<SensorData[]>([]);
   const [listado, setListado] = useState<AlumnosCursoData[]>([]);
-  const mqttClient = useMqtt();
 
   useMemo(() => {
     axios
@@ -130,7 +129,7 @@ const registrar = () => {
                 {...register("sensor", { required: true })}
                 label="Sensor"
                 labelId="sensor-select-label"
-                value={1}
+                defaultValue={1}
               >
                 {sensores.map((sensor) => (
                   <MenuItem value={sensor.id}>
