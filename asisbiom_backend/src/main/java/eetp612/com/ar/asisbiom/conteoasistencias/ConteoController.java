@@ -74,7 +74,7 @@ public class ConteoController {
             if (!curso.isPresent()) {
                 return ResponseEntity.badRequest().body("Curso no encontrado. ID: " + cursoId);
             }
-            pw.write("Curso, Division, Nombre y Apellido, DNI, Dias Hábiles, Inasistencias, Tardanzas, Retiros\n");
+            pw.write("Curso, Division, Nombre y Apellido, DNI, Dias Hábiles, Inasistencias 1er T,m Inasistencias 2do T., Inasistencias 3er T., Tardanzas, Retiros\n");
 
             alumnoRepository.findByCurso(curso.get()).forEach(alumno -> {
                 List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
@@ -84,7 +84,8 @@ public class ConteoController {
 
                     pw.write(alumno.getCurso().getCurso() + ", " + alumno.getCurso().getDivision() + ", "
                             + alumno.getNombreCompleto() + ", " + alumno.getDni() + ", " + conteo.getDiasHabiles()
-                            + ", " + conteo.getInasistencias() + ", " + conteo.getTardanzas() + ", "
+                            + ", " + conteo.getInasistencias1() + ", " + conteo.getInasistencias2() + ", "
+                            + conteo.getInasistencias3() + ", " + conteo.getTardanzas() + ", "
                             + conteo.getRetiros() + "\n");
                 }
             });

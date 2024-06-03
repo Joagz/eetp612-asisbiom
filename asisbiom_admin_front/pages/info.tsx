@@ -1,19 +1,14 @@
 import { Open_Sans } from "next/font/google";
 import {
-  AppBar,
-  IconButton,
   Link,
-  Paper,
   Table,
   TableBody,
   TableCell,
   TableContainer,
   TableHead,
   TableRow,
-  Toolbar,
   Typography,
 } from "@mui/material";
-import { MenuRounded, PictureAsPdf } from "@mui/icons-material";
 import { useState } from "react";
 import {
   Caption,

@@ -50,51 +50,6 @@ export default function Home() {
             </Title>
           </div>
           <div className="z-10 flex flex-wrap gap-6 justify-center items-center mx-4">
-            <Card component={Paper} className="w-full">
-              <CardContent className="flex flex-col justify-center gap-2">
-                <Overline>Equipo Directivo</Overline>
-                <Paragraph>
-                  <b>Director: </b>Héctor José Yasparra
-                </Paragraph>
-                <Paragraph>
-                  <b>Vicedirectores: </b>Sebastián Pisatti, Ricardo Restaldi
-                </Paragraph>
-                <Paragraph>
-                  <b>Secretaria: </b>Micaela Maradona
-                </Paragraph>
-                <Paragraph>
-                  <b>Prosecretarias: </b>Florencia Toneatti, Agostina Chiapello
-                </Paragraph>
-                <Paragraph>
-                  <b>Preceptoras: </b>Lorena De Oracio, Cecilia Gomez, Antonela
-                  Bortolotto, Natalí Arcando Romano
-                </Paragraph>
-                <br />
-                <Overline>Información</Overline>
-                <Paragraph>
-                  <b>Provincia:</b> Santa Fe
-                </Paragraph>
-                <Paragraph>
-                  <b>Ciudad:</b> Coronda
-                </Paragraph>
-                <Paragraph>
-                  <b>Modalidad:</b> TEIE ("Técnico en Equipos de Instalaciones
-                  Eléctricas")
-                </Paragraph>
-                <Paragraph>
-                  <b>Dirección:</b> Juan de Garay esquina Italia
-                </Paragraph>
-                <Paragraph>
-                  <b>Tipo de Turno:</b> Doble
-                </Paragraph>
-                <Paragraph>
-                  <b>Teléfono:</b> 0342-4910134
-                </Paragraph>
-                <Paragraph>
-                  <b>Correo:</b> eetp.612coronda@gmail.com
-                </Paragraph>
-              </CardContent>
-            </Card>
             <Card component={Paper} className="w-24">
               <CardContent className="flex flex-col justify-center items-center">
                 <People></People>
@@ -119,28 +74,75 @@ export default function Home() {
           </div>{" "}
         </div>
 
-        <div className="px-12 lg:flex-row flex-col flex flex-wrap w-full justify-center gap-7 items-center">
-          <a
-            href="/alumnos"
-            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
-          >
-            <SchoolRounded></SchoolRounded>
-            <Overline>Alumnos/Cursos</Overline>
-          </a>
-          <a
-            href="/alumnos/diario"
-            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
-          >
-            <ChecklistRounded></ChecklistRounded>
-            <Overline>Asistencia diaria</Overline>
-          </a>
-          <a
-            href="/alumnos/registrar"
-            className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-teal-300"
-          >
-            <AppRegistrationRounded></AppRegistrationRounded>
-            <Overline>Registrar alumno</Overline>
-          </a>
+        <div className="px-12 lg:flex-row flex-col flex flex-wrap w-full justify-center gap-7 items-start">
+          <Card component={Paper}>
+            <CardContent className="flex flex-col justify-center gap-2">
+              <Overline>Equipo Directivo</Overline>
+              <Paragraph>
+                <b>Director: </b>Héctor José Yasparra
+              </Paragraph>
+              <Paragraph>
+                <b>Vicedirectores: </b>Sebastián Pisatti, Ricardo Restaldi
+              </Paragraph>
+              <Paragraph>
+                <b>Secretaria: </b>Micaela Maradona
+              </Paragraph>
+              <Paragraph>
+                <b>Prosecretarias: </b>Florencia Toneatti, Agostina Chiapello
+              </Paragraph>
+              <Paragraph>
+                <b>Preceptoras: </b>Lorena De Oracio, Cecilia Gomez, Antonela
+                Bortolotto, Natalí Arcando Romano
+              </Paragraph>
+              <br />
+              <Overline>Información</Overline>
+              <Paragraph>
+                <b>Provincia:</b> Santa Fe
+              </Paragraph>
+              <Paragraph>
+                <b>Ciudad:</b> Coronda
+              </Paragraph>
+              <Paragraph>
+                <b>Modalidad:</b> TEIE ("Técnico en Equipos de Instalaciones
+                Eléctricas")
+              </Paragraph>
+              <Paragraph>
+                <b>Dirección:</b> Juan de Garay esquina Italia
+              </Paragraph>
+              <Paragraph>
+                <b>Tipo de Turno:</b> Doble
+              </Paragraph>
+              <Paragraph>
+                <b>Teléfono:</b> 0342-4910134
+              </Paragraph>
+              <Paragraph>
+                <b>Correo:</b> eetp.612coronda@gmail.com
+              </Paragraph>
+            </CardContent>
+          </Card>
+          <div className="flex flex-col gap-6">
+            <a
+              href="/alumnos"
+              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <SchoolRounded></SchoolRounded>
+              <Overline>Alumnos/Cursos</Overline>
+            </a>
+            <a
+              href="/alumnos/diario"
+              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <ChecklistRounded></ChecklistRounded>
+              <Overline>Asistencia diaria</Overline>
+            </a>
+            <a
+              href="/alumnos/registrar"
+              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <AppRegistrationRounded></AppRegistrationRounded>
+              <Overline>Registrar alumno</Overline>
+            </a>
+          </div>
         </div>
       </article>
     </MainLayout>

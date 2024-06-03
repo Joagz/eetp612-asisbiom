@@ -1,7 +1,7 @@
 import { Dispatch, SetStateAction } from "react";
 
 import { MenuRounded } from "@mui/icons-material";
-import { AppBar, Toolbar, IconButton } from "@mui/material";
+import { AppBar, Toolbar, IconButton, Typography, Button } from "@mui/material";
 import { SideMenu } from "./SideMenu";
 
 type Props = {
@@ -12,11 +12,16 @@ type Props = {
 export const NavBar = ({ menuOpen, setMenuOpen }: Props) => {
   return (
     <nav className={` fixed top-0 left-0 flex flex-col w-full z-[100]`}>
-      <AppBar className="relative z-100 bg-teal-500">
+      <AppBar className="relative z-100 bg-white">
         <Toolbar variant="dense">
-          <IconButton edge="start" onClick={() => setMenuOpen(!menuOpen)}>
-            <MenuRounded className="text-white" />
-          </IconButton>
+          <Button
+            startIcon={<MenuRounded />}
+            color="info"
+            size="large"
+            onClick={() => setMenuOpen(!menuOpen)}
+          >
+            Menú
+          </Button>
         </Toolbar>
       </AppBar>
       {menuOpen && <SideMenu />}

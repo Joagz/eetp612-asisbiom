@@ -58,5 +58,8 @@ public class Asistencia {
 
     @Column(name = "razon_retiro")
     private String razonRetiro;
+    
+    @Column(name = "dia")
+    private Integer dia;
 
 }

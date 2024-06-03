@@ -45,6 +45,7 @@ record AlumnosCurso(
         List<Alumno> alumnos) {
 }
 
+
 @RestController
 @RequestMapping("/api/alumno")
 public class AlumnoController {
@@ -73,15 +74,14 @@ public class AlumnoController {
     @Autowired
     private StatsService statsService;
 
-    // @ExceptionHandler(value = { Exception.class })
-    // public ResponseEntity<?> catchAll() {
-    // return ResponseEntity.internalServerError().body("Ocurrió un error al
-    // procesar la solicitud. Lo sentimos.");
-    // }
-
     @GetMapping
     public List<Alumno> findAll() {
         return alumnoRepository.findAll();
+    }
+
+    @GetMapping("/stats")
+    public List<ConteoAsistencia> findAllAndStats() {
+        return conteoRepository.findAll();
     }
 
     @GetMapping("/{curso}/{div}")
@@ -157,7 +157,7 @@ public class AlumnoController {
 
         Alumno alumno = alumnoDto.toAlumno(found.get());
         alumnoRepository.save(alumno);
-        conteoRepository.save(new ConteoAsistencia(alumno, 1));
+        conteoRepository.save(new ConteoAsistencia(alumno));
         statsService.addAlumno();
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }

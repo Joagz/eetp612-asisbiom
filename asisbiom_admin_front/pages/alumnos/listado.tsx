@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   Table,
   TableBody,
@@ -16,6 +16,15 @@ import {
   FormControl,
 } from "@mui/material";
 import { MainLayout } from "@/components";
+import axios from "axios";
+
+type _alumno_filter = {
+  nombre: string;
+  curso: string;
+  division: string;
+  dni: string;
+  inasistencias: number[];
+};
 
 const Listado = () => {
   // Ejemplo de datos
@@ -23,27 +32,36 @@ const Listado = () => {
   const [filtroCurso, setFiltroCurso] = useState("");
   const [filtroDni, setFiltroDni] = useState("");
   const [filtroDivision, setFiltroDivision] = useState("");
+  const [datos, setDatos] = useState<_alumno_filter[]>([]);
+  const [datosFiltrados, setDatosFiltrados] = useState<_alumno_filter[]>([]);
 
-  const datos = [
-    {
-      curso: "2",
-      division: "A",
-      nombre: "Juan Perez",
-      dni: "12345678",
-      diasHabiles: 60,
-      inasistencias: [2, 3, 1],
-    },
-    {
-      curso: "1",
-      division: "A",
-      nombre: "María Gomez",
-      dni: "87654321",
-      diasHabiles: 60,
-      inasistencias: [1, 2, 0],
-    },
-  ];
+  useMemo(() => {
+    axios
+      .get<any[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno`)
+      .then((res) => {
+        const alumnos = res.data;
 
-  const [datosFiltrados, setDatosFiltrados] = useState<any>(datos);
+        setDatos(
+          alumnos.map((alumno) => {
+            return {
+              nombre: alumno.nombre,
+              curso: alumno.curso.curso,
+              division: alumno.curso.division,
+              dni: alumno.dni,
+              inasistencias: [
+                alumno.inasistencias1,
+                alumno.inasistencias2,
+                alumno.inasistencias3,
+              ],
+            };
+          })
+        );
+      });
+  }, []);
+
+  useEffect(() => {
+    setDatosFiltrados(datos);
+  }, [datos]);
 
   function setFilter() {
     setDatosFiltrados(

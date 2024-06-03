@@ -33,9 +33,6 @@ public class ConteoAsistencia {
     @JoinColumn(name = "alumno_id")
     private Alumno alumno;
 
-    @Column(name = "inasistencias")
-    private Float inasistencias;
-
     @Column(name = "tardanzas")
     private Integer tardanzas;
 
@@ -45,17 +42,28 @@ public class ConteoAsistencia {
     @Column(name = "dias_habiles")
     private Long diasHabiles;
 
-    @Column(name = "trimestre")
-    private Integer trimestre;
+    @Column(name = "inasistencias_1")
+    private Float inasistencias1;
 
-    public ConteoAsistencia(Alumno alumno, Integer trimestre) {
+    @Column(name = "inasistencias_2")
+    private Float inasistencias2;
+
+    @Column(name = "inasistencias_3")
+    private Float inasistencias3;
+
+    
+
+    public ConteoAsistencia(Alumno alumno) {
         this.alumno = alumno;
-        this.inasistencias = 0f;
-        this.retiros = 0;
         this.tardanzas = 0;
+        this.retiros = 0;
         this.diasHabiles = 0l;
-        this.trimestre = trimestre;
+        this.inasistencias1 = 0f;
+        this.inasistencias2 = 0f;
+        this.inasistencias3 = 0f;
     }
+
+
 
     public ConteoAsistencia() {
     }

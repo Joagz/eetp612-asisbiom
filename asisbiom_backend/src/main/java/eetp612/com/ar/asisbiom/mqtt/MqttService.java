@@ -67,36 +67,6 @@ public class MqttService {
     }
 
     /*
-     * Primer Trimestre: del 18 de marzo al 31 de mayo (11 semanas). Segundo
-     * Trimestre: del 3 de junio al 30 de agosto (11 semanas). Tercer Trimestre: del
-     * 2 de septiembre al 22 de noviembre (12 semanas).
-     */
-    private int getActualTrimestre() {
-        LocalDate now = LocalDate.now();
-        DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd MM yyyy");
-        String _1t = "31 05 " + LocalDate.now().getYear();
-        String _2t = "30 08 " + LocalDate.now().getYear();
-        String _3t = "22 11 " + LocalDate.now().getYear();
-
-        System.out.println(_1t);
-        System.out.println(_2t);
-        System.out.println(_3t);
-
-        LocalDate _1tDate = LocalDate.parse(_1t, dtf);
-        LocalDate _2tDate = LocalDate.parse(_2t, dtf);
-        LocalDate _3tDate = LocalDate.parse(_3t, dtf);
-
-        if (now.isBefore(_1tDate))
-            return 1;
-        if (now.isBefore(_2tDate))
-            return 2;
-        if (now.isBefore(_3tDate))
-            return 3;
-
-        return 0;
-    }
-
-    /*
      * En el servidor MQTT los sensores envían datos de tiempo a través de un canal.
      * Los mensajes deberán seguir este formato dentro del mismo:
      * 
@@ -116,16 +86,14 @@ public class MqttService {
      * mensaje deberá terminar obligatoriamente con un carácter nulo ("\0")
      * 
      */
-    public MqttSensorMessage parse(Message<?> message) {
+    public MqttSensorMessage parse(String message) {
 
-        String str = message.getPayload().toString();
-
-        if (!str.matches(messageFormatRegex)) {
+        if (!message.matches(messageFormatRegex)) {
             return null;
         }
 
         StringBuilder sb = new StringBuilder();
-        char[] charArr = str.toCharArray();
+        char[] charArr = message.toCharArray();
         List<String> parsed = new ArrayList<>();
         MqttSensorMessage parsedMessage = new MqttSensorMessage();
 
@@ -152,7 +120,7 @@ public class MqttService {
 
     public MqttResponse retirar(Alumno alumno, Asistencia asistencia) {
 
-        List<ConteoAsistencia> found = conteoRepository.findByAlumnoAndTrimestre(alumno, getActualTrimestre());
+        List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
 
         if (found.isEmpty()) {
             return null;
@@ -215,6 +183,7 @@ public class MqttService {
         newAsistencia.setHorarioEntrada(LocalTime.now());
         newAsistencia.setTardanza(tardanza);
         newAsistencia.setRetirado(false);
+        newAsistencia.setDia(horario.getDia());
 
         asistenciaRepository.save(newAsistencia);
 

@@ -17,6 +17,7 @@ import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+import eetp612.com.ar.asisbiom.horarios.HorarioUtils;
 
 @Configuration
 @EnableScheduling
@@ -30,7 +31,6 @@ public class ScheduleConfig {
 
     @Autowired
     private HorarioRepository horarioRepository;
-
 
     // Esto hace el recuento de faltas al final del día
     @Scheduled(fixedRate = 24, timeUnit = TimeUnit.HOURS)
@@ -71,7 +71,18 @@ public class ScheduleConfig {
                 inasistencia += horario.getValorInasistencia();
             }
 
-            conteo.setInasistencias(conteo.getInasistencias() + inasistencia);
+            switch (HorarioUtils.getActualTrimestre()) {
+                case 1:
+                    conteo.setInasistencias1(conteo.getInasistencias1() + inasistencia);
+                    break;
+                case 2:
+                    conteo.setInasistencias2(conteo.getInasistencias2() + inasistencia);
+                    break;
+                case 3:
+                    conteo.setInasistencias3(conteo.getInasistencias3() + inasistencia);
+                    break;
+            }
+
             conteo.setDiasHabiles(conteo.getDiasHabiles() + 1);
             conteoRepository.save(conteo);
         });

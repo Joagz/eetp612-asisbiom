@@ -15,5 +15,4 @@ import eetp612.com.ar.asisbiom.alumnos.Alumno;
 @Repository
 public interface ConteoRepository extends JpaRepository<ConteoAsistencia, Integer> {
     List<ConteoAsistencia> findByAlumno(Alumno alumno);
-    List<ConteoAsistencia> findByAlumnoAndTrimestre(Alumno alumno, Integer trimestre);
 }
