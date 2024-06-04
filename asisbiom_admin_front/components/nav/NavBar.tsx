@@ -12,7 +12,7 @@ type Props = {
 export const NavBar = ({ menuOpen, setMenuOpen }: Props) => {
   return (
     <nav className={` fixed top-0 left-0 flex flex-col w-full z-[100]`}>
-      <AppBar className="relative z-100 bg-white">
+      <AppBar className="relative z-100 bg-white p-2">
         <Toolbar variant="dense">
           <Button
             startIcon={<MenuRounded />}

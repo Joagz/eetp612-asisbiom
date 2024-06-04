@@ -19,6 +19,7 @@ import {
 } from "@mui/material";
 import { useMemo, useState } from "react";
 import { MqttDataPacket, SensorActions, useMqtt } from "@/hooks";
+import { useRouter } from "next/router";
 /*
     nombreCompleto
     dni
@@ -48,8 +49,10 @@ interface SensorData {
 }
 
 const registrar = () => {
+  const router = useRouter();
   const [sensores, setSensores] = useState<SensorData[]>([]);
   const [listado, setListado] = useState<AlumnosCursoData[]>([]);
+  const [submitted, setSubmitted] = useState<boolean>();
 
   useMemo(() => {
     axios
@@ -73,11 +76,15 @@ const registrar = () => {
   } = useForm();
 
   function onSubmit(data: any) {
+    if (submitted) return;
+    setSubmitted(true);
     axios
       .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
         nombreCompleto: data.nombreCompleto,
         dni: data.dni,
         curso: data.curso,
+        correoElectronico: data.correoElectronico,
+        telefono: data.telefono,
       })
       .then((response) => {
         axios
@@ -96,7 +103,10 @@ const registrar = () => {
                 dataPacket
               )
               .then((res) => {
+                // confirmar sensor
                 console.log(res.data);
+
+                router.reload();
               });
           });
       });
@@ -164,6 +174,22 @@ const registrar = () => {
               id="dni"
             ></TextField>
 
+            <TextField
+              placeholder="Correo Electrónico (opcional)"
+              size="small"
+              {...register("correoElectronico", { required: false })}
+              error={errors?.correoElectronico != null}
+              id="correoElectronico"
+            ></TextField>
+
+            <TextField
+              placeholder="Teléfono (opcional)"
+              size="small"
+              {...register("telefono", { required: false })}
+              error={errors?.telefono != null}
+              id="telefono"
+            ></TextField>
+
             <FormControl fullWidth>
               <InputLabel size="small" id="curso-select-label">
                 Curso
@@ -198,12 +224,13 @@ const registrar = () => {
               </Select>
             </FormControl>
 
-            <Button type="submit">Registrar</Button>
+            <Button type="submit" disabled={submitted}>
+              Registrar
+            </Button>
           </Form>
         </article>
         <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
-          <div className="h-5"></div>
-
+          <div className="h-10"></div>
           <Overline>Turno Mañana</Overline>
           {listado
             .filter((obj) => obj.curso.turno == 1)

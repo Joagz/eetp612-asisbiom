@@ -37,21 +37,26 @@ const Listado = () => {
 
   useMemo(() => {
     axios
-      .get<any[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno`)
+      .get<any[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats`)
       .then((res) => {
-        const alumnos = res.data;
-
+        const listado = res.data;
+        console.log(res.data);
         setDatos(
-          alumnos.map((alumno) => {
+          listado.map((stat) => {
             return {
-              nombre: alumno.nombre,
-              curso: alumno.curso.curso,
-              division: alumno.curso.division,
-              dni: alumno.dni,
+              nombre: stat.alumno.nombreCompleto,
+              curso: stat.alumno.curso.curso,
+              division: stat.alumno.curso.division,
+              dni: stat.alumno.dni,
+              diasHabiles: stat.diasHabiles,
+              tardanzas: stat.tardanzas,
+              retiros: stat.retiros,
+              correoElectronico: stat.alumno.correoElectronico,
+              telefono: stat.alumno.telefono,
               inasistencias: [
-                alumno.inasistencias1,
-                alumno.inasistencias2,
-                alumno.inasistencias3,
+                stat.inasistencias1,
+                stat.inasistencias2,
+                stat.inasistencias3,
               ],
             };
           })
@@ -68,7 +73,7 @@ const Listado = () => {
       datos.filter(
         (data) =>
           data.nombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-          data.curso.toLowerCase().includes(filtroCurso.toLowerCase()) &&
+          data.curso.toString().toLowerCase().includes(filtroCurso.toLowerCase()) &&
           data.division.toLowerCase().includes(filtroDivision.toLowerCase()) &&
           data.dni.toLowerCase().includes(filtroDni.toLowerCase())
       )
@@ -154,6 +159,10 @@ const Listado = () => {
                 <TableCell className="font-bold" colSpan={3}>
                   Inasistencias
                 </TableCell>
+                <TableCell>Tardanzas</TableCell>
+                <TableCell>Retiros</TableCell>
+                <TableCell>Correo</TableCell>
+                <TableCell>Teléfono</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell></TableCell>
@@ -164,6 +173,10 @@ const Listado = () => {
                 <TableCell>1er Trimestre</TableCell>
                 <TableCell>2do Trimestre</TableCell>
                 <TableCell>3er Trimestre</TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
+                <TableCell></TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -179,6 +192,10 @@ const Listado = () => {
                   <TableCell>{fila.inasistencias[0]}</TableCell>
                   <TableCell>{fila.inasistencias[1]}</TableCell>
                   <TableCell>{fila.inasistencias[2]}</TableCell>
+                  <TableCell>{fila.tardanzas}</TableCell>
+                  <TableCell>{fila.retiros}</TableCell>
+                  <TableCell>{fila.correoElectronico}</TableCell>
+                  <TableCell>{fila.telefono}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

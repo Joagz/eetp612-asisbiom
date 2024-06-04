@@ -18,6 +18,7 @@ import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 import eetp612.com.ar.asisbiom.horarios.HorarioUtils;
+import eetp612.com.ar.asisbiom.stats.StatsService;
 
 @Configuration
 @EnableScheduling
@@ -31,11 +32,16 @@ public class ScheduleConfig {
 
     @Autowired
     private HorarioRepository horarioRepository;
+    
+    @Autowired
+    private StatsService statsService;
 
     // Esto hace el recuento de faltas al final del día
     @Scheduled(fixedRate = 24, timeUnit = TimeUnit.HOURS)
     public void scheduleFixedRateTaskAsync() throws InterruptedException {
         conteoRepository.findAll().forEach(conteo -> {
+            
+            statsService.reset();
 
             List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(conteo.getAlumno(),
                     LocalDate.now());

@@ -4,6 +4,7 @@ import { Card, CardContent, Paper } from "@mui/material";
 import {
   AppRegistrationRounded,
   ChecklistRounded,
+  ListRounded,
   Man,
   People,
   SchoolRounded,
@@ -141,6 +142,12 @@ export default function Home() {
             >
               <AppRegistrationRounded></AppRegistrationRounded>
               <Overline>Registrar alumno</Overline>
+            </a><a
+              href="/alumnos/listado"
+              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <ListRounded></ListRounded>
+              <Overline>Listado</Overline>
             </a>
           </div>
         </div>

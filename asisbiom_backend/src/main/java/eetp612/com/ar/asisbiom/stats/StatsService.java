@@ -12,14 +12,21 @@ public class StatsService {
     private StatsRepository repository;
 
     // public StatsService() {
-    //     Optional<Stats> info_diaria = repository.findById(StatsConfigs.INFO_DIARIA);
-    //     Optional<Stats> info_cantidad = repository.findById(StatsConfigs.INFO_CANTIDADES);
+    // Optional<Stats> info_diaria = repository.findById(StatsConfigs.INFO_DIARIA);
+    // Optional<Stats> info_cantidad =
+    // repository.findById(StatsConfigs.INFO_CANTIDADES);
 
-    //     if (!info_cantidad.isPresent())
-    //         repository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
-    //     if (!info_diaria.isPresent())
-    //         repository.save(new Stats(StatsConfigs.INFO_DIARIA));
+    // if (!info_cantidad.isPresent())
+    // repository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
+    // if (!info_diaria.isPresent())
+    // repository.save(new Stats(StatsConfigs.INFO_DIARIA));
     // }
+
+    public void reset() {
+        Stats presentes = repository.findById(StatsConfigs.INFO_DIARIA).get();
+        presentes.setCantidadAlumnos(0);
+        presentes.setCantidadPersonal(0);
+    }
 
     public void addAlumnoToPresentes() {
         Stats presentes = repository.findById(StatsConfigs.INFO_DIARIA).get();
