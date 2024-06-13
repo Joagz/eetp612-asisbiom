@@ -43,9 +43,9 @@ public class Horario {
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_salida")
     private LocalTime horarioSalida;
-
+    
     @Column(name = "clase")
-    private Integer clase;
+    private String clase;
 
     @Column(name = "dia")
     private Integer dia;

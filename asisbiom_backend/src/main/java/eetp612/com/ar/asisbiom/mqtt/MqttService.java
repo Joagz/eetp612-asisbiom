@@ -63,7 +63,6 @@ public class MqttService {
         String msgString = message.getSensorId() + "+" + message.getAccion() + "+" + message.getIdAlumno();
         engine.setMessage(msgString);
         engine.call();
-        System.out.println(msgString);
     }
 
     /*
@@ -140,11 +139,13 @@ public class MqttService {
 
     public MqttResponse asistir(Alumno alumno) {
 
+        // Encontrar asistencias por fecha y alumno
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+        // Filtrar aquellas en las que el alumno no se haya retirado
         asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null).collect(Collectors.toList());
 
         if (!asistencias.isEmpty()) {
-            System.out.println("ERROR INESPERADO: El alumno todavía sigue en el turno, intentando retirar...");
+            System.out.println("ERROR: El alumno todavía sigue en el turno, intentando retirar...");
             return MqttResponse.RETIRAR;
         }
 

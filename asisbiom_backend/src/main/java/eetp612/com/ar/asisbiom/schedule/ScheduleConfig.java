@@ -2,7 +2,6 @@ package eetp612.com.ar.asisbiom.schedule;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
@@ -52,28 +51,25 @@ public class ScheduleConfig {
             Float inasistencia = 0f;
 
             int i = 0;
-            ArrayList<Integer> toDelete = new ArrayList<>();
 
             for (Horario h : horarios) {
                 for (Asistencia a : asistencias) {
                     long minutesBetween = Math
-                            .abs(Duration.between(h.getHorarioEntrada(), a.getHorarioEntrada()).toMinutes());
-                    System.out.println("MINUTES BETWEEN : " + minutesBetween);
+                            .abs(Duration.between(h.getHorarioEntrada(), a.getHorarioEntrada()).toMinutes());                        
+                    // Colocar horario de salida si no se retiró el alumno
+                    if(a.getHorarioRetiro() == null) {
+                        a.setHorarioRetiro(h.getHorarioSalida());
+                    }
 
                     if (minutesBetween <= 15) {
-                        toDelete.add(i);
+                        horarios.remove(i);
                         break;
                     }
                 }
                 i++;
             }
 
-            for (int k : toDelete) {
-                horarios.remove(k);
-            }
-
             for (Horario horario : horarios) {
-                System.out.println(horario.getValorInasistencia());
                 inasistencia += horario.getValorInasistencia();
             }
 
