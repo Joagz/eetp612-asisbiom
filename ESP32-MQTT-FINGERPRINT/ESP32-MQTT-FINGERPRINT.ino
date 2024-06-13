@@ -69,12 +69,23 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   Serial.print("id_alumno: ");
   Serial.println(values[2]);
 
+  // ver accion que realizamos
+  switch (values[1]) {
+    case MQTT_ACTION_AUTH:
+      break;
+    case MQTT_ACTION_REGISTER:
+      break;
+    case MQTT_ACTION_CONFIRM:
+      break;
+  }
+
+
   if (strcmp(values[0], SENSOR_ID) == 0)
     // Codigo para registrar huella
     Serial.print("REGISTRAR ALUMNO CON ID: ");
-    Serial.println(values[2]);
-    // while (!enrollFingerprint(atoi(values[2]), finger))
-    //   ;
+  Serial.println(values[2]);
+  // while (!enrollFingerprint(atoi(values[2]), finger))
+  //   ;
 }
 
 void setup() {
@@ -85,21 +96,30 @@ void setup() {
 
   // initFingerprint(finger);
 
+
   WiFi.mode(WIFI_STA);
 
-  WiFiManager wiFiManager;
+  WiFi.begin("Flia Premet", "eljoaqui");
 
-  wiFiManager.resetSettings();
-
-  bool res;
-
-  res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
-
-  if (!res) {
-    Serial.println("Falla al conectar! reiniciando...");
-    delay(2000);
-    ESP.restart();
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.println("Connecting to WiFi..");
   }
+  Serial.println("Connected to the WiFi network");
+
+  // WiFiManager wiFiManager;
+
+  // wiFiManager.resetSettings();
+
+  // bool res;
+
+  // res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
+
+  // if (!res) {
+  //   Serial.println("Falla al conectar! reiniciando...");
+  //   delay(2000);
+  //   ESP.restart();
+  // }
 
   Serial.println("");
   Serial.println("WiFi conectado");
@@ -117,14 +137,6 @@ void setup() {
     Serial.println(httpResponseCode);
   }
   http.end();
-
-  // WiFi.begin("", "");
-
-  // while (WiFi.status() != WL_CONNECTED) {
-  //   delay(500);
-  //   Serial.println("Connecting to WiFi..");
-  // }
-  // Serial.println("Connected to the WiFi network");
 
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback_for_idinfo);

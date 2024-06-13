@@ -6,7 +6,7 @@
  */
 package eetp612.com.ar.asisbiom.notas;
 
-import java.util.Date;
+import java.time.LocalDate;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
 import jakarta.persistence.CascadeType;
@@ -43,10 +43,10 @@ public class Nota {
     private String asunto;
 
     @Column(name = "fecha")
-    private Date fecha;
+    private LocalDate fecha;
 
     @Column(name = "vencimiento")
-    private Date vencimiento;
+    private LocalDate vencimiento;
 
     @Column(name = "contenido")
     private String contenido;

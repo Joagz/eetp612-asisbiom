@@ -1,4 +1,4 @@
-#define mqttServer "192.168.1.100"
+#define mqttServer "192.168.100.50"
 #define mqttPassword "12345"
 #define mqttUser "FP_SENSOR"
 #define mqttPort 1887
