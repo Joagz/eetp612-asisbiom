@@ -47,7 +47,7 @@ public class SecurityConfig {
                     }
                 }))
                 .csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler)
-                        .ignoringRequestMatchers("/auth/v1/register", "/auth/v1/user", "/api/**") // ; temporal 
+                        .ignoringRequestMatchers("/auth/v1/register", "/auth/v1/user",  "/swagger-ui/**") // ; temporal 
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(),
@@ -56,8 +56,9 @@ public class SecurityConfig {
                         BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/auth/v1/**").permitAll())
-                .formLogin(login -> login.disable())
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").hasAnyAuthority("DEVELOPER")
+                        .anyRequest().permitAll())
+                .formLogin(Customizer.withDefaults())
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }

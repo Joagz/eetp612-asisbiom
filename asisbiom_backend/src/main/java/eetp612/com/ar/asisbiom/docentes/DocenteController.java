@@ -46,7 +46,7 @@ public class DocenteController {
     }
 
     @GetMapping("/cargos/{cargo}")
-    public List<Docente> getByCargo(@PathVariable("cargo") CargoDocente cargo) {
+    public List<Docente> getByCargo(@PathVariable("cargo") Roles cargo) {
         return userRepository.findByRole(roleRepository.findByRole(cargo).get(0)).stream()
                 .map(user -> user.getDocente()).toList();
     }

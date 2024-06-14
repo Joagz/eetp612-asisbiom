@@ -1,8 +1,9 @@
 package eetp612.com.ar.asisbiom.docentes;
 
-public enum CargoDocente {
+public enum Roles {
     PROFESOR,
     PRECEPTOR,
     SECRETARIO,
-    DIRECTIVO
+    DIRECTIVO,
+    DEVELOPER
 }

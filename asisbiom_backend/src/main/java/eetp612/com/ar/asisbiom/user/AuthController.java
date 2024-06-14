@@ -11,6 +11,7 @@ import java.util.Optional;
 import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -21,9 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping("/auth/v1")
 public class AuthController {
 
-    private final static String EMAIL_REGEX_PATTERN = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@" 
-    + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
-
+    private static final String EMAIL_REGEX_PATTERN = "^(?=.{1,64}@)[A-Za-z0-9_-]+(\\.[A-Za-z0-9_-]+)*@"
+            + "[^-][A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)*(\\.[A-Za-z]{2,})$";
 
     @Autowired
     private UserRepository userRepository;
@@ -37,8 +37,13 @@ public class AuthController {
     @Autowired
     private PasswordEncoder encoder;
 
+    // Registrar un nuevo usuario
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDto user) {
+
+        // NO PERMITIR USUARIOS CON ESTAS RELACIONES
+        if (user.id_docente() <= 1 || user.id_role() <= 1)
+            return ResponseEntity.status(HttpStatusCode.valueOf(403)).build();
 
         if (!userRepository.findByEmail(user.email()).isEmpty()) {
             return ResponseEntity.badRequest().body("El correo electrónico está en uso.");
@@ -68,6 +73,7 @@ public class AuthController {
         return ResponseEntity.ok().body(userRepository.save(toSave));
     }
 
+    // Servirá para que el usuario recupere su token JWT
     @RequestMapping("/user")
     public User getUserDetailsAfterLogin(Authentication authentication) {
         List<User> customers = userRepository.findByEmail(authentication.getName());
@@ -78,6 +84,5 @@ public class AuthController {
         }
 
     }
-
 
 }

@@ -1,6 +1,6 @@
 package eetp612.com.ar.asisbiom.user;
 
-import eetp612.com.ar.asisbiom.docentes.CargoDocente;
+import eetp612.com.ar.asisbiom.docentes.Roles;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -21,6 +21,6 @@ public class Role {
     private Integer id;
 
     @Enumerated(EnumType.STRING)
-    private CargoDocente role;
+    private Roles role;
 
 }
