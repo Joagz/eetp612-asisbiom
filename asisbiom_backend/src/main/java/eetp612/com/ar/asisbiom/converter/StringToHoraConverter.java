@@ -1,4 +1,4 @@
-package eetp612.com.ar.asisbiom.config;
+package eetp612.com.ar.asisbiom.converter;
 
 
 import org.springframework.core.convert.converter.Converter;

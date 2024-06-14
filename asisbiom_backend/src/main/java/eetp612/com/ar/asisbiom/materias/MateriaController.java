@@ -19,6 +19,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 
 @RestController
 @RequestMapping("/api/materia")
@@ -106,6 +108,11 @@ public class MateriaController {
         return ResponseEntity.ok().body(
                 materias);
 
+    }
+
+    @PostMapping
+    public ResponseEntity<?> create(@RequestBody Materia materia) {
+        return ResponseEntity.ok().body(materiaRepository.save(materia));
     }
 
 }
