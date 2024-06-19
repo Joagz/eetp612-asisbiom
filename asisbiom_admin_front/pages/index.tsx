@@ -12,7 +12,7 @@ import {
 import { useEffect, useState } from "react";
 import axios from "axios";
 
-export default function Home() {
+export function Home() {
   const [cantidades, setCantidades] = useState<{
     cant_personal: string;
     cant_alumnos: string;
@@ -155,3 +155,4 @@ export default function Home() {
     </MainLayout>
   );
 }
+export default Home;

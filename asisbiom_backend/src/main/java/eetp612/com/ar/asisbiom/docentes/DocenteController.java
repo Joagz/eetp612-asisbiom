@@ -9,6 +9,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import eetp612.com.ar.asisbiom.user.RoleRepository;
+import eetp612.com.ar.asisbiom.user.UserRepository;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +29,12 @@ public class DocenteController {
     @Autowired
     private DocenteRepository docenteRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private RoleRepository roleRepository;
+
     @ExceptionHandler(value = { Exception.class })
     public ResponseEntity<?> catchAll() {
         return ResponseEntity.internalServerError().body("Ocurrió un error al procesar la solicitud. Lo sentimos.");
@@ -37,8 +46,9 @@ public class DocenteController {
     }
 
     @GetMapping("/cargos/{cargo}")
-    public List<Docente> getMethodName(@PathVariable("cargo") CargoDocente cargo) {
-        return docenteRepository.findByCargoDocente(cargo);
+    public List<Docente> getByCargo(@PathVariable("cargo") Roles cargo) {
+        return userRepository.findByRole(roleRepository.findByRole(cargo).get(0)).stream()
+                .map(user -> user.getDocente()).toList();
     }
 
     @GetMapping("/search")

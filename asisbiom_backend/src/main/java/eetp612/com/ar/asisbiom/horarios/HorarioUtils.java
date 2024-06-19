@@ -53,18 +53,7 @@ public class HorarioUtils {
                 break;
             }
 
-            switch (h.getClase()) {
-                case 1:
-                    sumaFinal += 1 / 2;
-                    break;
-                case 2:
-                    sumaFinal += 1 / 2;
-                case 3:
-                    sumaFinal += 1 / 4;
-                    break;
-                default:
-                    break;
-            }
+            sumaFinal += h.getValorInasistencia();
 
         }
 

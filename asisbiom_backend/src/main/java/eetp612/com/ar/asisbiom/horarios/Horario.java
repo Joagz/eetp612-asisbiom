@@ -10,6 +10,7 @@ import java.time.LocalTime;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import eetp612.com.ar.asisbiom.cursos.Curso;
+import eetp612.com.ar.asisbiom.general.Dia;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -43,12 +44,12 @@ public class Horario {
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_salida")
     private LocalTime horarioSalida;
-
+    
     @Column(name = "clase")
-    private Integer clase;
+    private String clase;
 
     @Column(name = "dia")
-    private Integer dia;
+    private Dia dia;
     
     @Column(name = "valor_inasistencia")
     private Integer valorInasistencia;

@@ -5,6 +5,8 @@ import java.util.concurrent.Callable;
 import org.eclipse.paho.client.mqttv3.IMqttClient;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
 
+// Esta clase sirve para publicar mensajes al canal
+// que está especificado en TOPIC_IN del servidor MQTT
 public class MqttSensorEngine implements Callable<Void> {
 
     public static final String TOPIC_IN = "mqtt_sensor_in";
@@ -23,11 +25,11 @@ public class MqttSensorEngine implements Callable<Void> {
     @Override
     public Void call() throws Exception {
         if (!client.isConnected()) {
-            System.err.println("Client not connected!");
+            System.err.println("Cliente no conectado");
             return null;
         }
         if (message == null) {
-            System.out.println("Message is null");
+            System.out.println("El mensaje está vacío");
             return null;
         }
         

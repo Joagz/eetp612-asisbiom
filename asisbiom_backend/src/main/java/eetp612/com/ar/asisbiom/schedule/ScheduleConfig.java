@@ -2,7 +2,6 @@ package eetp612.com.ar.asisbiom.schedule;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,37 +50,28 @@ public class ScheduleConfig {
             Float inasistencia = 0f;
 
             int i = 0;
-            ArrayList<Integer> toDelete = new ArrayList<>();
 
             // filtrar horarios y eliminar aquellos cuyo horario de entrada
             // haya estado en un rango de 15 minutos
             for (Horario h : horarios) {
                 for (Asistencia a : asistencias) {
                     long minutesBetween = Math
-                            .abs(Duration.between(h.getHorarioEntrada(), a.getHorarioEntrada()).toMinutes());
-                    System.out.println("MINUTES BETWEEN : " + minutesBetween);
+                            .abs(Duration.between(h.getHorarioEntrada(), a.getHorarioEntrada()).toMinutes());                        
+                    // Colocar horario de salida si no se retiró el alumno
+                    if(a.getHorarioRetiro() == null) {
+                        a.setHorarioRetiro(h.getHorarioSalida());
+                    }
 
                     if (minutesBetween <= 15) {
-                        toDelete.add(i);
+                        horarios.remove(i);
                         break;
                     }
                 }
                 i++;
             }
 
-            for (int k : toDelete) {
-                horarios.remove(k);
-            }
-
             for (Horario horario : horarios) {
                 System.out.println(horario.getValorInasistencia());
-                
-                Asistencia newAsistencia = new Asistencia();
-                newAsistencia.setDia(horario.getDia());
-                newAsistencia.setAlumno(conteo.getAlumno());
-                newAsistencia.setFecha(LocalDate.now());
-                newAsistencia.setAsistencia(false);
-                asistenciaRepository.save(newAsistencia);
                 inasistencia += horario.getValorInasistencia();
             }
 

@@ -7,6 +7,7 @@ import java.util.List;
 public interface CursoRepository extends JpaRepository<Curso, Integer> {
     List<Curso> findByCurso(Integer curso);
     List<Curso> findByDivision(Character division);
+    List<Curso> findByOrderByCurso();
     List<Curso> findByCursoAndDivisionOrderByCursoAsc(Integer curso, Character division);
     List<Curso> findByTurno(Integer turno);
 }

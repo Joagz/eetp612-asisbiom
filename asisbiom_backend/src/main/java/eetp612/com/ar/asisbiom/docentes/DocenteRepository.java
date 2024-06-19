@@ -10,8 +10,6 @@ public interface DocenteRepository extends JpaRepository<Docente, Integer> {
 
     List<Docente> findByDni(String dni);
 
-    List<Docente> findByCargoDocente(CargoDocente cargoDocente);
-
     List<Docente> findByNombreCompleto(String nombreCompleto);
 
 }

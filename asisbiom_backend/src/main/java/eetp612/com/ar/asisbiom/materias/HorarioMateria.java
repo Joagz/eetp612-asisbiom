@@ -1,9 +1,7 @@
-package eetp612.com.ar.asisbiom.docentes;
+package eetp612.com.ar.asisbiom.materias;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -14,19 +12,20 @@ import lombok.ToString;
 @Data
 @ToString
 @Entity
-@Table(name = "personal_docente")
-public class Docente {
+@Table(name = "horario_materia")
+public class HorarioMateria {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    @Column(name = "nombre_completo")
-    private String nombreCompleto;
+    @Column(name = "hora_inicio")
+    private Integer horaInicio;
 
-    @Column(name = "telefono")
-    private String telefono;
+    @Column(name = "hora_fin")
+    private Integer horaFin;
 
-    @Column(name = "dni")
-    private String dni;
+    private Integer id_materia;
+
 
 }
