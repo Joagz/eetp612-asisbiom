@@ -38,6 +38,9 @@ public class Asistencia {
     @JoinColumn(name = "alumno_id")
     private Alumno alumno;
 
+    @Column(name = "asistencia")
+    private boolean asistencia;
+
     @JsonFormat(pattern = "HH:mm:ss")
     @Column(name = "horario_entrada")
     private LocalTime horarioEntrada;

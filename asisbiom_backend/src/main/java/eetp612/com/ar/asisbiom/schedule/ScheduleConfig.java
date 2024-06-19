@@ -4,7 +4,6 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
@@ -37,7 +36,7 @@ public class ScheduleConfig {
     private StatsService statsService;
 
     // Esto hace el recuento de faltas al final del día
-    @Scheduled(fixedRate = 24, timeUnit = TimeUnit.HOURS)
+    @Scheduled(cron = "0 0 19 * * MON-FRI", zone = "GMT-3")
     public void scheduleFixedRateTaskAsync() throws InterruptedException {
         conteoRepository.findAll().forEach(conteo -> {
             
@@ -54,6 +53,8 @@ public class ScheduleConfig {
             int i = 0;
             ArrayList<Integer> toDelete = new ArrayList<>();
 
+            // filtrar horarios y eliminar aquellos cuyo horario de entrada
+            // haya estado en un rango de 15 minutos
             for (Horario h : horarios) {
                 for (Asistencia a : asistencias) {
                     long minutesBetween = Math
@@ -74,6 +75,13 @@ public class ScheduleConfig {
 
             for (Horario horario : horarios) {
                 System.out.println(horario.getValorInasistencia());
+                
+                Asistencia newAsistencia = new Asistencia();
+                newAsistencia.setDia(horario.getDia());
+                newAsistencia.setAlumno(conteo.getAlumno());
+                newAsistencia.setFecha(LocalDate.now());
+                newAsistencia.setAsistencia(false);
+                asistenciaRepository.save(newAsistencia);
                 inasistencia += horario.getValorInasistencia();
             }
 

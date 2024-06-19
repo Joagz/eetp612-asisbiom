@@ -6,7 +6,6 @@ package eetp612.com.ar.asisbiom.mqtt;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,7 +16,6 @@ import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttConnectOptions;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.Message;
 import org.springframework.stereotype.Service;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
@@ -184,7 +182,7 @@ public class MqttService {
         newAsistencia.setTardanza(tardanza);
         newAsistencia.setRetirado(false);
         newAsistencia.setDia(horario.getDia());
-
+        newAsistencia.setAsistencia(true);
         asistenciaRepository.save(newAsistencia);
 
         return MqttResponse.OK;

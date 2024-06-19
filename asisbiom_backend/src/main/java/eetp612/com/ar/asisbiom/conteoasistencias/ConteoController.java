@@ -5,16 +5,6 @@
  */
 package eetp612.com.ar.asisbiom.conteoasistencias;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
-import eetp612.com.ar.asisbiom.cursos.Curso;
-import eetp612.com.ar.asisbiom.cursos.CursoRepository;
-import eetp612.com.ar.asisbiom.stats.Stats;
-import eetp612.com.ar.asisbiom.stats.StatsConfigs;
-import eetp612.com.ar.asisbiom.stats.StatsRepository;
-
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -30,7 +20,15 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
+import eetp612.com.ar.asisbiom.cursos.Curso;
+import eetp612.com.ar.asisbiom.cursos.CursoRepository;
+import eetp612.com.ar.asisbiom.stats.Stats;
+import eetp612.com.ar.asisbiom.stats.StatsConfigs;
+import eetp612.com.ar.asisbiom.stats.StatsRepository;
 
 @RestController
 @RequestMapping("/api/estadistica")
@@ -63,6 +61,20 @@ public class ConteoController {
         return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_DIARIA).get());
     }
 
+    // TODO: Remover
+    @GetMapping("/_initialize")
+    public String init() {
+        Optional<Stats> info_diaria = statsRepository.findById(StatsConfigs.INFO_DIARIA);
+        Optional<Stats> info_cantidad = statsRepository.findById(StatsConfigs.INFO_CANTIDADES);
+
+        if (!info_cantidad.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
+        if (!info_diaria.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.INFO_DIARIA));
+
+            return "ok";
+    }
+
     @GetMapping("/descarga/{cursoId}")
     public ResponseEntity<?> getFileFromCursoAndDivisionEntity(@PathVariable Integer cursoId) throws IOException {
 
@@ -74,7 +86,8 @@ public class ConteoController {
             if (!curso.isPresent()) {
                 return ResponseEntity.badRequest().body("Curso no encontrado. ID: " + cursoId);
             }
-            pw.write("Curso, Division, Nombre y Apellido, DNI, Dias Hábiles, Inasistencias 1er T,m Inasistencias 2do T., Inasistencias 3er T., Tardanzas, Retiros\n");
+            pw.write(
+                    "Curso, Division, Nombre y Apellido, DNI, Dias Hábiles, Inasistencias 1er T,m Inasistencias 2do T., Inasistencias 3er T., Tardanzas, Retiros\n");
 
             alumnoRepository.findByCurso(curso.get()).forEach(alumno -> {
                 List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);

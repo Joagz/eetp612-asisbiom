@@ -1,7 +1,5 @@
 package eetp612.com.ar.asisbiom.stats;
 
-import java.util.Optional;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -12,14 +10,13 @@ public class StatsService {
     private StatsRepository repository;
 
     // public StatsService() {
-    // Optional<Stats> info_diaria = repository.findById(StatsConfigs.INFO_DIARIA);
-    // Optional<Stats> info_cantidad =
-    // repository.findById(StatsConfigs.INFO_CANTIDADES);
+    //     Optional<Stats> info_diaria = repository.findById(StatsConfigs.INFO_DIARIA);
+    //     Optional<Stats> info_cantidad = repository.findById(StatsConfigs.INFO_CANTIDADES);
 
-    // if (!info_cantidad.isPresent())
-    // repository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
-    // if (!info_diaria.isPresent())
-    // repository.save(new Stats(StatsConfigs.INFO_DIARIA));
+    //     if (!info_cantidad.isPresent())
+    //         repository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
+    //     if (!info_diaria.isPresent())
+    //         repository.save(new Stats(StatsConfigs.INFO_DIARIA));
     // }
 
     public void reset() {

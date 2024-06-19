@@ -116,7 +116,7 @@ const registrar = () => {
     <MainLayout title={"Registrar alumno"}>
       <section className="flex flex-wrap w-full gap-4">
         <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
-          <div className="h-5"></div>
+          <div className="h-10"></div>
           <Form
             control={control}
             onSubmit={handleSubmit(onSubmit)}
@@ -230,7 +230,7 @@ const registrar = () => {
           </Form>
         </article>
         <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
-          <div className="h-10"></div>
+          <div className="h-20"></div>
           <Overline>Turno Mañana</Overline>
           {listado
             .filter((obj) => obj.curso.turno == 1)

@@ -72,9 +72,9 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   if (strcmp(values[0], SENSOR_ID) == 0)
     // Codigo para registrar huella
     Serial.print("REGISTRAR ALUMNO CON ID: ");
-    Serial.println(values[2]);
-    // while (!enrollFingerprint(atoi(values[2]), finger))
-    //   ;
+  Serial.println(values[2]);
+  // while (!enrollFingerprint(atoi(values[2]), finger))
+  //   ;
 }
 
 void setup() {
@@ -83,8 +83,32 @@ void setup() {
     delay(100);
   }
 
-  // initFingerprint(finger);
+  finger.begin(57600);
 
+  if (finger.verifyPassword()) {
+    Serial.println("Sensor de huella digital encontrado!");
+  } else {
+    Serial.println("Sensor no encontrado...");
+    while (1) {
+      Serial.print(".");
+      delay(1000);
+    }
+  }
+
+  Serial.print(F("Estado: 0x"));
+  Serial.println(finger.status_reg, HEX);
+  Serial.print(F("ID del sistema: 0x"));
+  Serial.println(finger.system_id, HEX);
+  Serial.print(F("Capacidad: "));
+  Serial.println(finger.capacity);
+  Serial.print(F("Nivel de seguridad: "));
+  Serial.println(finger.security_level);
+  Serial.print(F("Dir. del disp.: "));
+  Serial.println(finger.device_addr, HEX);
+  Serial.print(F("Tam. de paquete: "));
+  Serial.println(finger.packet_len);
+  Serial.print(F("Baud: "));
+  Serial.println(finger.baud_rate);
   WiFi.mode(WIFI_STA);
 
   WiFiManager wiFiManager;
