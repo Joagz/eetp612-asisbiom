@@ -41,6 +41,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    // Solo filtrar cuando ingresamos (LOGIN)
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return !request.getServletPath().equals("/auth/v1/user");

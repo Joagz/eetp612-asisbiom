@@ -16,6 +16,7 @@ import lombok.ToString;
 @Entity
 @Table(name = "personal_docente")
 public class Docente {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
