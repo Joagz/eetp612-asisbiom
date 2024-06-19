@@ -96,7 +96,6 @@ void setup() {
 
   finger.begin(57600);
 
-<<<<<<< HEAD
   if (finger.verifyPassword()) {
     Serial.println("Sensor de huella digital encontrado!");
   } else {
@@ -121,9 +120,7 @@ void setup() {
   Serial.println(finger.packet_len);
   Serial.print(F("Baud: "));
   Serial.println(finger.baud_rate);
-=======
 
->>>>>>> 67a5ea31925e6373fff307f9b54cbce6cb33df8a
   WiFi.mode(WIFI_STA);
 
   WiFi.begin("Flia Premet", "eljoaqui");

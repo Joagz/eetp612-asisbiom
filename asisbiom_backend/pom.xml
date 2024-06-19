@@ -68,6 +68,13 @@
 			<version>2.5.0</version>
 		</dependency>
 
+		<!-- Para archivos xlsx -->
+		<dependency>
+			<groupId>org.apache.poi</groupId>
+			<artifactId>poi</artifactId>
+			<version>5.2.5</version>
+		</dependency>
+
 
 		<dependency>
 			<groupId>io.jsonwebtoken</groupId>

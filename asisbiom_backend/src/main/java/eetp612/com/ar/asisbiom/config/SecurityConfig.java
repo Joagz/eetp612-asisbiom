@@ -56,9 +56,10 @@ public class SecurityConfig {
                         BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/api/**").authenticated()
-                        .requestMatchers("/swagger-ui/**", "/api-docs/**").hasAnyAuthority("DEVELOPER")
+                        // .requestMatchers("/swagger-ui/**", "/api-docs/**").hasAnyAuthority("DEVELOPER")
+                        .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().permitAll())
-                .formLogin(Customizer.withDefaults())
+                .formLogin(form -> form.disable())
                 .httpBasic(Customizer.withDefaults());
         return http.build();
     }
