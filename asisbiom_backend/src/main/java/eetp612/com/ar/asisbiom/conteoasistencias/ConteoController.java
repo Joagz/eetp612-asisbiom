@@ -12,6 +12,9 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,16 +26,41 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import eetp612.com.ar.asisbiom.alumnos.Alumno;
 import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
+import eetp612.com.ar.asisbiom.asistencias.Asistencia;
+import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import eetp612.com.ar.asisbiom.stats.Stats;
 import eetp612.com.ar.asisbiom.stats.StatsConfigs;
 import eetp612.com.ar.asisbiom.stats.StatsRepository;
 
+record InnerConteoAsistencia(
+        Integer id,
+        String nombreCompleto,
+        Boolean tardanza,
+        Boolean retirado,
+        Boolean presente,
+        Long diasHabiles,
+        Float inasistencias1,
+        Float inasistencias2,
+        Float inasistencias3) {
+}
+
 @RestController
 @RequestMapping("/api/estadistica")
 public class ConteoController {
+
+    String[] RESUME_FILE_HEADERS = {
+            "Nombre Completo",
+            "tardanza",
+            "retirado",
+            "presente",
+            "diasHabiles",
+            "inasistencias1",
+            "inasistencias2",
+            "inasistencias3" };
 
     @Autowired
     private ConteoRepository conteoRepository;
@@ -46,18 +74,76 @@ public class ConteoController {
     @Autowired
     private StatsRepository statsRepository;
 
+    @Autowired
+    private AsistenciaRepository asistenciaRepository;
+
     @GetMapping("")
     public ResponseEntity<?> findAll() {
         return ResponseEntity.ok().body(conteoRepository.findAll());
     }
 
+    // Aclaracion importante: En este caso no se tiene en cuenta el contraturno para
+    // la toma
+    // de la asistencia. El metodo encuentra el listado de alumnos del curso y
+    // devuelve un resumen
+    @GetMapping("/{curso}")
+    public ResponseEntity<?> findStudentsByCourseAndGetResume(@PathVariable("curso") Integer cursoId) {
+
+        Optional<Curso> foundCurso = cursoRepository.findById(cursoId);
+
+        if (foundCurso.isPresent()) {
+            Curso curso = foundCurso.get();
+
+            List<Alumno> alumnos = alumnoRepository.findByCurso(curso);
+
+            List<InnerConteoAsistencia> stats = new ArrayList<>();
+
+            alumnos.forEach(alumno -> {
+                List<ConteoAsistencia> foundConteoAlumno = conteoRepository.findByAlumno(alumno);
+                if (!foundConteoAlumno.isEmpty()) {
+                    ConteoAsistencia conteoAsistencia = foundConteoAlumno.get(0);
+                    boolean presente = false;
+                    boolean tardanza = false;
+                    boolean retirado = false;
+
+                    List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+
+                    if (!asistencias.isEmpty()) {
+                        Asistencia asistencia = asistencias.get(0);
+                        presente = true;
+                        tardanza = asistencia.getTardanza();
+                        retirado = asistencia.getRetirado();
+                    }
+
+                    InnerConteoAsistencia innerConteoAsistencia = new InnerConteoAsistencia(alumno.getId(),
+                            alumno.getNombreCompleto(), tardanza, retirado, presente, conteoAsistencia.getDiasHabiles(),
+                            conteoAsistencia.getInasistencias1(), conteoAsistencia.getInasistencias2(),
+                            conteoAsistencia.getInasistencias3());
+
+                    stats.add(innerConteoAsistencia);
+                }
+            });
+            return ResponseEntity.ok().body(stats);
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
     @GetMapping("/cantidades")
     public ResponseEntity<?> getRecuento() {
+
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.INFO_CANTIDADES);
+        if (!found.isPresent())
+            return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_CANTIDADES).get());
+
     }
 
     @GetMapping("/cantidades/diaria")
     public ResponseEntity<?> getRecuentoDiario() {
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.INFO_DIARIA);
+        if (!found.isPresent())
+            return ResponseEntity.notFound().build();
         return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_DIARIA).get());
     }
 
@@ -72,34 +158,53 @@ public class ConteoController {
         if (!info_diaria.isPresent())
             statsRepository.save(new Stats(StatsConfigs.INFO_DIARIA));
 
-            return "ok";
+        return "ok";
     }
 
     @GetMapping("/descarga/{cursoId}")
     public ResponseEntity<?> getFileFromCursoAndDivisionEntity(@PathVariable Integer cursoId) throws IOException {
+        // Depende de la plataforma donde ejecutemos
 
-        File csv = new File("\\home\\joago\\estadistica.csv");
+        // Windows
+        File csv = new File("\\temp\\estadistica.csv");
+
+        // Linux
+        // File csv = new File("\\home\\{usr}\\tmp\\estadistica.csv");
 
         try (PrintWriter pw = new PrintWriter(csv)) {
-            Optional<Curso> curso = cursoRepository.findById(cursoId);
 
-            if (!curso.isPresent()) {
-                return ResponseEntity.badRequest().body("Curso no encontrado. ID: " + cursoId);
-            }
-            pw.write(
-                    "Curso, Division, Nombre y Apellido, DNI, Dias Hábiles, Inasistencias 1er T,m Inasistencias 2do T., Inasistencias 3er T., Tardanzas, Retiros\n");
+            Optional<Curso> foundCurso = cursoRepository.findById(cursoId);
 
-            alumnoRepository.findByCurso(curso.get()).forEach(alumno -> {
-                List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
+            if (!foundCurso.isPresent())
+                return ResponseEntity.notFound().build();
 
-                if (!found.isEmpty()) {
-                    ConteoAsistencia conteo = found.get(0);
+            Curso curso = foundCurso.get();
+            pw.write(Arrays.toString(RESUME_FILE_HEADERS).replace("[", "").replace("]", "") + "\n");
 
-                    pw.write(alumno.getCurso().getCurso() + ", " + alumno.getCurso().getDivision() + ", "
-                            + alumno.getNombreCompleto() + ", " + alumno.getDni() + ", " + conteo.getDiasHabiles()
-                            + ", " + conteo.getInasistencias1() + ", " + conteo.getInasistencias2() + ", "
-                            + conteo.getInasistencias3() + ", " + conteo.getTardanzas() + ", "
-                            + conteo.getRetiros() + "\n");
+            List<Alumno> alumnos = alumnoRepository.findByCurso(curso);
+
+            alumnos.forEach(alumno -> {
+                List<ConteoAsistencia> foundConteoAlumno = conteoRepository.findByAlumno(alumno);
+                if (!foundConteoAlumno.isEmpty()) {
+                    ConteoAsistencia conteoAsistencia = foundConteoAlumno.get(0);
+                    boolean presente = false;
+                    boolean tardanza = false;
+                    boolean retirado = false;
+
+                    List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+
+                    if (!asistencias.isEmpty()) {
+                        Asistencia asistencia = asistencias.get(0);
+                        presente = true;
+                        tardanza = asistencia.getTardanza();
+                        retirado = asistencia.getRetirado();
+                    }
+
+                    pw.write((alumno.getNombreCompleto() + "," + tardanza + "," + retirado + "," + presente + ","
+                            + conteoAsistencia.getDiasHabiles() + "," +
+                            conteoAsistencia.getInasistencias1() + "," + conteoAsistencia.getInasistencias2() + "," +
+                            conteoAsistencia.getInasistencias3()));
+
                 }
             });
 

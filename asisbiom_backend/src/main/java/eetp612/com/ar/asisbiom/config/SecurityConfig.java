@@ -20,7 +20,6 @@ import eetp612.com.ar.asisbiom.filter.JWTTokenGeneratorFilter;
 import eetp612.com.ar.asisbiom.filter.JWTTokenValidatorFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
 
 @Configuration
 public class SecurityConfig {
@@ -34,20 +33,18 @@ public class SecurityConfig {
                 .cors(corsCustomizer -> corsCustomizer.configurationSource(new CorsConfigurationSource() {
                     @Override
                     public CorsConfiguration getCorsConfiguration(HttpServletRequest request) {
+                        // TODO: configurar con el endpoint de el front
                         CorsConfiguration config = new CorsConfiguration();
-                        config.setAllowedOrigins(Collections.singletonList("*")); // acá va la URL
-                                                                                                      // del servidor
-                                                                                                      // del FRONTEND
-                        config.setAllowedMethods(Collections.singletonList("*"));
+                        config.setAllowedOrigins(Arrays.asList("http://localhost:3000/"));
+                        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE"));
                         config.setAllowCredentials(true);
-                        config.setAllowedHeaders(Collections.singletonList("*"));
+                        config.setAllowedHeaders(Arrays.asList("*"));
                         config.setExposedHeaders(Arrays.asList("Authorization"));
                         config.setMaxAge(3600L);
                         return config;
                     }
                 }))
                 .csrf((csrf) -> csrf.csrfTokenRequestHandler(requestHandler)
-                        .ignoringRequestMatchers("/auth/v1/register", "/auth/v1/user",  "/swagger-ui/**") // ; temporal 
                         .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()))
                 .addFilterAfter(new CsrfCookieFilter(), BasicAuthenticationFilter.class)
                 .addFilterAfter(new JWTTokenGeneratorFilter(),
@@ -55,7 +52,7 @@ public class SecurityConfig {
                 .addFilterBefore(new JWTTokenValidatorFilter(),
                         BasicAuthenticationFilter.class)
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/api/**").authenticated()
+                        .requestMatchers("/api/**").permitAll()
                         // .requestMatchers("/swagger-ui/**", "/api-docs/**").hasAnyAuthority("DEVELOPER")
                         .requestMatchers("/swagger-ui/**", "/api-docs/**").permitAll()
                         .anyRequest().permitAll())

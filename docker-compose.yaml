@@ -1,0 +1,13 @@
+services:
+  asisbiom_db:
+    image: mysql
+    container_name: asisbiom_db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+    volumes:
+        - db_data:/var/lib/mysql
+
+volumes:
+  db_data:

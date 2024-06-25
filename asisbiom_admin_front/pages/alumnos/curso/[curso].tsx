@@ -14,60 +14,30 @@ import {
 } from "@mui/material";
 import axios from "axios";
 import { useMemo, useState } from "react";
-
-import Alumno from "@/interface/Alumno";
 import Curso from "@/interface/Curso";
+import { useApi } from "@/hooks/useApi";
 
-const byCurso = ({ cursoStr }: { cursoStr: string }) => {
-  const [curso, setCurso] = useState<Curso>({} as Curso);
-  const [alumnos, setAlumno] = useState<Alumno[]>([]);
-  const numero = cursoStr?.slice(0, 1);
-  const division = cursoStr?.slice(1);
+const byCurso = ({ data }: { data: { curso: string, id: number, division: string } }) => {
+  const [alumnos, setAlumno] = useState<[]>([]);
 
   useMemo(() => {
-    axios
-      .get<Curso>(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${numero}/${division}`
-      )
+    useApi<Curso>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${data.curso}/${data.division}` })
       .then((res) => {
-        axios
-          .get<Alumno[]>(
-            `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${numero}/${division}`
-          )
+        useApi<[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${data.id}` })
           .then((alumnoRes) => {
             setAlumno(alumnoRes.data);
-            setCurso(res.data);
           });
       });
   }, []);
 
-  // Datos de ejemplo para la tabla principal y especificaciones
-  const attendanceData = [
-    {
-      fullName: "Juan Pérez",
-      dni: "12345678",
-      present: true,
-      absentOrLate: "A",
-      totalAbsences: 3,
-      totalDays: 20,
-    },
-    {
-      fullName: "María Gómez",
-      dni: "87654321",
-      present: false,
-      absentOrLate: "T",
-      totalAbsences: 5,
-      totalDays: 20,
-    },
-    // Agregar más datos si es necesario
-  ];
+
 
   return (
     <MainLayout title="Curso">
       <article className="py-20 px-6 flex flex-col gap-8">
         <IconButton href="/alumnos" className="w-fit"><ArrowBack></ArrowBack></IconButton>
-        <Overline>
-          Información de {`${cursoStr?.slice(0, 1)}° '${cursoStr?.slice(1)}'`}
+        <Overline>dz
+          Información de {`${data.curso}° '${data.division}'`}
         </Overline>
         <div className="flex gap-8">
           <Button
@@ -75,7 +45,7 @@ const byCurso = ({ cursoStr }: { cursoStr: string }) => {
             variant="contained"
             color="primary"
             size="large"
-            href={`/alumnos/curso/editar/${cursoStr}`}
+            href={`/alumnos/curso/editar/${data.curso}${data.division}`}
             endIcon={<Edit />}
           >
             Editar Curso
@@ -86,7 +56,7 @@ const byCurso = ({ cursoStr }: { cursoStr: string }) => {
             variant="contained"
             color="success"
             size="large"
-            href={`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/download${curso.id}`}
+            href={`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/descarga/${data.id}`}
             endIcon={<Download />}
           >
             Descargar
@@ -112,22 +82,37 @@ const byCurso = ({ cursoStr }: { cursoStr: string }) => {
                 <TableHead>
                   <TableRow>
                     <TableCell>Nombre Completo</TableCell>
-                    <TableCell>DNI</TableCell>
                     <TableCell>Presente</TableCell>
-                    <TableCell>Ausente / Tardanza</TableCell>
-                    <TableCell>Total Inasistencias</TableCell>
+                    <TableCell>Tardanza</TableCell>
+                    <TableCell>Retirado</TableCell>
                     <TableCell>Días Hábiles</TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>Inasistencias</TableCell>
+                    <TableCell></TableCell>
+                  </TableRow>
+                  <TableRow>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell></TableCell>
+                    <TableCell>1er Trimestre</TableCell>
+                    <TableCell>2do Trimestre</TableCell>
+                    <TableCell>3er Trimestre</TableCell>
+
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {attendanceData.map((row, index) => (
+                  {alumnos.map((row: any, index) => (
                     <TableRow key={index}>
-                      <TableCell>{row.fullName}</TableCell>
-                      <TableCell>{row.dni}</TableCell>
-                      <TableCell>{row.present ? "Sí" : "No"}</TableCell>
-                      <TableCell>{row.absentOrLate}</TableCell>
-                      <TableCell>{row.totalAbsences}</TableCell>
-                      <TableCell>{row.totalDays}</TableCell>
+                      <TableCell>{row.nombreCompleto}</TableCell>
+                      <TableCell>{row.presente ? "Sí" : "No"}</TableCell>
+                      <TableCell>{row.tardanza ? "Sí" : "-"}</TableCell>
+                      <TableCell>{row.retirado ? "Sí" : "-"}</TableCell>
+                      <TableCell>{row.diasHabiles}</TableCell>
+                      <TableCell>{row.inasistencias1}</TableCell>
+                      <TableCell>{row.inasistencias2}</TableCell>
+                      <TableCell>{row.inasistencias3}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -143,19 +128,23 @@ const byCurso = ({ cursoStr }: { cursoStr: string }) => {
 export async function getServerSideProps(context: any) {
   const { curso: cursoStr } = context.query;
 
-  const res = await axios.get(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(
-      0,
-      1
-    )}/${cursoStr?.slice(1)}`
-  );
-  const curso = res.data;
-
-  return {
-    props: {
-      cursoStr,
-    },
-  };
+  try {
+    const res = await axios.get(
+      `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(0, 1)}/${cursoStr?.slice(1)}`
+    );
+    const data = res.data;
+    console.log(data);
+    return {
+      props: {
+        data,
+      },
+    };
+  } catch (error) {
+    console.error("Error fetching curso data:", error);
+    return {
+      notFound: true,
+    };
+  }
 }
 
 export default byCurso;
