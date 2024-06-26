@@ -21,4 +21,16 @@ public class Curso {
     private Character division;
     private Integer curso;
     private Integer turno;
+
+    public Curso() {
+    }
+    
+    public Curso(Character division, Integer curso, Integer turno) {
+        this.division = division;
+        this.curso = curso;
+        this.turno = turno;
+    }
+
+    
 }
+

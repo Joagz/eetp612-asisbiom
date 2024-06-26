@@ -77,6 +77,9 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
       break;
     case MQTT_ACTION_CONFIRM:
       break;
+    case MQTT_ACTION_PING:
+      client.publish(MQTT_TOPIC_SENSOR_OUT, "PONG");
+      return;
   }
 
 
