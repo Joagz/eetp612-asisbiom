@@ -30,7 +30,7 @@ import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 @Service
 public class MqttService {
 
-    private static final String messageFormatRegex = "[A-Za-z0-9]+\\+[A-Za-z0-9]+\\+[A-Za-z0-9]";
+    private static Integer COUNTER = 0;
 
     @Autowired
     private MqttRepository mqttRepository;
@@ -57,62 +57,12 @@ public class MqttService {
         engine = new MqttSensorEngine(publisher);
     }
 
-    public void sendMessage(MqttSensorMessage message) throws Exception {
-        String msgString = message.getSensorId() + "+" + message.getAccion() + "+" + message.getIdAlumno();
+    public int sendMessage(MqttSensorMessage message) throws Exception {
+        String msgString = COUNTER + "+" + message.getSensorId() + "+" + message.getAccion() + "+" + message.getIdAlumno();
         engine.setMessage(msgString);
         engine.call();
-    }
-
-    /*
-     * En el servidor MQTT los sensores envían datos de tiempo a través de un canal.
-     * Los mensajes deberán seguir este formato dentro del mismo:
-     * 
-     * Ejemplo para asistencia:
-     * "id_sensor+asistencia+1"
-     * 
-     * Ejemplo para retiro:
-     * "id_sensor+retiro+1"
-     * 
-     * En general:
-     * "[id_sensor]+[accion]+[id_alumno]"
-     * 
-     * donde id_sensor es la identificación del sensor dentro del servidor, asignada
-     * en su microcontrolador.
-     * El segundo campo contiene la hora, seguido de una barra inclinada y la fecha.
-     * Los datos son luego transformados en LocalTime y Date. El
-     * mensaje deberá terminar obligatoriamente con un carácter nulo ("\0")
-     * 
-     */
-    public MqttSensorMessage parse(String message) {
-
-        if (!message.matches(messageFormatRegex)) {
-            return null;
-        }
-
-        StringBuilder sb = new StringBuilder();
-        char[] charArr = message.toCharArray();
-        List<String> parsed = new ArrayList<>();
-        MqttSensorMessage parsedMessage = new MqttSensorMessage();
-
-        for (char c : charArr) {
-            if (c == '+') {
-                parsed.add(sb.toString());
-                sb.delete(0, sb.length());
-                break;
-            }
-            sb.append(c);
-        }
-
-        if (mqttRepository.findBySensorId(parsed.get(0)).isEmpty()) {
-            return null;
-        }
-
-        parsedMessage.setSensorId(parsed.get(0));
-        parsedMessage.setAccion(Integer.parseInt(parsed.get(1)));
-        parsedMessage.setIdAlumno(Integer.parseInt(parsed.get(2)));
-
-        return parsedMessage;
-
+        COUNTER++;
+        return COUNTER;
     }
 
     public MqttResponse retirar(Alumno alumno, Asistencia asistencia) {

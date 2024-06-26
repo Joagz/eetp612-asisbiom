@@ -78,222 +78,230 @@ const registrar = () => {
       .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`)
       .then((sensorApiRes) => {
 
-        axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`, {
+        // Enviar ping request al sensor
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/ping`, {
           accion: SensorActions.PING,
           idAlumno: 0,
           sensorId: sensorApiRes.data.sensorId
-        })
+        }).then(res => {
 
-        axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
-            nombreCompleto: data.nombreCompleto,
-            dni: data.dni,
-            curso: data.curso,
-            correoElectronico: data.correoElectronico,
-            telefono: data.telefono,
-          })
-          .then((alumnoApiRes) => {
-                const dataPacket: MqttDataPacket = {
-                  accion: SensorActions.REGISTER,
-                  idAlumno: alumnoApiRes.data.id,
-                  sensorId: sensorApiRes.data.sensorId,
-                };
+          // el sensor deberia responder al backend o no, por lo
+          // que la respuesta que llega deberia ser solo si responde
+          axios
+            .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
+              nombreCompleto: data.nombreCompleto,
+              dni: data.dni,
+              curso: data.curso,
+              correoElectronico: data.correoElectronico,
+              telefono: data.telefono,
+            })
+            .then((alumnoApiRes) => {
+              const dataPacket: MqttDataPacket = {
+                accion: SensorActions.REGISTER,
+                idAlumno: alumnoApiRes.data.id,
+                sensorId: sensorApiRes.data.sensorId,
+              };
 
-                console.log(dataPacket);
-                axios
-                  .post(
-                    `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
-                    dataPacket
-                  )
-                  .then((response) => {
-                    // confirmar sensor
-                    console.log(response.data);
+              console.log(dataPacket);
+              axios
+                .post(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
+                  dataPacket
+                )
+                .then((response) => {
+                  // confirmar sensor
+                  console.log(response.data);
 
-                    router.reload();
-                  });
-              });
-          });
-      }
+                  router.reload();
+                });
+            });
+        }).catch(err => {
+
+        });
+
+
+      });
+  }
 
   return (
-      <MainLayout title={"Registrar alumno"}>
-        <section className="flex flex-wrap w-full gap-4">
-          <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
-            <div className="h-10"></div>
-            <Form
-              control={control}
-              onSubmit={handleSubmit(onSubmit)}
-              className="p-4 border rounded-md w-full flex flex-col gap-4"
-            >
-              <Overline>Nuevo alumno</Overline>
-              <Paragraph>
-                Luego de haber sido registrado, se le pedirá en el sensor
-                seleccionado que coloque la huella (al alumno).
-              </Paragraph>
+    <MainLayout title={"Registrar alumno"}>
+      <section className="flex flex-wrap w-full gap-4">
+        <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
+          <div className="h-10"></div>
+          <Form
+            control={control}
+            onSubmit={handleSubmit(onSubmit)}
+            className="p-4 border rounded-md w-full flex flex-col gap-4"
+          >
+            <Overline>Nuevo alumno</Overline>
+            <Paragraph>
+              Luego de haber sido registrado, se le pedirá en el sensor
+              seleccionado que coloque la huella (al alumno).
+            </Paragraph>
 
-              <FormControl fullWidth>
-                <InputLabel id="sensor-select-label">Sensor</InputLabel>
-                <Select
-                  {...register("sensor", { required: true })}
-                  label="Sensor"
-                  labelId="sensor-select-label"
-                  defaultValue={1}
-                >
-                  {sensores.map((sensor) => (
-                    <MenuItem value={sensor.id}>
-                      <div className="flex flex-col gap-1">
-                        <Typography variant="body2" color={"GrayText"}>
-                          Dirección IP: {sensor.ip}
-                        </Typography>
-                        <Typography variant="body1" fontWeight={700}>
-                          Nombre: {sensor.sensorId}
-                        </Typography>
-                        <Typography variant="body2">
-                          Se encuentra en {sensor.ubicacion}
-                        </Typography>
-                      </div>
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
+            <FormControl fullWidth>
+              <InputLabel id="sensor-select-label">Sensor</InputLabel>
+              <Select
+                {...register("sensor", { required: true })}
+                label="Sensor"
+                labelId="sensor-select-label"
+                defaultValue={1}
+              >
+                {sensores.map((sensor) => (
+                  <MenuItem value={sensor.id}>
+                    <div className="flex flex-col gap-1">
+                      <Typography variant="body2" color={"GrayText"}>
+                        Dirección IP: {sensor.ip}
+                      </Typography>
+                      <Typography variant="body1" fontWeight={700}>
+                        Nombre: {sensor.sensorId}
+                      </Typography>
+                      <Typography variant="body2">
+                        Se encuentra en {sensor.ubicacion}
+                      </Typography>
+                    </div>
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
 
-              <TextField
-                placeholder="Nombre Completo"
+            <TextField
+              placeholder="Nombre Completo"
+              size="small"
+              {...register("nombreCompleto", { required: true })}
+              error={errors?.nombreCompleto != null}
+              helperText={
+                errors?.nombreCompleto != null && "Este campo es obligatorio"
+              }
+              id="nombreCompleto"
+            ></TextField>
+
+            <TextField
+              placeholder="Nro. de Documento (DNI)"
+              size="small"
+              {...register("dni", { required: true })}
+              error={errors?.dni != null}
+              helperText={errors?.dni != null && "Este campo es obligatorio"}
+              id="dni"
+            ></TextField>
+
+            <TextField
+              placeholder="Correo Electrónico (opcional)"
+              size="small"
+              {...register("correoElectronico", { required: false })}
+              error={errors?.correoElectronico != null}
+              id="correoElectronico"
+            ></TextField>
+
+            <TextField
+              placeholder="Teléfono (opcional)"
+              size="small"
+              {...register("telefono", { required: false })}
+              error={errors?.telefono != null}
+              id="telefono"
+            ></TextField>
+
+            <FormControl fullWidth>
+              <InputLabel size="small" id="curso-select-label">
+                Curso
+              </InputLabel>
+              <Select
+                {...register("curso", { required: true })}
                 size="small"
-                {...register("nombreCompleto", { required: true })}
-                error={errors?.nombreCompleto != null}
-                helperText={
-                  errors?.nombreCompleto != null && "Este campo es obligatorio"
-                }
-                id="nombreCompleto"
-              ></TextField>
+                label="Curso"
+                labelId="curso-select-label"
+                defaultValue={1}
+              >
+                <MenuItem disabled>Turno Mañana</MenuItem>
+                {listado
+                  .filter((obj) => obj.curso.turno == 1)
+                  .map((obj) => {
+                    return (
+                      <MenuItem value={obj.curso.id}>
+                        {obj.curso.curso} "{obj.curso.division}"
+                      </MenuItem>
+                    );
+                  })}
+                <MenuItem disabled>Turno Tarde</MenuItem>
+                {listado
+                  .filter((obj) => obj.curso.turno == 2)
+                  .map((obj) => {
+                    return (
+                      <MenuItem value={obj.curso.id}>
+                        {obj.curso.curso} "{obj.curso.division}"
+                      </MenuItem>
+                    );
+                  })}
+              </Select>
+            </FormControl>
 
-              <TextField
-                placeholder="Nro. de Documento (DNI)"
-                size="small"
-                {...register("dni", { required: true })}
-                error={errors?.dni != null}
-                helperText={errors?.dni != null && "Este campo es obligatorio"}
-                id="dni"
-              ></TextField>
-
-              <TextField
-                placeholder="Correo Electrónico (opcional)"
-                size="small"
-                {...register("correoElectronico", { required: false })}
-                error={errors?.correoElectronico != null}
-                id="correoElectronico"
-              ></TextField>
-
-              <TextField
-                placeholder="Teléfono (opcional)"
-                size="small"
-                {...register("telefono", { required: false })}
-                error={errors?.telefono != null}
-                id="telefono"
-              ></TextField>
-
-              <FormControl fullWidth>
-                <InputLabel size="small" id="curso-select-label">
-                  Curso
-                </InputLabel>
-                <Select
-                  {...register("curso", { required: true })}
-                  size="small"
-                  label="Curso"
-                  labelId="curso-select-label"
-                  defaultValue={1}
-                >
-                  <MenuItem disabled>Turno Mañana</MenuItem>
-                  {listado
-                    .filter((obj) => obj.curso.turno == 1)
-                    .map((obj) => {
-                      return (
-                        <MenuItem value={obj.curso.id}>
-                          {obj.curso.curso} "{obj.curso.division}"
-                        </MenuItem>
-                      );
-                    })}
-                  <MenuItem disabled>Turno Tarde</MenuItem>
-                  {listado
-                    .filter((obj) => obj.curso.turno == 2)
-                    .map((obj) => {
-                      return (
-                        <MenuItem value={obj.curso.id}>
-                          {obj.curso.curso} "{obj.curso.division}"
-                        </MenuItem>
-                      );
-                    })}
-                </Select>
-              </FormControl>
-
-              <Button type="submit" disabled={submitted}>
-                Registrar
-              </Button>
-            </Form>
-          </article>
-          <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
-            <div className="h-20"></div>
-            <Overline>Turno Mañana</Overline>
-            {listado
-              .filter((obj) => obj.curso.turno == 1)
-              .map((obj) => (
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
+            <Button type="submit" disabled={submitted}>
+              Registrar
+            </Button>
+          </Form>
+        </article>
+        <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
+          <div className="h-20"></div>
+          <Overline>Turno Mañana</Overline>
+          {listado
+            .filter((obj) => obj.curso.turno == 1)
+            .map((obj) => (
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        {obj.curso.curso} '{obj.curso.division}'
+                      </TableCell>
+                      <TableCell>Nombre completo</TableCell>
+                      <TableCell>DNI</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
+                    {obj.alumnos.map((alumno) => (
                       <TableRow>
-                        <TableCell>
-                          {obj.curso.curso} '{obj.curso.division}'
-                        </TableCell>
-                        <TableCell>Nombre completo</TableCell>
-                        <TableCell>DNI</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{alumno.nombreCompleto}</TableCell>
+                        <TableCell>{alumno.dni}</TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
-                      {obj.alumnos.map((alumno) => (
-                        <TableRow>
-                          <TableCell></TableCell>
-                          <TableCell>{alumno.nombreCompleto}</TableCell>
-                          <TableCell>{alumno.dni}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              ))}
-            <Overline>Turno Tarde</Overline>
-            {listado
-              .filter((obj) => obj.curso.turno == 2)
-              .map((obj) => (
-                <TableContainer component={Paper}>
-                  <Table size="small">
-                    <TableHead>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ))}
+          <Overline>Turno Tarde</Overline>
+          {listado
+            .filter((obj) => obj.curso.turno == 2)
+            .map((obj) => (
+              <TableContainer component={Paper}>
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>
+                        {obj.curso.curso} '{obj.curso.division}'
+                      </TableCell>
+                      <TableCell>Nombre completo</TableCell>
+                      <TableCell>DNI</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
+                    {obj.alumnos.map((alumno) => (
                       <TableRow>
-                        <TableCell>
-                          {obj.curso.curso} '{obj.curso.division}'
-                        </TableCell>
-                        <TableCell>Nombre completo</TableCell>
-                        <TableCell>DNI</TableCell>
+                        <TableCell></TableCell>
+                        <TableCell>{alumno.nombreCompleto}</TableCell>
+                        <TableCell>{alumno.dni}</TableCell>
                       </TableRow>
-                    </TableHead>
-                    <TableBody>
-                      {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
-                      {obj.alumnos.map((alumno) => (
-                        <TableRow>
-                          <TableCell></TableCell>
-                          <TableCell>{alumno.nombreCompleto}</TableCell>
-                          <TableCell>{alumno.dni}</TableCell>
-                        </TableRow>
-                      ))}
-                    </TableBody>
-                  </Table>
-                </TableContainer>
-              ))}
-          </article>
-        </section>
-      </MainLayout>
-    );
-  };
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            ))}
+        </article>
+      </section>
+    </MainLayout>
+  );
+};
 
-  export default registrar;
+export default registrar;
