@@ -16,7 +16,7 @@ export function SignIn() {
     }
 
     return (
-        <MainLayout title="Registrarse">
+        <MainLayout title="Signin">
             <section className="flex flex-wrap w-full gap-4">
                 <article className="p-6 flex flex-col gap-5 flex-1 w-full h-full absolute justify-center items-center">
                     <div className="h-10"></div>
