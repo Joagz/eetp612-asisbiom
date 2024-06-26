@@ -166,10 +166,10 @@ public class ConteoController {
         // Depende de la plataforma donde ejecutemos
 
         // Windows
-        File csv = new File("\\temp\\estadistica.csv");
+        // File csv = new File("\\temp\\estadistica.csv");
 
         // Linux
-        // File csv = new File("\\home\\{usr}\\tmp\\estadistica.csv");
+        File csv = new File("\\home\\{usr}\\tmp\\estadistica.csv");
 
         try (PrintWriter pw = new PrintWriter(csv)) {
 
