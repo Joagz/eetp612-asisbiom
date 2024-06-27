@@ -17,6 +17,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
+enum SensorAction {
+    AUTH, REGISTER, CONFIRM, PING
+}
+
 @RestController
 @RequestMapping("/api/sensor")
 public class MqttController {
@@ -42,6 +46,23 @@ public class MqttController {
             return ResponseEntity.internalServerError().body("No se pudo enviar!");
         }
         return ResponseEntity.ok().body(message);
+    }
+
+    @PostMapping("/ping")
+    public ResponseEntity<?> ping(@RequestBody MqttSensorMessage message) {
+        MqttSensorMessage res = null;
+        try {
+            message.setAccion(SensorAction.PING.ordinal());
+            int id = mqttService.sendMessage(message);
+            while (MqttMessageHandler.getMessages().peek().getMessageId() != id)
+                ;
+            if (MqttMessageHandler.getMessages().peek().getAccion().equals(SensorAction.PING.ordinal())) {
+                res = MqttMessageHandler.getMessages().pop();
+            }
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("No se pudo enviar!");
+        }
+        return ResponseEntity.ok().body(res);
     }
 
     @PostMapping("")

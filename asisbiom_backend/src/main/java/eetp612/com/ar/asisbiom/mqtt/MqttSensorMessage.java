@@ -4,6 +4,7 @@
  */
 package eetp612.com.ar.asisbiom.mqtt;
 
+import jakarta.annotation.Nullable;
 import lombok.Data;
 import lombok.ToString;
 
@@ -11,6 +12,8 @@ import lombok.ToString;
 @ToString
 public class MqttSensorMessage {
     
+    @Nullable
+    private Integer messageId;
     private String sensorId;
     private Integer idAlumno;
     private Integer accion;

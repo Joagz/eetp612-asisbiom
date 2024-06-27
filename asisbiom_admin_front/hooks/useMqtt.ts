@@ -17,6 +17,7 @@ export enum SensorActions {
   AUTH,
   REGISTER,
   CONFIRM,
+  PING
 }
 
 export type MqttDataPacket = {

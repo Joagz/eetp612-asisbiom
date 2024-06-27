@@ -20,13 +20,6 @@ import {
 import { useMemo, useState } from "react";
 import { MqttDataPacket, SensorActions, useMqtt } from "@/hooks";
 import { useRouter } from "next/router";
-/*
-    nombreCompleto
-    dni
-    turno
-    curso
-    division
-*/
 
 interface AlumnosCursoData {
   alumnos: AlumnoData[];
@@ -37,10 +30,12 @@ interface AlumnosCursoData {
     division: string;
   };
 }
+
 interface AlumnoData {
   nombreCompleto: string;
   dni: string;
 }
+
 interface SensorData {
   id: number;
   ip: string;
@@ -78,37 +73,53 @@ const registrar = () => {
   function onSubmit(data: any) {
     if (submitted) return;
     setSubmitted(true);
+
     axios
-      .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
-        nombreCompleto: data.nombreCompleto,
-        dni: data.dni,
-        curso: data.curso,
-        correoElectronico: data.correoElectronico,
-        telefono: data.telefono,
-      })
-      .then((response) => {
-        axios
-          .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`)
-          .then((res) => {
-            const dataPacket: MqttDataPacket = {
-              accion: SensorActions.REGISTER,
-              idAlumno: response.data.id,
-              sensorId: res.data.sensorId,
-            };
+      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`)
+      .then((sensorApiRes) => {
 
-            console.log(dataPacket);
-            axios
-              .post(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
-                dataPacket
-              )
-              .then((res) => {
-                // confirmar sensor
-                console.log(res.data);
+        // Enviar ping request al sensor
+        axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/ping`, {
+          accion: SensorActions.PING,
+          idAlumno: 0,
+          sensorId: sensorApiRes.data.sensorId
+        }).then(res => {
 
-                router.reload();
-              });
-          });
+          // el sensor deberia responder al backend o no, por lo
+          // que la respuesta que llega deberia ser solo si responde
+          axios
+            .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
+              nombreCompleto: data.nombreCompleto,
+              dni: data.dni,
+              curso: data.curso,
+              correoElectronico: data.correoElectronico,
+              telefono: data.telefono,
+            })
+            .then((alumnoApiRes) => {
+              const dataPacket: MqttDataPacket = {
+                accion: SensorActions.REGISTER,
+                idAlumno: alumnoApiRes.data.id,
+                sensorId: sensorApiRes.data.sensorId,
+              };
+
+              console.log(dataPacket);
+              axios
+                .post(
+                  `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
+                  dataPacket
+                )
+                .then((response) => {
+                  // confirmar sensor
+                  console.log(response.data);
+
+                  router.reload();
+                });
+            });
+        }).catch(err => {
+
+        });
+
+
       });
   }
 
@@ -247,6 +258,7 @@ const registrar = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
                     {obj.alumnos.map((alumno) => (
                       <TableRow>
                         <TableCell></TableCell>
@@ -274,6 +286,7 @@ const registrar = () => {
                     </TableRow>
                   </TableHead>
                   <TableBody>
+                    {obj.alumnos.length == 0 && <Typography className="text-slate-400 font-xs p-1 pl-4">No se cargaron alumnos</Typography>}
                     {obj.alumnos.map((alumno) => (
                       <TableRow>
                         <TableCell></TableCell>

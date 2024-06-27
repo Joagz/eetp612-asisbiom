@@ -29,8 +29,8 @@ const HomeAlumnos = () => {
   return (
     <MainLayout title={"Alumnos"}>
       <article className="pt-20 px-6 w-full flex justify-center gap-8">
-        <section className="flex flex-col gap-8 w-full *:md:w-1/2 items-center">
-          <Title>Alumnos - Cursos</Title>
+        <section className="flex flex-col gap-2 w-full *:md:w-1/2 items-center">
+          <Title>Cursos</Title>
           <Overline>Listado de cursos de la Institución</Overline>
           {cursos?.length == 0 && (
             <Chip

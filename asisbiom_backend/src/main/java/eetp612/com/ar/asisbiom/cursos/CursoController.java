@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestMethod;
+
 
 @RestController
 @RequestMapping("/api/curso")
@@ -46,6 +48,42 @@ public class CursoController {
         Curso saved = cursoRepository.save(curso);
         return ResponseEntity.ok().body(saved);
     }
+
+    @RequestMapping("/_initialize")
+    public String initDefault() {
+
+        cursoRepository.save(new Curso('A',1,2));
+        cursoRepository.save(new Curso('B',1,2));
+        cursoRepository.save(new Curso('C',1,2));
+        cursoRepository.save(new Curso('D',1,2));
+        cursoRepository.save(new Curso('E',1,2));
+     
+        cursoRepository.save(new Curso('A',2,2));
+        cursoRepository.save(new Curso('B',2,2));
+        cursoRepository.save(new Curso('C',2,2));
+        cursoRepository.save(new Curso('D',2,2));
+
+        cursoRepository.save(new Curso('A',3,1));
+        cursoRepository.save(new Curso('B',3,1));
+        cursoRepository.save(new Curso('C',3,2));
+        cursoRepository.save(new Curso('D',3,2));
+
+        cursoRepository.save(new Curso('A',4,1));
+        cursoRepository.save(new Curso('B',4,1));
+        cursoRepository.save(new Curso('C',4,2));
+        cursoRepository.save(new Curso('D',4,2));
+
+        cursoRepository.save(new Curso('A',5,1));
+        cursoRepository.save(new Curso('B',5,1));
+        cursoRepository.save(new Curso('C',5,2));
+        cursoRepository.save(new Curso('D',5,2));
+
+        cursoRepository.save(new Curso('A',6,1));
+        cursoRepository.save(new Curso('B',6,2));
+
+        return "ok";
+    }
+    
 
     @GetMapping("/turno")
     public ResponseEntity<List<List<Curso>>> getCursos() {
