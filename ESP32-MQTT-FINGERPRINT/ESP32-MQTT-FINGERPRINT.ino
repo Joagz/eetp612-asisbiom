@@ -70,16 +70,6 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   Serial.println(values[2]);
 
   // ver accion que realizamos
-<<<<<<< HEAD
-  // switch (values[1]) {
-  //   case MQTT_ACTION_AUTH:
-  //     break;
-  //   case MQTT_ACTION_REGISTER:
-  //     break;
-  //   case MQTT_ACTION_CONFIRM:
-  //     break;
-  // }
-=======
   switch (values[1]) {
     case MQTT_ACTION_AUTH:
       break;
@@ -91,7 +81,6 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
       client.publish(MQTT_TOPIC_SENSOR_OUT, "PONG");
       return;
   }
->>>>>>> 8632ea380d355b1d554e2d2ddd45be678c66282b
 
 
   if (strcmp(values[0], SENSOR_ID) == 0)

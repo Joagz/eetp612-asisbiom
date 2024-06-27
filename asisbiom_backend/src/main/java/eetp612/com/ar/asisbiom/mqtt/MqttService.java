@@ -106,6 +106,7 @@ public class MqttService {
         horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(LocalTime.now()))
                 .collect(Collectors.toList());
 
+            System.out.println(horarios);
         // Si no hay horarios, volver.
         if (horarios.isEmpty()) {
             System.out.println("ERROR: No se asiste al alumno, no hay horarios para este turno.");

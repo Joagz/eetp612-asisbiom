@@ -228,7 +228,6 @@ public class AlumnoController {
         if (found.isPresent()) {
             Alumno alumno = found.get();
             MqttResponse response = mqttService.asistir(alumno);
-
             switch (response) {
                 case ERROR_NO_HORARIO:
                     return ResponseEntity.internalServerError().body("No hay un horario para este alumno hoy.");

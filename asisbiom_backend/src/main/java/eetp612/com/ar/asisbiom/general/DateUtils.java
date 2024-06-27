@@ -11,8 +11,8 @@ import lombok.experimental.UtilityClass;
 @UtilityClass
 public class DateUtils {
 
-    public static Integer getDay() {
-        return LocalDate.now().getDayOfWeek().getValue();
+    public static Dia getDay() {
+        return Dia.values()[LocalDate.now().getDayOfWeek().getValue()-1];
     }
 
     public static boolean isTimeBefore(LocalTime a, LocalTime b) {
