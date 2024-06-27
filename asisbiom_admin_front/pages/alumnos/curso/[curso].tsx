@@ -17,7 +17,7 @@ import { useMemo, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
 
-const byCurso = ({ data }: { data: { curso: string, id: number, division: string } }) => {
+const listCurso = ({ data }: { data: { curso: string, id: number, division: string } }) => {
   const [alumnos, setAlumno] = useState<[]>([]);
 
   useMemo(() => {
@@ -36,7 +36,7 @@ const byCurso = ({ data }: { data: { curso: string, id: number, division: string
     <MainLayout title="Curso">
       <article className="py-20 px-6 flex flex-col gap-8">
         <IconButton href="/alumnos" className="w-fit"><ArrowBack></ArrowBack></IconButton>
-        <Overline>dz
+        <Overline>
           Información de {`${data.curso}° '${data.division}'`}
         </Overline>
         <div className="flex gap-8">
@@ -68,9 +68,8 @@ const byCurso = ({ data }: { data: { curso: string, id: number, division: string
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell>Curso:</TableCell>
-                    <TableCell>División:</TableCell>
-                    <TableCell>Fecha:</TableCell>
+                    <TableCell><b>Curso: {data.curso}</b></TableCell>
+                    <TableCell><b>División: {data.division}</b></TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -99,7 +98,6 @@ const byCurso = ({ data }: { data: { curso: string, id: number, division: string
                     <TableCell>1er Trimestre</TableCell>
                     <TableCell>2do Trimestre</TableCell>
                     <TableCell>3er Trimestre</TableCell>
-
                   </TableRow>
                 </TableHead>
                 <TableBody>
@@ -147,4 +145,4 @@ export async function getServerSideProps(context: any) {
   }
 }
 
-export default byCurso;
+export default listCurso;

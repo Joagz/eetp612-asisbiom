@@ -70,14 +70,14 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   Serial.println(values[2]);
 
   // ver accion que realizamos
-  switch (values[1]) {
-    case MQTT_ACTION_AUTH:
-      break;
-    case MQTT_ACTION_REGISTER:
-      break;
-    case MQTT_ACTION_CONFIRM:
-      break;
-  }
+  // switch (values[1]) {
+  //   case MQTT_ACTION_AUTH:
+  //     break;
+  //   case MQTT_ACTION_REGISTER:
+  //     break;
+  //   case MQTT_ACTION_CONFIRM:
+  //     break;
+  // }
 
 
   if (strcmp(values[0], SENSOR_ID) == 0)
