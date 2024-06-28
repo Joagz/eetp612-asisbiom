@@ -17,12 +17,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -216,6 +219,21 @@ public class ConteoController {
 
         return ResponseEntity.ok().contentType(MediaType.parseMediaType("text/csv"))
                 .header("Content-Disposition", "attachment; filename=estadistica.csv").body(Files.readAllBytes(path));
+    }
+
+    @PutMapping("/editar/{id}")
+    public ResponseEntity<?> editarCurso(@PathVariable Integer id, @RequestBody List<InnerConteoAsistencia> alumnos) {
+
+        if (cursoRepository.findByCurso(id).isEmpty())
+            return ResponseEntity.notFound().build();
+
+        alumnos.forEach(alumno -> {
+            Optional<ConteoAsistencia> found = conteoRepository.findById(alumno.id());
+            if (found.isPresent())
+                conteoRepository.save(found.get());
+        });
+
+        return ResponseEntity.ok().body(" editado !");
     }
 
 }

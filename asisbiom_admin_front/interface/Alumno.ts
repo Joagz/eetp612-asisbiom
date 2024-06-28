@@ -6,3 +6,4 @@ export default interface Alumno {
   correoElectronico: string;
   dni: string;
 }
+

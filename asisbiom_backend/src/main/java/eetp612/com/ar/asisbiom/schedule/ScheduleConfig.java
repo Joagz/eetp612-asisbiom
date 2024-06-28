@@ -33,10 +33,10 @@ public class ScheduleConfig {
     
     @Autowired
     private StatsService statsService;
-
+    
     // Esto hace el recuento de faltas al final del día
     @Scheduled(cron = "0 0 19 * * MON-FRI", zone = "GMT-3")
-    public void scheduleFixedRateTaskAsync() throws InterruptedException {
+    public void asistenciaScheduled() throws InterruptedException {
         conteoRepository.findAll().forEach(conteo -> {
             
             statsService.reset();

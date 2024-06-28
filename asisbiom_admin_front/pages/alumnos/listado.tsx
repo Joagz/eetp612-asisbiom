@@ -20,7 +20,7 @@ import axios from "axios";
 
 type _alumno_filter = {
   nombre: string;
-  curso: string;
+  curso?: string;
   division: string;
   dni: string;
   inasistencias: number[];
@@ -45,8 +45,8 @@ const Listado = () => {
           listado.map((stat) => {
             return {
               nombre: stat.alumno.nombreCompleto,
-              curso: stat.alumno.curso.curso,
-              division: stat.alumno.curso.division,
+              curso: stat.alumno.curso?.curso || "No asignado",
+              division: stat.alumno.curso?.division || "No asignado",
               dni: stat.alumno.dni,
               diasHabiles: stat.diasHabiles,
               tardanzas: stat.tardanzas,
@@ -73,7 +73,7 @@ const Listado = () => {
       datos.filter(
         (data) =>
           data.nombre.toLowerCase().includes(filtroNombre.toLowerCase()) &&
-          data.curso.toString().toLowerCase().includes(filtroCurso.toLowerCase()) &&
+          data.curso?.toString().toLowerCase().includes(filtroCurso.toLowerCase()) &&
           data.division.toLowerCase().includes(filtroDivision.toLowerCase()) &&
           data.dni.toLowerCase().includes(filtroDni.toLowerCase())
       )

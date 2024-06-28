@@ -47,7 +47,6 @@ record AlumnosCurso(
         List<Alumno> alumnos) {
 }
 
-
 @RestController
 @RequestMapping("/api/alumno")
 public class AlumnoController {
@@ -84,7 +83,7 @@ public class AlumnoController {
     // TODO: Implementar
     @PutMapping("/{id}")
     public ResponseEntity<?> edit(@PathVariable("id") Integer id) {
-        
+
         return ResponseEntity.ok().body("Editado correctamente");
     }
 
@@ -93,8 +92,6 @@ public class AlumnoController {
 
         return ResponseEntity.ok().body("Eliminado correctamente");
     }
-
-    
 
     @GetMapping("/stats")
     public List<ConteoAsistencia> findAllAndStats() {
@@ -223,7 +220,8 @@ public class AlumnoController {
     }
 
     @PostMapping("/asistir/{id}")
-    public ResponseEntity<?> asistir(@PathVariable("id") Integer id) {
+    public ResponseEntity<?> asistir(@PathVariable("id") Integer id,
+            @RequestParam(required = false) boolean comingFromClient) {
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
             Alumno alumno = found.get();
@@ -235,8 +233,9 @@ public class AlumnoController {
                     statsService.addAlumnoToPresentes();
                     return ResponseEntity.ok().body("Asistencia registrada exitosamente.");
                 case RETIRAR:
-                    return ResponseEntity.status(200).header("Accept-confirm", "confirm-retirar")
-                            .body("Esperando confirmación...");
+                    if (!comingFromClient)
+                        return ResponseEntity.status(200).header("Accept-confirm", "confirm-retirar")
+                                .body("Esperando confirmación...");
                 default:
                     break;
             }

@@ -16,26 +16,33 @@ import axios from "axios";
 import { useMemo, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
+import AlumnoStats from "@/interface/AlumnoStats";
 
-const listCurso = ({ data }: { data: { curso: string, id: number, division: string } }) => {
-  const [alumnos, setAlumno] = useState<[]>([]);
+const listCurso = ({
+  data,
+}: {
+  data: { curso: string; id: number; division: string };
+}) => {
+  const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
 
   useMemo(() => {
-    useApi<Curso>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${data.curso}/${data.division}` })
-      .then((res) => {
-        useApi<[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${data.id}` })
-          .then((alumnoRes) => {
-            setAlumno(alumnoRes.data);
-          });
+    useApi<Curso>({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${data.curso}/${data.division}`,
+    }).then((res) => {
+      useApi<[]>({
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${data.id}`,
+      }).then((alumnoRes) => {
+        setAlumnos(alumnoRes.data);
       });
+    });
   }, []);
-
-
 
   return (
     <MainLayout title="Curso">
       <article className="py-20 px-6 flex flex-col gap-8">
-        <IconButton href="/alumnos" className="w-fit"><ArrowBack></ArrowBack></IconButton>
+        <IconButton href="/alumnos" className="w-fit">
+          <ArrowBack></ArrowBack>
+        </IconButton>
         <Overline>
           Información de {`${data.curso}° '${data.division}'`}
         </Overline>
@@ -68,8 +75,12 @@ const listCurso = ({ data }: { data: { curso: string, id: number, division: stri
               <Table>
                 <TableBody>
                   <TableRow>
-                    <TableCell><b>Curso: {data.curso}</b></TableCell>
-                    <TableCell><b>División: {data.division}</b></TableCell>
+                    <TableCell>
+                      <b>Curso: {data.curso}</b>
+                    </TableCell>
+                    <TableCell>
+                      <b>División: {data.division}</b>
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>
@@ -101,8 +112,8 @@ const listCurso = ({ data }: { data: { curso: string, id: number, division: stri
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alumnos.map((row: any, index) => (
-                    <TableRow key={index}>
+                  {alumnos.map((row: AlumnoStats) => (
+                    <TableRow key={row.id}>
                       <TableCell>{row.nombreCompleto}</TableCell>
                       <TableCell>{row.presente ? "Sí" : "No"}</TableCell>
                       <TableCell>{row.tardanza ? "Sí" : "-"}</TableCell>
@@ -128,7 +139,10 @@ export async function getServerSideProps(context: any) {
 
   try {
     const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(0, 1)}/${cursoStr?.slice(1)}`
+      `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(
+        0,
+        1
+      )}/${cursoStr?.slice(1)}`
     );
     const data = res.data;
     console.log(data);

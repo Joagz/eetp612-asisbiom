@@ -3,8 +3,7 @@ import axios from "axios";
 import { useEffect, useMemo, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
-import Alumno from "@/interface/Alumno";
-import { ArrowBack, Visibility, Save, Delete } from "@mui/icons-material";
+import { ArrowBack, Visibility, Save, Delete, Edit } from "@mui/icons-material";
 import {
   IconButton,
   Button,
@@ -19,13 +18,14 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import AlumnoStats from "@/interface/AlumnoStats";
 
 const editCurso = ({
   data,
 }: {
   data: { curso: string; id: number; division: string };
 }) => {
-  const [alumnos, setAlumnos] = useState<any[]>([]);
+  const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
   const [toDelete, setToDelete] = useState<number[]>([]);
   const [throwAlert, setThrowAlert] = useState<{
     status: boolean;
@@ -53,7 +53,7 @@ const editCurso = ({
         status: true,
         message:
           "Borrando alumno " +
-          alumnos[alumno].nombreCompleto +
+          alumnos[alumno - 1].nombreCompleto +
           "... ¿Está seguro?",
         response: false,
         alumnoId: alumno,
@@ -67,23 +67,40 @@ const editCurso = ({
   }, [throwAlert]);
 
   function editCurso() {
+    console.log(alumnos);
+    alumnos.forEach((alumno) => {
+      if (alumno.presente)
+        useApi<AlumnoStats[]>({
+          method: "POST",
+          url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?comingFromClient=true`,
+        }).catch((err) => alert("No hay horarios para este alumno hoy!"));
+    });
+
     toDelete.forEach((alumno) => {
       useApi({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${alumno}`,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${
+          alumno + 1
+        }`,
         method: "DELETE",
       }).then((res) => console.log(res));
     });
   }
 
-  function editAlumno(row: number, retirado: boolean, tardanza: boolean) {
+  function editAlumno(
+    row: number,
+    retirado: boolean,
+    tardanza: boolean,
+    presente: boolean
+  ) {
     // Editar el estado de alumnos
     let edit = alumnos[row];
     edit.tardanza = tardanza;
     edit.retirado = retirado;
+    edit.presente = presente;
     const newArr: any[] = [
       ...alumnos.slice(0, row),
       edit,
-      ...alumnos.slice(row + 1, alumnos.length - 1),
+      ...alumnos.slice(row + 1, alumnos.length),
     ];
     setAlumnos(newArr);
   }
@@ -91,7 +108,7 @@ const editCurso = ({
   return (
     <MainLayout title="Curso">
       {throwAlert?.status && (
-        <div className="absolute flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-8 bg-white shadow-sm border">
+        <div className="absolute bg-slate-300 flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-8 shadow-sm border">
           <Typography>{throwAlert.message}</Typography>
           <div className="flex gap-4">
             <Button
@@ -176,10 +193,8 @@ const editCurso = ({
                     <TableCell>Presente</TableCell>
                     <TableCell>Tardanza</TableCell>
                     <TableCell>Retirado</TableCell>
-                    <TableCell>Días Hábiles</TableCell>
                     <TableCell></TableCell>
-                    <TableCell>Inasistencias</TableCell>
-                    <TableCell></TableCell>
+                    <TableCell>Acciones</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell></TableCell>
@@ -187,37 +202,60 @@ const editCurso = ({
                     <TableCell></TableCell>
                     <TableCell></TableCell>
                     <TableCell></TableCell>
-                    <TableCell>1er Trimestre</TableCell>
-                    <TableCell>2do Trimestre</TableCell>
-                    <TableCell>3er Trimestre</TableCell>
                     <TableCell></TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {alumnos.map((row: any, index: number) => (
+                  {alumnos.map((row: AlumnoStats, index: number) => (
                     <TableRow
-                      key={index}
+                      key={index + 1}
                       className={`${
-                        toDelete.find((a) => a == index) != null
+                        toDelete.find((a) => a == index + 1) != null
                           ? "bg-red-300"
                           : ""
                       }`}
                     >
                       <TableCell>{row.nombreCompleto}</TableCell>
-                      <TableCell>{row.presente ? "Sí" : "No"}</TableCell>
+                      <TableCell>
+                        {" "}
+                        <Button
+                          disabled={
+                            toDelete.find((a) => a == index + 1) != null
+                          }
+                          className="m-0"
+                          color={row.presente ? "success" : "error"}
+                          size="small"
+                          variant="contained"
+                          onClick={() =>
+                            editAlumno(
+                              index,
+                              row.retirado,
+                              row.tardanza,
+                              !row.presente
+                            )
+                          }
+                        >
+                          {row.presente ? "Sí" : "No"}
+                        </Button>
+                      </TableCell>
                       <TableCell>
                         {" "}
                         <Button
                           disabled={
                             !row.presente ||
-                            toDelete.find((a) => a == index) != null
+                            toDelete.find((a) => a == index + 1) != null
                           }
                           className="m-0"
-                          color={row.tardanza ? "error" : "success"}
+                          color={row.tardanza ? "success" : "error"}
                           size="small"
                           variant="contained"
                           onClick={() =>
-                            editAlumno(index, row.retirado, !row.tardanza)
+                            editAlumno(
+                              index + 1,
+                              row.retirado,
+                              !row.tardanza,
+                              row.presente
+                            )
                           }
                         >
                           {row.tardanza ? "Sí" : "No"}
@@ -228,29 +266,39 @@ const editCurso = ({
                         <Button
                           disabled={
                             !row.presente ||
-                            toDelete.find((a) => a == index) != null
+                            toDelete.find((a) => a == index + 1) != null
                           }
                           className="m-0"
-                          color={row.retirado ? "error" : "success"}
+                          color={row.retirado ? "success" : "error"}
                           size="small"
                           variant="contained"
                           onClick={() =>
-                            editAlumno(index, !row.retirado, row.tardanza)
+                            editAlumno(
+                              index + 1,
+                              !row.retirado,
+                              row.tardanza,
+                              row.presente
+                            )
                           }
                         >
                           {row.retirado ? "Sí" : "No"}
                         </Button>
                       </TableCell>
-                      <TableCell>{row.diasHabiles}</TableCell>
-                      <TableCell>{row.inasistencias1}</TableCell>
-                      <TableCell>{row.inasistencias2}</TableCell>
-                      <TableCell>{row.inasistencias3}</TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={() => deleteAlumno(index)}
+                          onClick={() => deleteAlumno(index + 1)}
                           color="error"
                         >
                           <Delete />
+                        </IconButton>
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          // TODO: crear pag. para editar
+                          href={`/alumos/editar/${row.id}`}
+                          color="inherit"
+                        >
+                          <Edit />
                         </IconButton>
                       </TableCell>
                     </TableRow>
