@@ -22,7 +22,7 @@ import eetp612.com.ar.asisbiom.docentes.DocenteRepository;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
-import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
+import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -225,17 +225,18 @@ public class AlumnoController {
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
             Alumno alumno = found.get();
-            MqttResponse response = mqttService.asistir(alumno);
-            switch (response) {
-                case ERROR_NO_HORARIO:
-                    return ResponseEntity.internalServerError().body("No hay un horario para este alumno hoy.");
+            MqttResponseAsistenciaWrapper wrapper = mqttService.asistir(alumno);
+
+            switch (wrapper.response()) {
+                case NO_HORARIO:
+                    return ResponseEntity.ok().body(wrapper);
                 case OK:
                     statsService.addAlumnoToPresentes();
-                    return ResponseEntity.ok().body("Asistencia registrada exitosamente.");
+                    return ResponseEntity.ok().body(wrapper);
                 case RETIRAR:
                     if (!comingFromClient)
                         return ResponseEntity.status(200).header("Accept-confirm", "confirm-retirar")
-                                .body("Esperando confirmación...");
+                                .body(wrapper);
                 default:
                     break;
             }

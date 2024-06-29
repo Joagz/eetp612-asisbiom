@@ -19,6 +19,9 @@ import {
   Typography,
 } from "@mui/material";
 import AlumnoStats from "@/interface/AlumnoStats";
+import MqttResponseAsistenciaWrapper from "@/interface/MqttResponseAsistenciaWrapper";
+import MqttResponse from "@/interface/MqttResponse";
+import { useRouter } from "next/router";
 
 const editCurso = ({
   data,
@@ -26,13 +29,18 @@ const editCurso = ({
   data: { curso: string; id: number; division: string };
 }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
+  const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false);
   const [toDelete, setToDelete] = useState<number[]>([]);
   const [throwAlert, setThrowAlert] = useState<{
     status: boolean;
     message: string;
-    response: boolean;
-    alumnoId: number;
+    response?: boolean;
+    alumnoId?: number;
+    isJustOkeyAlert?: boolean;
+    doSomething?: () => void;
   }>();
+
+  const router = useRouter();
 
   useMemo(() => {
     useApi<Curso>({
@@ -48,13 +56,11 @@ const editCurso = ({
 
   // TODO: CRUD
   function deleteAlumno(alumno: number) {
+    setHasBeenEdited(true);
     if (toDelete.find((a) => a == alumno) == null) {
       setThrowAlert({
         status: true,
-        message:
-          "Borrando alumno " +
-          alumnos[alumno - 1].nombreCompleto +
-          "... ¿Está seguro?",
+        message: "Borrando alumno ¿está seguro?",
         response: false,
         alumnoId: alumno,
       });
@@ -62,28 +68,62 @@ const editCurso = ({
   }
 
   useEffect(() => {
-    if (throwAlert?.response)
-      setToDelete(toDelete.concat([...toDelete, throwAlert?.alumnoId]));
+    if (throwAlert?.response && throwAlert?.alumnoId)
+      setToDelete(toDelete.concat([...toDelete, throwAlert!.alumnoId]));
   }, [throwAlert]);
 
   function editCurso() {
-    console.log(alumnos);
-    alumnos.forEach((alumno) => {
-      if (alumno.presente)
-        useApi<AlumnoStats[]>({
-          method: "POST",
-          url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?comingFromClient=true`,
-        }).catch((err) => alert("No hay horarios para este alumno hoy!"));
-    });
-
     toDelete.forEach((alumno) => {
       useApi({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${
-          alumno + 1
-        }`,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${alumno}`,
         method: "DELETE",
       }).then((res) => console.log(res));
     });
+
+    if (hasBeenEdited) {
+      alumnos.forEach((alumno) => {
+        if (alumno.presente && toDelete.find((a) => a == alumno.id) == null)
+          useApi<MqttResponseAsistenciaWrapper>({
+            method: "POST",
+            url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?comingFromClient=true`,
+          }).then((res) => {
+            switch (res.data.response) {
+              case MqttResponse.RETIRAR:
+                setThrowAlert({
+                  message: `Retirando alumno... ¿Está seguro?`,
+                  status: true,
+                  isJustOkeyAlert: false,
+                  response: false,
+                  alumnoId: alumno.id,
+                });
+                break;
+              case MqttResponse.NO_HORARIO:
+                setThrowAlert({
+                  message: `No hay horarios para este curso hoy`,
+                  status: true,
+                  isJustOkeyAlert: true,
+                });
+                break;
+              case MqttResponse.OK:
+                setThrowAlert({
+                  message: `Alumno asistido correctamente`,
+                  status: true,
+                  isJustOkeyAlert: true,
+                });
+                break;
+            }
+          });
+      });
+
+      setThrowAlert({
+        message: "Guardado correctamente.",
+        isJustOkeyAlert: true,
+        status: true,
+        doSomething: () => {
+          router.reload();
+        },
+      });
+    }
   }
 
   function editAlumno(
@@ -92,54 +132,69 @@ const editCurso = ({
     tardanza: boolean,
     presente: boolean
   ) {
-    // Editar el estado de alumnos
+    setHasBeenEdited(true);
     let edit = alumnos[row];
-    edit.tardanza = tardanza;
-    edit.retirado = retirado;
-    edit.presente = presente;
-    const newArr: any[] = [
-      ...alumnos.slice(0, row),
-      edit,
-      ...alumnos.slice(row + 1, alumnos.length),
-    ];
-    setAlumnos(newArr);
+    if (edit) {
+      let index = alumnos.indexOf(edit);
+      edit.tardanza = tardanza;
+      edit.retirado = retirado;
+      edit.presente = presente;
+      const newArr: any[] = [
+        ...alumnos.slice(0, row),
+        edit,
+        ...alumnos.slice(row + 1, alumnos.length),
+      ];
+      setAlumnos(newArr);
+    }
   }
 
   return (
     <MainLayout title="Curso">
       {throwAlert?.status && (
-        <div className="absolute bg-slate-300 flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-8 shadow-sm border">
-          <Typography>{throwAlert.message}</Typography>
-          <div className="flex gap-4">
+        <div className="z-[1000] absolute bg-slate-100 flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-12 shadow-lg border-2 rounded-md">
+          <Typography variant="h6">{throwAlert.message}</Typography>
+          {throwAlert.isJustOkeyAlert ? (
             <Button
-              onClick={() => {
-                setThrowAlert({
-                  message: throwAlert.message,
-                  status: false,
-                  response: true,
-                  alumnoId: throwAlert.alumnoId,
-                });
-              }}
               variant="contained"
-              color="error"
-            >
-              Si
-            </Button>
-            <Button
               onClick={() => {
-                setThrowAlert({
-                  message: throwAlert.message,
-                  status: false,
-                  response: false,
-                  alumnoId: throwAlert.alumnoId,
-                });
+                setThrowAlert({ status: false, message: throwAlert.message });
+                if (throwAlert.doSomething) throwAlert.doSomething();
               }}
-              variant="contained"
-              color="success"
             >
-              No
+              Aceptar
             </Button>
-          </div>
+          ) : (
+            <div className="flex gap-4">
+              <Button
+                onClick={() => {
+                  setThrowAlert({
+                    message: throwAlert.message,
+                    status: false,
+                    response: true,
+                    alumnoId: throwAlert.alumnoId,
+                  });
+                }}
+                variant="contained"
+                color="error"
+              >
+                Si
+              </Button>
+              <Button
+                onClick={() => {
+                  setThrowAlert({
+                    message: throwAlert.message,
+                    status: false,
+                    response: false,
+                    alumnoId: throwAlert.alumnoId,
+                  });
+                }}
+                variant="contained"
+                color="success"
+              >
+                No
+              </Button>
+            </div>
+          )}
         </div>
       )}
       <article className="py-20 px-6 flex flex-col gap-8">
@@ -208,9 +263,9 @@ const editCurso = ({
                 <TableBody>
                   {alumnos.map((row: AlumnoStats, index: number) => (
                     <TableRow
-                      key={index + 1}
+                      key={index}
                       className={`${
-                        toDelete.find((a) => a == index + 1) != null
+                        toDelete.find((a) => a == row.id) != null
                           ? "bg-red-300"
                           : ""
                       }`}
@@ -251,7 +306,7 @@ const editCurso = ({
                           variant="contained"
                           onClick={() =>
                             editAlumno(
-                              index + 1,
+                              index,
                               row.retirado,
                               !row.tardanza,
                               row.presente
@@ -274,7 +329,7 @@ const editCurso = ({
                           variant="contained"
                           onClick={() =>
                             editAlumno(
-                              index + 1,
+                              index,
                               !row.retirado,
                               row.tardanza,
                               row.presente
@@ -286,7 +341,7 @@ const editCurso = ({
                       </TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={() => deleteAlumno(index + 1)}
+                          onClick={() => deleteAlumno(row.id)}
                           color="error"
                         >
                           <Delete />

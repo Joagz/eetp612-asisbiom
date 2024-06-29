@@ -1,4 +1,3 @@
-import { Open_Sans } from "next/font/google";
 import {
   Link,
   Table,
@@ -9,7 +8,6 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { useState } from "react";
 import {
   Caption,
   MainLayout,
@@ -20,14 +18,8 @@ import {
   TableDocument,
   Title,
 } from "@/components";
-import { NavBar } from "@/components/nav/NavBar";
-
-const open_sans = Open_Sans({ subsets: ["latin"], weight: "variable" });
 
 export default function Info() {
-  // Estados
-  const [menuOpen, setMenuOpen] = useState(false);
-
   return (
     <MainLayout title="Acerca de">
       <article className="flex-[2] p-4 flex flex-col gap-3">

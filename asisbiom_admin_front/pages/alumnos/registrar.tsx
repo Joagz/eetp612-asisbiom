@@ -228,69 +228,81 @@ const registrar = () => {
         </article>
         <article className="flex flex-col gap-5 flex-1 min-w-[500px]">
           <div className="h-20"></div>
-          <Overline>Turno Mañana</Overline>
           {listado
             .filter((obj) => obj.curso.turno == 1)
             .map((obj) => (
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>
-                        {obj.curso.curso} '{obj.curso.division}'
-                      </TableCell>
-                      <TableCell>Nombre completo</TableCell>
-                      <TableCell>DNI</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {obj.alumnos.length == 0 && (
-                      <Typography className="text-slate-400 font-xs p-1 pl-4">
-                        No se cargaron alumnos
-                      </Typography>
-                    )}
-                    {obj.alumnos.map((alumno) => (
-                      <TableRow>
-                        <TableCell></TableCell>
-                        <TableCell>{alumno.nombreCompleto}</TableCell>
-                        <TableCell>{alumno.dni}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <>
+                {obj.alumnos.length > 0 && (
+                  <>
+                    <Overline>Turno Tarde</Overline>
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>
+                              {obj.curso.curso} '{obj.curso.division}'
+                            </TableCell>
+                            <TableCell>Nombre completo</TableCell>
+                            <TableCell>DNI</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {obj.alumnos.length == 0 && (
+                            <Typography className="text-slate-400 font-xs p-1 pl-4">
+                              No se cargaron alumnos
+                            </Typography>
+                          )}
+                          {obj.alumnos.map((alumno) => (
+                            <TableRow>
+                              <TableCell></TableCell>
+                              <TableCell>{alumno.nombreCompleto}</TableCell>
+                              <TableCell>{alumno.dni}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </>
+                )}
+              </>
             ))}
-          <Overline>Turno Tarde</Overline>
           {listado
             .filter((obj) => obj.curso.turno == 2)
             .map((obj) => (
-              <TableContainer component={Paper}>
-                <Table size="small">
-                  <TableHead>
-                    <TableRow>
-                      <TableCell>
-                        {obj.curso.curso} '{obj.curso.division}'
-                      </TableCell>
-                      <TableCell>Nombre completo</TableCell>
-                      <TableCell>DNI</TableCell>
-                    </TableRow>
-                  </TableHead>
-                  <TableBody>
-                    {obj.alumnos.length == 0 && (
-                      <Typography className="text-slate-400 font-xs p-1 pl-4">
-                        No se cargaron alumnos
-                      </Typography>
-                    )}
-                    {obj.alumnos.map((alumno) => (
-                      <TableRow>
-                        <TableCell></TableCell>
-                        <TableCell>{alumno.nombreCompleto}</TableCell>
-                        <TableCell>{alumno.dni}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </TableContainer>
+              <>
+                {obj.alumnos.length > 0 && (
+                  <>
+                    <Overline>Turno Tarde</Overline>
+                    <TableContainer component={Paper}>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>
+                              {obj.curso.curso} '{obj.curso.division}'
+                            </TableCell>
+                            <TableCell>Nombre completo</TableCell>
+                            <TableCell>DNI</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {obj.alumnos.length == 0 && (
+                            <Typography className="text-slate-400 font-xs p-1 pl-4">
+                              No se cargaron alumnos
+                            </Typography>
+                          )}
+                          {obj.alumnos.map((alumno) => (
+                            <TableRow>
+                              <TableCell></TableCell>
+                              <TableCell>{alumno.nombreCompleto}</TableCell>
+                              <TableCell>{alumno.dni}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </TableContainer>
+                  </>
+                )}
+              </>
             ))}
         </article>
       </section>

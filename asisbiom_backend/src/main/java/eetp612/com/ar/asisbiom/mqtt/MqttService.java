@@ -6,7 +6,6 @@ package eetp612.com.ar.asisbiom.mqtt;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,9 +32,6 @@ public class MqttService {
     private static Integer COUNTER = 0;
 
     @Autowired
-    private MqttRepository mqttRepository;
-
-    @Autowired
     private AsistenciaRepository asistenciaRepository;
 
     @Autowired
@@ -58,7 +54,8 @@ public class MqttService {
     }
 
     public int sendMessage(MqttSensorMessage message) throws Exception {
-        String msgString = COUNTER + "+" + message.getSensorId() + "+" + message.getAccion() + "+" + message.getIdAlumno();
+        String msgString = COUNTER + "+" + message.getSensorId() + "+" + message.getAccion() + "+"
+                + message.getIdAlumno();
         engine.setMessage(msgString);
         engine.call();
         COUNTER++;
@@ -85,33 +82,38 @@ public class MqttService {
         return MqttResponse.OK;
     }
 
-    public MqttResponse asistir(Alumno alumno) {
-
+    public MqttResponseAsistenciaWrapper asistir(Alumno alumno) {
         // Encontrar asistencias por fecha y alumno
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
-        // Filtrar aquellas en las que el alumno no se haya retirado
-        asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null).collect(Collectors.toList());
 
-        if (!asistencias.isEmpty()) {
-            System.out.println("ERROR: El alumno todavía sigue en el turno, intentando retirar...");
-            return MqttResponse.RETIRAR;
-        }
-
-        Asistencia newAsistencia = new Asistencia();
         // Conseguir listado de horarios por curso, division y día de la semana
         List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
                 DateUtils.getDay());
+        Asistencia newAsistencia = new Asistencia();
+        System.out.println(horarios);
+        // Si no hay horarios, volver.
+        if (horarios.isEmpty()) {
+            System.out.println("ERROR: No se asiste al alumno, no hay horarios para este turno.");
+
+            MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(null, MqttResponse.NO_HORARIO);
+
+            return wrapper;
+        }
+
+        // Filtrar aquellas en las que el alumno no se haya retirado
+        asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null)
+                .collect(Collectors.toList());
+
+        if (!asistencias.isEmpty()) {
+            System.out.println("ERROR: El alumno todavía sigue en el turno, intentando retirar...");
+            MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(null, MqttResponse.RETIRAR);
+
+            return wrapper;
+        }
 
         // Filtrar aquellos horarios que sean anteriores a la hora actual
         horarios.stream().filter(horario -> horario.getHorarioSalida().isAfter(LocalTime.now()))
                 .collect(Collectors.toList());
-
-            System.out.println(horarios);
-        // Si no hay horarios, volver.
-        if (horarios.isEmpty()) {
-            System.out.println("ERROR: No se asiste al alumno, no hay horarios para este turno.");
-            return MqttResponse.ERROR_NO_HORARIO;
-        }
 
         // Ordenar los horarios para que el horario de entrada más cercano esté primero.
         horarios.sort(new Comparator<Horario>() {
@@ -127,7 +129,7 @@ public class MqttService {
         if (horario.getHorarioEntrada().isBefore(LocalTime.now())) {
             tardanza = true;
         }
-        
+
         newAsistencia.setAlumno(alumno);
         newAsistencia.setFecha(LocalDate.now());
         newAsistencia.setHorarioEntrada(LocalTime.now());
@@ -135,9 +137,10 @@ public class MqttService {
         newAsistencia.setRetirado(false);
         newAsistencia.setDia(horario.getDia());
         newAsistencia.setAsistencia(true);
-        asistenciaRepository.save(newAsistencia);
+        MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(
+                asistenciaRepository.save(newAsistencia), MqttResponse.OK);
 
-        return MqttResponse.OK;
+        return wrapper;
     }
 
 }

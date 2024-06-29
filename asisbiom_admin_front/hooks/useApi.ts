@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 
 interface ApiReq<T> {
   url: string;
@@ -6,7 +6,11 @@ interface ApiReq<T> {
   body?: T | null;
 }
 
-export function useApi<T>({ url, method = "GET", body = null }: ApiReq<T>) {
+export function useApi<T>({
+  url,
+  method = "GET",
+  body = null,
+}: ApiReq<T>): Promise<AxiosResponse<T, any>> {
   switch (method) {
     case "GET":
       return axios.get<T>(url, {
@@ -16,19 +20,19 @@ export function useApi<T>({ url, method = "GET", body = null }: ApiReq<T>) {
         },
       });
     case "POST":
-      return axios.post(url, body, {
+      return axios.post<T>(url, body, {
         headers: {
           "Access-Control-Allow-Origin": "*",
         },
       });
     case "PUT":
-      return axios.put(url, body, {
+      return axios.put<T>(url, body, {
         headers: {
           "Access-Control-Allow-Origin": "*",
         },
       });
     case "DELETE":
-      return axios.delete(url, {
+      return axios.delete<T>(url, {
         headers: {
           "Access-Control-Allow-Origin": "*",
         },
