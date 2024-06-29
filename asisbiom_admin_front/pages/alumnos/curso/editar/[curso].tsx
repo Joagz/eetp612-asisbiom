@@ -22,6 +22,7 @@ import AlumnoStats from "@/interface/AlumnoStats";
 import MqttResponseAsistenciaWrapper from "@/interface/MqttResponseAsistenciaWrapper";
 import MqttResponse from "@/interface/MqttResponse";
 import { useRouter } from "next/router";
+import { getCookie } from "cookies-next";
 
 const editCurso = ({
   data,
@@ -73,46 +74,59 @@ const editCurso = ({
   }, [throwAlert]);
 
   function editCurso() {
+    console.log(getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!));
     toDelete.forEach((alumno) => {
-      useApi({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${alumno}`,
-        method: "DELETE",
-      }).then((res) => console.log(res));
+      axios
+        .delete(
+          `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${alumno}`,
+          {
+            headers: {
+              Authorization: getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!),
+            },
+          }
+        )
+        .then((res) => console.log(res.data));
     });
 
     if (hasBeenEdited) {
       alumnos.forEach((alumno) => {
         if (alumno.presente && toDelete.find((a) => a == alumno.id) == null)
-          useApi<MqttResponseAsistenciaWrapper>({
-            method: "POST",
-            url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?comingFromClient=true`,
-          }).then((res) => {
-            switch (res.data.response) {
-              case MqttResponse.RETIRAR:
-                setThrowAlert({
-                  message: `Retirando alumno... ¿Está seguro?`,
-                  status: true,
-                  isJustOkeyAlert: false,
-                  response: false,
-                  alumnoId: alumno.id,
-                });
-                break;
-              case MqttResponse.NO_HORARIO:
-                setThrowAlert({
-                  message: `No hay horarios para este curso hoy`,
-                  status: true,
-                  isJustOkeyAlert: true,
-                });
-                break;
-              case MqttResponse.OK:
-                setThrowAlert({
-                  message: `Alumno asistido correctamente`,
-                  status: true,
-                  isJustOkeyAlert: true,
-                });
-                break;
-            }
-          });
+          axios
+            .post(
+              `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}`,
+              {
+                headers: {
+                  Authorization: getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!),
+                },
+              }
+            )
+            .then((res) => {
+              switch (res.data.response) {
+                case MqttResponse.RETIRAR:
+                  setThrowAlert({
+                    message: `Retirando alumno... ¿Está seguro?`,
+                    status: true,
+                    isJustOkeyAlert: false,
+                    response: false,
+                    alumnoId: alumno.id,
+                  });
+                  break;
+                case MqttResponse.NO_HORARIO:
+                  setThrowAlert({
+                    message: `No hay horarios para este curso hoy`,
+                    status: true,
+                    isJustOkeyAlert: true,
+                  });
+                  break;
+                case MqttResponse.OK:
+                  setThrowAlert({
+                    message: `Alumno asistido correctamente`,
+                    status: true,
+                    isJustOkeyAlert: true,
+                  });
+                  break;
+              }
+            });
       });
 
       setThrowAlert({
