@@ -3,6 +3,7 @@ package eetp612.com.ar.asisbiom.config;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -46,7 +47,24 @@ public class SecurityConfig {
                         BasicAuthenticationFilter.class)
                 .addFilterBefore(new JWTTokenValidatorFilter(),
                         BasicAuthenticationFilter.class)
-                .authorizeHttpRequests(req -> req.anyRequest().permitAll()) // permitir todas
+                .authorizeHttpRequests(req -> req.requestMatchers(
+
+                        // Estadistica
+                        "/api/estadistica/cantidades/**").permitAll()
+                        .requestMatchers("/api/estadistica").authenticated()
+                        .requestMatchers("/api/estadistica/_initialize").hasAnyAuthority("DEVELOPER")
+
+                        // Alumnos
+                        .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/alumno/**").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
+                        .hasAnyAuthority("DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR")
+                        .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
+                        .hasAnyAuthority("DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR")
+
+                        // TODO: secure requests...
+
+                )
                 .formLogin(form -> form.disable())
                 .httpBasic(Customizer.withDefaults());
 

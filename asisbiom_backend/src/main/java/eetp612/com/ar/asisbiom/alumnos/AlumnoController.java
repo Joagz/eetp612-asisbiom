@@ -11,12 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eetp612.com.ar.asisbiom.mqtt.MqttService;
 import eetp612.com.ar.asisbiom.stats.StatsService;
+import eetp612.com.ar.asisbiom.user.User;
+import eetp612.com.ar.asisbiom.user.UserRepository;
 import eetp612.com.ar.asisbiom.asistencias.Asistencia;
 import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
+import eetp612.com.ar.asisbiom.docentes.CursoDocente;
+import eetp612.com.ar.asisbiom.docentes.CursoDocenteRepository;
 import eetp612.com.ar.asisbiom.docentes.Docente;
 import eetp612.com.ar.asisbiom.docentes.DocenteRepository;
 import eetp612.com.ar.asisbiom.general.DateUtils;
@@ -35,6 +39,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -74,6 +80,12 @@ public class AlumnoController {
 
     @Autowired
     private StatsService statsService;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CursoDocenteRepository cursoDocenteRepository;
 
     @GetMapping
     public List<Alumno> findAll() {
@@ -222,10 +234,37 @@ public class AlumnoController {
     @PostMapping("/asistir/{id}")
     public ResponseEntity<?> asistir(@PathVariable("id") Integer id,
             @RequestParam(required = false) boolean comingFromClient) {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        List<User> usersFound = userRepository.findByEmail(auth.getPrincipal().toString());
+        if (usersFound.isEmpty())
+            return ResponseEntity.status(403).body("No se encontró un usuario con el correo " + auth.getPrincipal());
+
+        User user = usersFound.get(0);
+        Docente docente = user.getDocente();
+        List<CursoDocente> cursoDocenteFound = cursoDocenteRepository.findByDocente(docente);
+
+        if (cursoDocenteFound.isEmpty())
+            return ResponseEntity.status(403)
+                    .body("El docente con el correo " + auth.getPrincipal() + " no tiene cursos a cargo");
+
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
+
             Alumno alumno = found.get();
             MqttResponseAsistenciaWrapper wrapper = mqttService.asistir(alumno);
+            boolean access = false;
+
+            for (CursoDocente cd : cursoDocenteFound) {
+                if (cd.getCurso().equals(alumno.getCurso())) {
+                    access = true;
+                    break;
+                }
+            }
+
+            if (!access)
+                return ResponseEntity.status(403)
+                        .body("El docente con el correo " + auth.getPrincipal() + " no tiene el curso a cargo");
 
             switch (wrapper.response()) {
                 case NO_HORARIO:
