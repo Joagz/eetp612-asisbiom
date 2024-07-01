@@ -11,16 +11,24 @@ import {
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getCookie } from "cookies-next";
 
 export function Home() {
   const [cantidades, setCantidades] = useState<{
     cant_personal: string;
     cant_alumnos: string;
   }>({} as any);
+  const [showActions, setShowActions] = useState<boolean>(false);
 
   const [alumnosPresentes, setAlumnosPresentes] = useState<number>(0);
 
   useEffect(() => {
+    if (
+      process.env.NEXT_PUBLIC_JWT_COOKIE &&
+      getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE)
+    )
+      setShowActions(true);
+
     axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades`)
       .then((res) => {
@@ -121,7 +129,8 @@ export function Home() {
               </Paragraph>
             </CardContent>
           </Card>
-          <div className="flex flex-col gap-6">
+
+          <div className={` flex-col gap-6 ${showActions ? "flex" : "hidden"}`}>
             <a
               href="/alumnos"
               className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
@@ -142,7 +151,8 @@ export function Home() {
             >
               <AppRegistrationRounded></AppRegistrationRounded>
               <Overline>Registrar alumno</Overline>
-            </a><a
+            </a>
+            <a
               href="/alumnos/listado"
               className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >

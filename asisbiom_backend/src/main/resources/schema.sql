@@ -10,11 +10,6 @@ insert into cursos (division, curso, turno) values ('B', 2, 2);
 insert into cursos (division, curso, turno) values ('C', 2, 2);
 insert into cursos (division, curso, turno) values ('D', 2, 2);
 
-insert into cursos (division, curso, turno) values ('A', 2, 2);
-insert into cursos (division, curso, turno) values ('B', 2, 2);
-insert into cursos (division, curso, turno) values ('C', 2, 2);
-insert into cursos (division, curso, turno) values ('D', 2, 2);
-
 insert into cursos (division, curso, turno) values ('A', 3, 1);
 insert into cursos (division, curso, turno) values ('B', 3, 1);
 insert into cursos (division, curso, turno) values ('C', 3, 2);

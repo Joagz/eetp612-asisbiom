@@ -18,8 +18,9 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { MqttDataPacket, SensorActions, useMqtt } from "@/hooks";
+import { MqttDataPacket, SensorActions } from "@/hooks";
 import { useRouter } from "next/router";
+import { useApi } from "@/hooks/useApi";
 
 interface AlumnosCursoData {
   alumnos: AlumnoData[];
@@ -47,7 +48,10 @@ const registrar = () => {
   const router = useRouter();
   const [sensores, setSensores] = useState<SensorData[]>([]);
   const [listado, setListado] = useState<AlumnosCursoData[]>([]);
-  const [submitted, setSubmitted] = useState<boolean>();
+  const [disabled, setDisabled] = useState<boolean>(false);
+
+  const [dniErr, setDniErr] = useState<boolean>(false);
+  const [dniErrMsg, setDniErrMsg] = useState<string>("");
 
   useMemo(() => {
     axios
@@ -71,41 +75,60 @@ const registrar = () => {
   } = useForm();
 
   function onSubmit(data: any) {
-    if (submitted) return;
-    setSubmitted(true);
+    if (disabled) return;
+    setDisabled(true);
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`)
-      .then((sensorApiRes) => {
-        axios
-          .post(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`, {
-            nombreCompleto: data.nombreCompleto,
-            dni: data.dni,
-            curso: data.curso,
-            correoElectronico: data.correoElectronico,
-            telefono: data.telefono,
-          })
-          .then((alumnoApiRes) => {
-            const dataPacket: MqttDataPacket = {
-              accion: SensorActions.REGISTER,
-              idAlumno: alumnoApiRes.data.id,
-              sensorId: sensorApiRes.data.sensorId,
-            };
-            axios
-              .post(
-                `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
-                dataPacket
-              )
-              .then((response) => {
-                // confirmar sensor
-                console.log(response.data);
+    if (data.dni.length != 8) {
+      setDniErr(true);
+      setDniErrMsg("El DNI debe tener 8 caracteres");
+      return;
+    }
 
-                router.reload();
-              });
-          });
+    // Realizamos verificaciones sobre el DNI
+    useApi({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/documento/${data.dni}`,
+    })
+      .then((res) => {
+        // Mostramos un error si el DNI está repetido
+        if (res.status == 200) {
+          setDniErr(true);
+          setDniErrMsg("El DNI está registrado para otro alumno");
+        }
       })
       .catch((err) => {
-        alert("Error sending message");
+        useApi({
+          url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/${data.sensor}`,
+        })
+          .then((sensorApiRes: any) => {
+            useApi({
+              url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/registrar`,
+              body: {
+                nombreCompleto: data.nombreCompleto,
+                dni: data.dni,
+                curso: data.curso,
+                correoElectronico: data.correoElectronico,
+                telefono: data.telefono,
+              },
+              method: "POST",
+            }).then((alumnoApiRes: any) => {
+              const dataPacket: MqttDataPacket = {
+                accion: SensorActions.REGISTER,
+                idAlumno: alumnoApiRes.data.id,
+                sensorId: sensorApiRes.data.sensorId,
+              };
+              useApi({
+                url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
+                body: dataPacket,
+                method: "POST",
+              }).then((response: any) => {
+                console.log(response.data);
+                router.reload();
+              });
+            });
+          })
+          .catch((err) => {
+            alert("Error sending message : \n" + err);
+          });
       });
   }
 
@@ -115,6 +138,7 @@ const registrar = () => {
         <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
           <div className="h-10"></div>
           <Form
+            onChange={() => setDisabled(false)}
             control={control}
             onSubmit={handleSubmit(onSubmit)}
             className="p-4 border rounded-md w-full flex flex-col gap-4"
@@ -167,7 +191,11 @@ const registrar = () => {
               size="small"
               {...register("dni", { required: true })}
               error={errors?.dni != null}
-              helperText={errors?.dni != null && "Este campo es obligatorio"}
+              helperText={
+                (errors?.dni != null || dniErr) && (
+                  <>{dniErr ? dniErrMsg : "Este campo es obligatorio"}</>
+                )
+              }
               id="dni"
             ></TextField>
 
@@ -221,7 +249,7 @@ const registrar = () => {
               </Select>
             </FormControl>
 
-            <Button type="submit" disabled={submitted}>
+            <Button type="submit" disabled={disabled}>
               Registrar
             </Button>
           </Form>

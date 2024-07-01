@@ -245,4 +245,13 @@ public class AlumnoController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/documento/{dni}")
+    public ResponseEntity<?> findByDocumento(@PathVariable("dni") String dni) {
+        List<Alumno> found = alumnoRepository.findByDni(dni);
+        if (!found.isEmpty()) {
+            return ResponseEntity.ok().body(found.get(0));
+        }
+        return ResponseEntity.notFound().build();
+    }
+
 }
