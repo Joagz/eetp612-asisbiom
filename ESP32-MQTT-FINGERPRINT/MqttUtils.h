@@ -1,3 +1,5 @@
+#ifndef MQTTUTILS_H
+#define MQTTUTILS_H
 #define mqttServer "192.168.100.50"
 #define mqttPassword "12345"
 #define mqttUser "FP_SENSOR"
@@ -10,4 +12,4 @@
 #define MQTT_ACTION_REGISTER 1
 #define MQTT_ACTION_CONFIRM 2
 #define MQTT_ACTION_PING
-
+#endif
