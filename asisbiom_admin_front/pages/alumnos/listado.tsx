@@ -40,7 +40,6 @@ const Listado = () => {
       .get<any[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats`)
       .then((res) => {
         const listado = res.data;
-        console.log(res.data);
         setDatos(
           listado.map((stat) => {
             return {

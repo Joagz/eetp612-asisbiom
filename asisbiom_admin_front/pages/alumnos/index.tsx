@@ -1,4 +1,5 @@
 import { MainLayout, Overline, Paragraph, Title } from "@/components";
+import { useApi } from "@/hooks/useApi";
 import Curso from "@/interface/Curso";
 import { Edit, SearchOff, Visibility } from "@mui/icons-material";
 import {
@@ -12,18 +13,17 @@ import {
   TableRow,
   tableCellClasses,
 } from "@mui/material";
-import axios from "axios";
 import { useMemo, useState } from "react";
 
 const HomeAlumnos = () => {
   const [cursos, setCursos] = useState<Curso[]>();
 
   useMemo(() => {
-    axios
-      .get<Curso[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/curso`)
-      .then((res) => {
-        setCursos(res.data);
-      });
+    useApi<Curso[]>({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso`,
+    }).then((res) => {
+      setCursos(res.data);
+    });
   }, []);
 
   return (

@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
@@ -82,7 +83,10 @@ public class AuthController {
         } else {
             return null;
         }
-
     }
 
+    @GetMapping("/jwt-credentials-check")
+    public ResponseEntity<?> jwtCredentialsCheck() {
+        return ResponseEntity.ok().build();
+    }
 }

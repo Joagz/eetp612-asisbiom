@@ -1,5 +1,4 @@
 import { Form, useForm } from "react-hook-form";
-import axios from "axios";
 import { MainLayout, Overline, Paragraph } from "@/components";
 import {
   Button,
@@ -54,17 +53,15 @@ const registrar = () => {
   const [dniErrMsg, setDniErrMsg] = useState<string>("");
 
   useMemo(() => {
-    axios
-      .get<SensorData[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor`)
-      .then((response) => setSensores(response.data));
+    useApi<SensorData[]>({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor`,
+    }).then((response) => setSensores(response.data));
 
-    axios
-      .get<AlumnosCursoData[]>(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/list-cursos`
-      )
-      .then((response) => {
-        setListado(response.data);
-      });
+    useApi<AlumnosCursoData[]>({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/list-cursos`,
+    }).then((response) => {
+      setListado(response.data);
+    });
   }, []);
 
   const {
@@ -121,7 +118,6 @@ const registrar = () => {
                 body: dataPacket,
                 method: "POST",
               }).then((response: any) => {
-                console.log(response.data);
                 router.reload();
               });
             });

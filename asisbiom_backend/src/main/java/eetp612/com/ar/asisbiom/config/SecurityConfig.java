@@ -62,7 +62,11 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
                         .hasAnyAuthority("DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR")
 
-                        // TODO: secure requests...
+                        .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
+                        .requestMatchers("/auth/v1/user").permitAll()
+
+                        .anyRequest().authenticated()
+                // TODO: secure requests...
 
                 )
                 .formLogin(form -> form.disable())

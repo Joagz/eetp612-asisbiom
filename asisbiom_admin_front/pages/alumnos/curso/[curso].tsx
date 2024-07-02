@@ -12,25 +12,25 @@ import {
   Button,
   IconButton,
 } from "@mui/material";
-import axios from "axios";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
 import AlumnoStats from "@/interface/AlumnoStats";
 
-const listCurso = ({
-  data,
-}: {
-  data: { curso: string; id: number; division: string };
-}) => {
+const ListCurso = ({ curso }: { curso: string }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
+  const [data, setData] = useState<Curso>({} as Curso);
 
-  useMemo(() => {
+  useEffect(() => {
+    const year = curso?.slice(0, 1);
+    const division = curso?.slice(1, 2);
+
     useApi<Curso>({
-      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${data.curso}/${data.division}`,
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${year}/${division}`,
     }).then((res) => {
+      setData(res.data);
       useApi<[]>({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${data.id}`,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${res.data.id}`,
       }).then((alumnoRes) => {
         setAlumnos(alumnoRes.data);
       });
@@ -38,7 +38,7 @@ const listCurso = ({
   }, []);
 
   return (
-    <MainLayout title="Curso">
+    <MainLayout title={curso}>
       <article className="py-20 px-6 flex flex-col gap-8">
         <IconButton href="/alumnos" className="w-fit">
           <ArrowBack></ArrowBack>
@@ -133,30 +133,10 @@ const listCurso = ({
     </MainLayout>
   );
 };
+ListCurso.getInitialProps = async ({ query }: any) => {
+  const { curso } = query;
 
-export async function getServerSideProps(context: any) {
-  const { curso: cursoStr } = context.query;
+  return { curso };
+};
 
-  try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(
-        0,
-        1
-      )}/${cursoStr?.slice(1)}`
-    );
-    const data = res.data;
-    console.log(data);
-    return {
-      props: {
-        data,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching curso data:", error);
-    return {
-      notFound: true,
-    };
-  }
-}
-
-export default listCurso;
+export default ListCurso;

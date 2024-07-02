@@ -3,6 +3,7 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import jwt_decode, { jwtDecode } from "jwt-decode";
+import axios from "axios";
 
 function parseJwt(token: string) {
   if (!token) {
@@ -36,22 +37,42 @@ export function middleware(request: NextRequest) {
     )!;
 
     if (jwt) {
-      if (request.nextUrl.pathname == "/signin")
-        return NextResponse.redirect(new URL("/", request.url));
+      return axios
+        .get(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/v1/jwt-credentials-check`,
+          {
+            headers: {
+              Authorization: jwt.value,
+            },
+          }
+        )
+        .then((res) => {
+          if (request.nextUrl.pathname == "/signin")
+            return NextResponse.redirect(new URL("/", request.url));
 
-      const decoded: { roles: string } = parseJwt(jwt.value);
+          const decoded: { roles: string } = parseJwt(jwt.value);
 
-      console.log(request.nextUrl.pathname);
-      for (let i = 0; i < permissions.length; i++) {
-        if (request.nextUrl.pathname.includes(permissions[i].url))
-          if (
-            permissions[i].roles.find((role) => role == decoded.roles) != null
-          )
-            return NextResponse.next();
-      }
+          for (let i = 0; i < permissions.length; i++) {
+            if (request.nextUrl.pathname.includes(permissions[i].url))
+              if (
+                permissions[i].roles.find((role) => role == decoded.roles) !=
+                null
+              )
+                return NextResponse.next();
+          }
+        })
+        .catch((err) => {
+          return NextResponse.redirect(
+            new URL(
+              `/forbidden?forbidden_url=${request.nextUrl.pathname}&rollback=/`,
+              request.url
+            )
+          );
+        });
     }
-    if (request.nextUrl.pathname == "/signin") return NextResponse.next();
 
+    if (request.nextUrl.pathname == "/signin") return NextResponse.next();
+    
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 

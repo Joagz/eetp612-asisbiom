@@ -12,7 +12,6 @@ const InicioSensores = (props: Props) => {
       .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor`)
       .then((res) => setSensors(res.data));
   }, []);
-  console.log(sensors.length);
   return (
     <PrincipalLayout justify="start" title={"Inicio"}>
       <div className="text-center lg:text-2xl pb-3">

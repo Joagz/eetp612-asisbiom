@@ -1,6 +1,6 @@
 import { MainLayout, Overline } from "@/components";
 import axios from "axios";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
 import { ArrowBack, Visibility, Save, Delete, Edit } from "@mui/icons-material";
@@ -15,20 +15,14 @@ import {
   TableRow,
   TableCell,
   TableHead,
-  TextField,
   Typography,
 } from "@mui/material";
 import AlumnoStats from "@/interface/AlumnoStats";
-import MqttResponseAsistenciaWrapper from "@/interface/MqttResponseAsistenciaWrapper";
 import MqttResponse from "@/interface/MqttResponse";
 import { useRouter } from "next/router";
 import { getCookie } from "cookies-next";
 
-const editCurso = ({
-  data,
-}: {
-  data: { curso: string; id: number; division: string };
-}) => {
+const EditCurso = ({ curso }: { curso: string }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false);
   const [toDelete, setToDelete] = useState<number[]>([]);
@@ -40,15 +34,19 @@ const editCurso = ({
     isJustOkeyAlert?: boolean;
     doSomething?: () => void;
   }>();
-
+  const [data, setData] = useState<Curso>({} as Curso);
   const router = useRouter();
 
-  useMemo(() => {
+  useEffect(() => {
+    const year = curso?.slice(0, 1);
+    const division = curso?.slice(1, 2);
+
     useApi<Curso>({
-      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${data.curso}/${data.division}`,
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${year}/${division}`,
     }).then((res) => {
+      setData(res.data);
       useApi<[]>({
-        url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${data.id}`,
+        url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/${res.data.id}`,
       }).then((alumnoRes) => {
         setAlumnos(alumnoRes.data);
       });
@@ -74,7 +72,6 @@ const editCurso = ({
   }, [throwAlert]);
 
   function editCurso() {
-    console.log(getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!));
     toDelete.forEach((alumno) => {
       axios
         .delete(
@@ -163,7 +160,7 @@ const editCurso = ({
   }
 
   return (
-    <MainLayout title="Curso">
+    <MainLayout title={`Editar ${curso}`}>
       {throwAlert?.status && (
         <div className="z-[1000] absolute bg-slate-100 flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-12 shadow-lg border-2 rounded-md">
           <Typography variant="h6">{throwAlert.message}</Typography>
@@ -382,51 +379,9 @@ const editCurso = ({
   );
 };
 
-export async function getServerSideProps(context: any) {
-  const { curso: cursoStr } = context.query;
+EditCurso.getInitialProps = async ({ query }: any) => {
+  const { curso } = query;
 
-  try {
-    const res = await axios.get(
-      `${process.env.NEXT_PUBLIC_API_URL}/api/curso/${cursoStr?.slice(
-        0,
-        1
-      )}/${cursoStr?.slice(1)}`
-    );
-    const data = res.data;
-    console.log(data);
-    return {
-      props: {
-        data,
-      },
-    };
-  } catch (error) {
-    console.error("Error fetching curso data:", error);
-    return {
-      notFound: true,
-    };
-  }
-}
-
-function AlumnoRow({ row }: any) {
-  const [alumno, setAlumno] = useState({
-    tardanza: row.tardanza,
-    retirado: row.retirado,
-  });
-
-  return (
-    <>
-      <TableCell>
-        <TextField value={row.nombreCompleto}>{row.nombreCompleto}</TextField>
-      </TableCell>
-      <TableCell>{row.presente ? "Sí" : "No"}</TableCell>
-      <TableCell>{alumno.tardanza ? "Sí" : "-"}</TableCell>
-      <TableCell>{alumno.retirado ? "Sí" : "-"}</TableCell>
-      <TableCell>{row.diasHabiles}</TableCell>
-      <TableCell>{row.inasistencias1}</TableCell>
-      <TableCell>{row.inasistencias2}</TableCell>
-      <TableCell>{row.inasistencias3}</TableCell>
-    </>
-  );
-}
-
-export default editCurso;
+  return { curso };
+};
+export default EditCurso;

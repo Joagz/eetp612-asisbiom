@@ -13,18 +13,18 @@
 //   rejectUnauthorized: false,
 // };
 
-// export enum SensorActions {
-//   AUTH,
-//   REGISTER,
-//   CONFIRM,
-//   PING
-// }
+export enum SensorActions {
+  AUTH,
+  REGISTER,
+  CONFIRM,
+  PING
+}
 
-// export type MqttDataPacket = {
-//   sensorId: string;
-//   accion: SensorActions;
-//   idAlumno: number;
-// };
+export type MqttDataPacket = {
+  sensorId: string;
+  accion: SensorActions;
+  idAlumno: number;
+};
 
 // let _client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);
 
