@@ -14,6 +14,7 @@
 
 static const char *WIFI_SSID_DEFAULT = "fingerprint_sensor";
 static const char *WIFI_PWD_DEFAULT = "1675230706";
+static int LAST_KEY = -1;
 
 // EEPROM memory
 Preferences pref;
@@ -50,8 +51,9 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
   Serial.print(topic);
   Serial.print("] ");
 
-  char values[3][8] = { { '\0' }, { '\0' }, { '\0' } };
+  char values[4][16] = { { '\0' }, { '\0' }, { '\0' }, { '\0' } };  //64bytes
 
+  // Extraer el mensaje y formatearlo, colocarlo dentro de 'values'
   for (int i = 0, k = 0, j = 0; i < length; i++) {
     if ((char)payload[i] == 0x2B) {
       k++;
@@ -62,33 +64,58 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
     }
   }
 
-  Serial.print("id_sensor: ");
-  Serial.println(values[0]);
-  Serial.print("accion: ");
-  Serial.println(values[1]);
-  Serial.print("id_alumno: ");
-  Serial.println(values[2]);
+  mqtt_message message;
+  message.message_id = atoi(values[0]);
+  message.sensor_id = values[1];
+  message.action = atoi(values[2]);
+  message.student_id = atoi(values[3]);
 
-  // ver accion que realizamos
-  switch (values[1]) {
-    case MQTT_ACTION_AUTH:
-      break;
-    case MQTT_ACTION_REGISTER:
-      break;
-    case MQTT_ACTION_CONFIRM:
-      break;
-    case MQTT_ACTION_PING:
-      client.publish(MQTT_TOPIC_SENSOR_OUT, "PONG");
-      return;
+  if (LAST_KEY >= message.message_id) {
+    return;
   }
 
+  LAST_KEY = message.message_id;
 
-  if (strcmp(values[0], SENSOR_ID) == 0)
-    // Codigo para registrar huella
-    Serial.print("REGISTRAR ALUMNO CON ID: ");
-  Serial.println(values[2]);
-  // while (!enrollFingerprint(atoi(values[2]), finger))
-  //   ;
+  Serial.println("----- NUEVO MENSAJE -----");
+  Serial.print("message_id: ");
+  Serial.println(message.message_id);
+  Serial.print("sensor_id: ");
+  Serial.println(message.sensor_id);
+  Serial.print("action: ");
+  Serial.println(message.action);
+  Serial.print("student_id: ");
+  Serial.println(message.student_id);
+
+  if (strcmp(message.sensor_id, SENSOR_ID) == 0) {
+    // ver accion que realizamos
+    switch (message.action) {
+      case MQTT_ACTION_AUTH:
+        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_AUTH");
+#ifdef FINGERPRINT_SENSOR_CONN
+        getFingerprintID(finger);
+
+        // ejecutar lectura
+#endif
+        break;
+      case MQTT_ACTION_REGISTER:
+        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_REGISTER");
+        // Codigo para registrar huella
+        Serial.print("REGISTRAR ALUMNO CON ID: ");
+        Serial.println(message.student_id);
+
+#ifdef FINGERPRINT_SENSOR_CONN
+        while (!enrollFingerprint(atoi(message.student_id), finger))
+          ;
+#endif
+        break;
+      case MQTT_ACTION_CONFIRM:
+        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_CONFIRM");
+        break;
+      case MQTT_ACTION_PING:
+        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_PING");
+        return;
+    }
+  }
 }
 
 void setup() {
@@ -99,6 +126,7 @@ void setup() {
 
   finger.begin(57600);
 
+#ifdef FINGERPRINT_SENSOR_CONN
   if (finger.verifyPassword()) {
     Serial.println("Sensor de huella digital encontrado!");
   } else {
@@ -108,6 +136,7 @@ void setup() {
       delay(1000);
     }
   }
+#endif
 
   Serial.print(F("Estado: 0x"));
   Serial.println(finger.status_reg, HEX);
