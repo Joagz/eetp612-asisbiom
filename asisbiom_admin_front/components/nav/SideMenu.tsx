@@ -6,11 +6,16 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
       <div className="h-2"></div>
       <NavButton href="/">Inicio</NavButton>
       {isLoggedIn && (
-        <DropdownBtn title="Alumnos">
-          <NavButton href="/alumnos">Cursos</NavButton>
-          <NavButton href="/alumnos/registrar">Registrar</NavButton>
-          <NavButton href="/alumnos/listado">Listado</NavButton>
-        </DropdownBtn>
+        <>
+          <DropdownBtn title="Alumnos">
+            <NavButton href="/alumnos">Cursos</NavButton>
+            <NavButton href="/alumnos/registrar">Registrar</NavButton>
+          </DropdownBtn>
+          <DropdownBtn title="Notas">
+          <NavButton href="/nota/listado">Listado</NavButton>
+          <NavButton href="/nota/nueva">Escribir nota</NavButton>
+          </DropdownBtn>
+        </>
       )}
       <NavButton href="/asistencia-diaria">Asistencia Diaria</NavButton>
       <NavButton href="/">Estadisticas</NavButton>

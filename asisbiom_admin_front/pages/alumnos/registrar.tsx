@@ -1,4 +1,4 @@
-import { Form, useForm } from "react-hook-form";
+import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 import { MainLayout, Overline, Paragraph } from "@/components";
 import {
   Button,
@@ -43,6 +43,7 @@ interface SensorData {
   ubicacion: string;
 }
 
+// Registrar un nuevo alumno
 const registrar = () => {
   const router = useRouter();
   const [sensores, setSensores] = useState<SensorData[]>([]);
@@ -130,13 +131,17 @@ const registrar = () => {
 
   return (
     <MainLayout title={"Registrar alumno"}>
-      <section className="flex flex-wrap w-full gap-4">
-        <article className="p-6 flex flex-col gap-5 flex-1 min-w-[500px]">
+      <section className="flex flex-wrap w-full gap-4 p-6">
+        <article className="flex flex-col gap-4 flex-1 min-w-[500px]">
           <div className="h-10"></div>
           <Form
             onChange={() => setDisabled(false)}
             control={control}
-            onSubmit={handleSubmit(onSubmit)}
+            onSubmit={
+              handleSubmit(
+                onSubmit
+              ) as unknown as FormSubmitHandler<FieldValues>
+            }
             className="p-4 border rounded-md w-full flex flex-col gap-4"
           >
             <Overline>Nuevo alumno</Overline>

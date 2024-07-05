@@ -83,9 +83,9 @@ export function Home() {
           </div>{" "}
         </div>
 
-        <div className="px-12 lg:flex-row flex-col flex flex-wrap w-full justify-center gap-7 items-start">
+        <div className="px-12 w-full flex-col flex lg:flex-row justify-center gap-7 items-start">
           <Card component={Paper}>
-            <CardContent className="flex flex-col justify-center gap-2">
+            <CardContent className="flex flex-col justify-center gap-2 flex-grow w-full">
               <Overline>Equipo Directivo</Overline>
               <Paragraph>
                 <b>Director: </b>Héctor José Yasparra
@@ -130,31 +130,31 @@ export function Home() {
             </CardContent>
           </Card>
 
-          <div className={` flex-col gap-6 ${showActions ? "flex" : "hidden"}`}>
+          <div className={`lg:w-auto w-full flex-col gap-6 ${showActions ? "flex" : "hidden"}`}>
             <a
               href="/alumnos"
-              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >
               <SchoolRounded></SchoolRounded>
               <Overline>Alumnos/Cursos</Overline>
             </a>
             <a
               href="/alumnos/diario"
-              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >
               <ChecklistRounded></ChecklistRounded>
               <Overline>Asistencia diaria</Overline>
             </a>
             <a
               href="/alumnos/registrar"
-              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >
               <AppRegistrationRounded></AppRegistrationRounded>
               <Overline>Registrar alumno</Overline>
             </a>
             <a
               href="/alumnos/listado"
-              className="hover:bg-teal-200 transition-all hover:scale-95 flex-1 min-w-fit lg:w-auto w-full text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >
               <ListRounded></ListRounded>
               <Overline>Listado</Overline>

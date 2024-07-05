@@ -3,8 +3,8 @@ import { Button, FormControl, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { deleteCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/router";
-import { useState } from "react";
-import { Form, useForm } from "react-hook-form";
+import { FormEventHandler, useState } from "react";
+import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
 export function SignIn() {
   const {
@@ -17,6 +17,8 @@ export function SignIn() {
   const [error, setError] = useState<boolean>(false);
 
   function submitevent(data: any) {
+    localStorage.setItem("enable-note-info-chip", "on");
+
     axios
       .get(`${process.env.NEXT_PUBLIC_API_URL}/auth/v1/user`, {
         method: "POST",
@@ -51,7 +53,11 @@ export function SignIn() {
           <div className="h-10"></div>
           <Form
             control={control}
-            onSubmit={handleSubmit(submitevent)}
+            onSubmit={
+              handleSubmit(
+                submitevent
+              ) as unknown as FormSubmitHandler<FieldValues>
+            }
             className="p-4 border rounded-md w-[500px] flex flex-col gap-4"
           >
             <Overline>Iniciar Sesión</Overline>
