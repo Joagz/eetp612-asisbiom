@@ -6,15 +6,23 @@
 #define mqttPort 1887
 
 #include <stdint.h>
+#include <PubSubClient.h>
+#include <WiFiManager.h>
+#include <WiFi.h>
 
 #define MQTT_TOPIC_SENSOR_IN "mqtt_sensor_in"
 #define MQTT_TOPIC_SENSOR_OUT "mqtt_sensor_out"
 
+void callback_debug(char *topic, byte *payload, unsigned int length);
+void callback_for_idinfo(char *topic, byte *payload, unsigned int length);
+void init_mqtt_service();
+void mqttClientLoop();
+
 typedef struct {
-  int message_id;
-  char *sensor_id;
-  int action;
-  int student_id;
+    int message_id;
+    char *sensor_id;
+    int action;
+    int student_id;
 } mqtt_message;
 
 #define MQTT_ACTION_AUTH 0
