@@ -13,6 +13,7 @@ static const char *WIFI_PWD_DEFAULT = "1675230706";
 
 #define DEFAULT_WIFI_SSID "Flia Premet"
 #define DEFAULT_WIFI_PWD "eljoaqui"
+#define USE_DEFAULT_WIFI 1
 
 #endif
 
