@@ -14,9 +14,12 @@ import {
   Grid,
   InputLabel,
   FormControl,
+  IconButton,
 } from "@mui/material";
 import { MainLayout } from "@/components";
 import axios from "axios";
+import { useApi } from "@/hooks/useApi";
+import { Edit, EditNote, NoteAdd } from "@mui/icons-material";
 
 type _alumno_filter = {
   nombre: string;
@@ -36,13 +39,14 @@ const Listado = () => {
   const [datosFiltrados, setDatosFiltrados] = useState<_alumno_filter[]>([]);
 
   useMemo(() => {
-    axios
-      .get<any[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats`)
+    useApi
+      <any[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats` })
       .then((res) => {
         const listado = res.data;
         setDatos(
           listado.map((stat) => {
             return {
+              id: stat.alumno.id,
               nombre: stat.alumno.nombreCompleto,
               curso: stat.alumno.curso?.curso || "No asignado",
               division: stat.alumno.curso?.division || "No asignado",
@@ -162,6 +166,7 @@ const Listado = () => {
                 <TableCell>Retiros</TableCell>
                 <TableCell>Correo</TableCell>
                 <TableCell>Teléfono</TableCell>
+                <TableCell>Acciones</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell></TableCell>
@@ -172,6 +177,7 @@ const Listado = () => {
                 <TableCell>1er Trimestre</TableCell>
                 <TableCell>2do Trimestre</TableCell>
                 <TableCell>3er Trimestre</TableCell>
+                <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
@@ -195,6 +201,7 @@ const Listado = () => {
                   <TableCell>{fila.retiros}</TableCell>
                   <TableCell>{fila.correoElectronico}</TableCell>
                   <TableCell>{fila.telefono}</TableCell>
+                  <TableCell><IconButton href={`/nota/alumno/${fila.id}`} title="Nueva Nota"><EditNote /></IconButton></TableCell>
                 </TableRow>
               ))}
             </TableBody>

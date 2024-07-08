@@ -16,6 +16,7 @@ export const TableDocument = (props: Props) => {
       <TableCell>
         <Link
           href={props.link}
+          target="_blank"
           className="flex gap-1 items-center text-blue-600"
         >
           <PictureAsPdf fontSize="small" />

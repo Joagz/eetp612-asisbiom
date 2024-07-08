@@ -6,7 +6,10 @@ import {
   ChecklistRounded,
   ListRounded,
   Man,
+  Notes,
   People,
+  Public,
+  QueryStats,
   SchoolRounded,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
@@ -130,7 +133,7 @@ export function Home() {
             </CardContent>
           </Card>
 
-          <div className={`lg:w-auto w-full flex-col gap-6 ${showActions ? "flex" : "hidden"}`}>
+          <div className={`z-[100] lg:w-auto w-full flex-col gap-6 ${showActions ? "flex" : "hidden"}`}>
             <a
               href="/alumnos"
               className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
@@ -160,6 +163,39 @@ export function Home() {
               <Overline>Listado</Overline>
             </a>
           </div>
+          <div className={`z-[100] lg:w-auto w-full flex-col gap-6 ${!showActions ? "flex" : "hidden"}`}>
+            <a
+              href="/info"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <People />
+              <Overline>Sobre Nosotros</Overline>
+            </a>
+            <a
+              target="_blank" 
+              href="http://eetp612.com.ar/index.php"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <Public />
+              <Overline>Sitio Web Oficial</Overline>
+            </a>
+            <a
+              href="/estadistica"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <QueryStats />
+              <Overline>Estadisticas</Overline>
+            </a>
+            <a
+              target="_blank"
+              href="https://docs.google.com/document/d/1Xg-surUUbUj96hIaZC7PVef1saWX045L6DwcApeRPzg/edit?usp=sharing"
+              className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
+            >
+              <Notes />
+              <Overline>Registro de Campo</Overline>
+            </a>
+          </div>
+
         </div>
       </article>
     </MainLayout>

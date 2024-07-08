@@ -1,3 +1,4 @@
+
 -- Insertar cursos por defecto
 insert into cursos (division, curso, turno) values ('A', 1, 2);
 insert into cursos (division, curso, turno) values ('B', 1, 2);

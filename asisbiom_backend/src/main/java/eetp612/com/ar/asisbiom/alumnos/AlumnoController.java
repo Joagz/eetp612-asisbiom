@@ -92,11 +92,36 @@ public class AlumnoController {
         return alumnoRepository.findAll();
     }
 
-    // TODO: Implementar
-    @PutMapping("/{id}")
-    public ResponseEntity<?> edit(@PathVariable("id") Integer id) {
+    @GetMapping("/{id}")
+    public Alumno findById(@PathVariable("id") int id) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
 
-        return ResponseEntity.ok().body("Editado correctamente");
+        if (found.isPresent())
+            return found.get();
+
+        return null;
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> edit(@PathVariable("id") Integer id, @RequestBody AlumnoDto alumno) {
+
+        Optional<Alumno> found = alumnoRepository.findById(id);
+        if (found.isPresent()) {
+            Alumno edit = found.get();
+            List<Curso> foundCurso = cursoRepository.findByCurso(alumno.curso());
+
+            if (!foundCurso.isEmpty()) {
+                edit.setCorreoElectronico(alumno.correoElectronico());
+                edit.setCurso(foundCurso.get(0));
+                edit.setDni(alumno.dni());
+                edit.setNombreCompleto(alumno.nombreCompleto());
+                edit.setTelefono(alumno.telefono());
+
+                return ResponseEntity.ok().body("Editado correctamente");
+            }
+        }
+        return ResponseEntity.badRequest().body("Por favor revisa los parámetros");
+
     }
 
     @DeleteMapping("/{id}")

@@ -94,7 +94,7 @@ export default function Info() {
               <TableDocument
                 name={"ASISBIOM v1.0"}
                 info={"Documentación principal del proyecto"}
-                link={"https://www.google.com"}
+                link={"https://docs.google.com/document/d/1qhv-tIIdVhR_-fxgxOlSZAMJZNUhbwB4HbeLz8_zjK8/edit?usp=sharing"}
               />
             </TableBody>
           </Table>
@@ -127,23 +127,28 @@ export default function Info() {
         <div className="flex-1 flex flex-col gap-1">
           <Overline>Bibliografía</Overline>
           <Typography variant="body1" className="text-xs">
-            <Link href="https://github.com/Joagz/eetp612-asisbiom">
+            <Link target="_blank"
+              href="https://github.com/Joagz/eetp612-asisbiom">
               Repositorio de la aplicación
             </Link>
           </Typography>
           <Typography variant="body1" className="text-xs">
-            <Link href="https://github.com/Joagz/esp32-mqtt-fingerprint">
+            <Link target="_blank"
+              href="https://github.com/Joagz/eetp612-asisbiom/tree/dev/ESP32-MQTT-FINGERPRINT">
               Código del microcontrolador
             </Link>
           </Typography>
           <Typography variant="body1" className="text-xs">
-            <Link href="https://www.arduino.cc/">Arduino</Link>
+            <Link target="_blank"
+              href="https://www.arduino.cc/">Arduino</Link>
           </Typography>
           <Typography variant="body1" className="text-xs">
-            <Link href="https://nextjs.org/">NextJS</Link>
+            <Link target="_blank"
+              href="https://nextjs.org/">NextJS</Link>
           </Typography>
           <Typography variant="body1" className="text-xs">
-            <Link href="https://spring.io/">Spring Framework</Link>
+            <Link target="_blank"
+              href="https://spring.io/">Spring Framework</Link>
           </Typography>
         </div>
       </aside>

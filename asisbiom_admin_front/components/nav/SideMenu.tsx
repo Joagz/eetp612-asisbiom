@@ -10,10 +10,10 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
           <DropdownBtn title="Alumnos">
             <NavButton href="/alumnos">Cursos</NavButton>
             <NavButton href="/alumnos/registrar">Registrar</NavButton>
+            <NavButton href="/alumnos/listado">Buscar Alumno</NavButton>
           </DropdownBtn>
           <DropdownBtn title="Notas">
-          <NavButton href="/nota/listado">Listado</NavButton>
-          <NavButton href="/nota/nueva">Escribir nota</NavButton>
+            <NavButton href="/listado">Registro</NavButton>
           </DropdownBtn>
         </>
       )}
