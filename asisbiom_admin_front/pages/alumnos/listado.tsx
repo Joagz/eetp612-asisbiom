@@ -19,7 +19,7 @@ import {
 import { MainLayout } from "@/components";
 import axios from "axios";
 import { useApi } from "@/hooks/useApi";
-import { Edit, EditNote, NoteAdd } from "@mui/icons-material";
+import { Edit, EditNote, NoteAdd, Visibility } from "@mui/icons-material";
 
 type _alumno_filter = {
   nombre: string;
@@ -68,10 +68,6 @@ const Listado = () => {
   }, []);
 
   useEffect(() => {
-    setDatosFiltrados(datos);
-  }, [datos]);
-
-  function setFilter() {
     setDatosFiltrados(
       datos.filter(
         (data) =>
@@ -81,7 +77,7 @@ const Listado = () => {
           data.dni.toLowerCase().includes(filtroDni.toLowerCase())
       )
     );
-  }
+  }, [datos, filtroNombre, filtroCurso, filtroDivision, filtroDni]);
 
   return (
     <MainLayout title="Alumnos - Listado">
@@ -89,30 +85,36 @@ const Listado = () => {
         <div className="h-20"></div>
         <div className="flex justify-start gap-4 flex-wrap">
           <TextField
-            className="flex-1 min-w-[200px] max-w-[300px]"
+            className="flex min-w-[200px] max-w-[300px]"
             label="Nombre y Apellido"
             variant="outlined"
             value={filtroNombre}
-            onChange={(e) => setFiltroNombre(e.target.value)}
+            onChange={(e) => {
+              setFiltroNombre(e.target.value);
+            }}
             style={{ marginBottom: "10px", width: "300px" }}
           />
           <TextField
-            className="flex-1 min-w-[200px] max-w-[300px]"
+            className="flex min-w-[200px] max-w-[300px]"
             label="DNI"
             variant="outlined"
             value={filtroDni}
-            onChange={(e) => setFiltroDni(e.target.value)}
+            onChange={(e) => {
+              setFiltroDni(e.target.value);
+            }}
             style={{ marginBottom: "10px", width: "300px" }}
           />
           <FormControl>
             <InputLabel id="curso-input">Curso</InputLabel>
             <Select
-              className="flex-1 min-w-[200px] max-w-[300px]"
+              className="flex min-w-[200px] max-w-[300px]"
               label="Curso"
               id="curso-input"
               variant="outlined"
               value={filtroCurso}
-              onChange={(e) => setFiltroCurso(e.target.value)}
+              onChange={(e) => {
+                setFiltroCurso(e.target.value);
+              }}
               style={{ marginBottom: "10px", width: "300px" }}
             >
               <MenuItem value={"1"}>1ero</MenuItem>
@@ -126,12 +128,14 @@ const Listado = () => {
           <FormControl>
             <InputLabel id="division-input">División</InputLabel>
             <Select
-              className="flex-1 min-w-[200px] max-w-[300px]"
+              className="flex min-w-[200px] max-w-[300px]"
               label="División"
               id="division-input"
               variant="outlined"
               value={filtroDivision}
-              onChange={(e) => setFiltroDivision(e.target.value)}
+              onChange={(e) => {
+                setFiltroDivision(e.target.value);
+              }}
               style={{ marginBottom: "10px", width: "300px" }}
             >
               <MenuItem value={"A"}>A</MenuItem>
@@ -141,13 +145,7 @@ const Listado = () => {
               <MenuItem value={"E"}>E</MenuItem>
             </Select>
           </FormControl>
-          <Button
-            className="flex-1 h-[61.750px] max-w-[300px] min-w-[200px]"
-            onClick={() => setFilter()}
-            variant="contained"
-          >
-            Buscar
-          </Button>{" "}
+
         </div>
         <br />
         <TableContainer component={Paper} variant="outlined">
@@ -164,8 +162,6 @@ const Listado = () => {
                 </TableCell>
                 <TableCell>Tardanzas</TableCell>
                 <TableCell>Retiros</TableCell>
-                <TableCell>Correo</TableCell>
-                <TableCell>Teléfono</TableCell>
                 <TableCell>Acciones</TableCell>
               </TableRow>
               <TableRow>
@@ -177,8 +173,6 @@ const Listado = () => {
                 <TableCell>1er Trimestre</TableCell>
                 <TableCell>2do Trimestre</TableCell>
                 <TableCell>3er Trimestre</TableCell>
-                <TableCell></TableCell>
-                <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
                 <TableCell></TableCell>
@@ -199,9 +193,10 @@ const Listado = () => {
                   <TableCell>{fila.inasistencias[2]}</TableCell>
                   <TableCell>{fila.tardanzas}</TableCell>
                   <TableCell>{fila.retiros}</TableCell>
-                  <TableCell>{fila.correoElectronico}</TableCell>
-                  <TableCell>{fila.telefono}</TableCell>
-                  <TableCell><IconButton href={`/nota/alumno/${fila.id}`} title="Nueva Nota"><EditNote /></IconButton></TableCell>
+                  <TableCell>
+                  <IconButton href={`/nota/alumno/${fila.id}`} className="hover:text-yellow-600" title="Nueva Nota"><EditNote /></IconButton>
+                  <IconButton href={`/alumnos/${fila.id}`} className="hover:text-blue-600" title="Más información"><Visibility /></IconButton>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>

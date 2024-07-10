@@ -2,22 +2,22 @@ package eetp612.com.ar.asisbiom.materias;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
-import eetp612.com.ar.asisbiom.docentes.Docente;
 import eetp612.com.ar.asisbiom.general.Dia;
+import eetp612.com.ar.asisbiom.user.User;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 
 public interface MateriaRepository extends JpaRepository<Materia, Integer> {
 
-    List<Materia> findByDocente(Docente docente);
+    List<Materia> findByUsuario(User usuario);
 
     List<Materia> findByCurso(Curso curso);
 
     List<Materia> findByCursoAndDia(Curso curso, Dia dia);
 
-    List<Materia> findByDocenteAndDia(Docente docente, Dia dia);
+    List<Materia> findByUsuarioAndDia(User usuario, Dia dia);
 
-    List<Materia> findByCursoAndDocente(Curso curso, Docente docente);
+    List<Materia> findByCursoAndUsuario(Curso curso, User usuario);
 
-    List<Materia> findByCursoAndDiaAndDocente(Curso curso, Dia dia, Docente docente);
+    List<Materia> findByCursoAndDiaAndUsuario(Curso curso, Dia dia, User usuario);
 
 }

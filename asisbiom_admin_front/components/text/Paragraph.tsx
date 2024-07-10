@@ -7,7 +7,7 @@ type Props = { children: any };
 
 export function Paragraph({ children }: Props) {
   return (
-    <Typography variant="body1" className="text-xs" align="justify">
+    <Typography variant="body1" align="justify">
       {children}
     </Typography>
   );

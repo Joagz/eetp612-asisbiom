@@ -142,11 +142,11 @@ export function Home() {
               <Overline>Alumnos/Cursos</Overline>
             </a>
             <a
-              href="/alumnos/diario"
+              href="/alumnos/listado"
               className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >
               <ChecklistRounded></ChecklistRounded>
-              <Overline>Asistencia diaria</Overline>
+              <Overline>Buscar Alumno</Overline>
             </a>
             <a
               href="/alumnos/registrar"

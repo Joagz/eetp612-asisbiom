@@ -19,10 +19,7 @@ import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
-import eetp612.com.ar.asisbiom.docentes.CursoDocente;
-import eetp612.com.ar.asisbiom.docentes.CursoDocenteRepository;
-import eetp612.com.ar.asisbiom.docentes.Docente;
-import eetp612.com.ar.asisbiom.docentes.DocenteRepository;
+import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
@@ -67,9 +64,6 @@ public class AlumnoController {
     private ConteoRepository conteoRepository;
 
     @Autowired
-    private DocenteRepository docenteRepository;
-
-    @Autowired
     private AsistenciaRepository asistenciaRepository;
 
     @Autowired
@@ -83,9 +77,6 @@ public class AlumnoController {
 
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private CursoDocenteRepository cursoDocenteRepository;
 
     @GetMapping
     public List<Alumno> findAll() {
@@ -213,21 +204,24 @@ public class AlumnoController {
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 
-    @PostMapping("/retirar/{idDocente}/{idAlumno}")
-    public ResponseEntity<?> retirar(@PathVariable("idDocente") Integer idDocente,
+    @PostMapping("/retirar/{idUsuario}/{idAlumno}")
+    public ResponseEntity<?> retirar(@PathVariable("idDocente") Integer idUsuario,
             @PathVariable("idAlumno") Integer idAlumno) {
 
-        Optional<Docente> foundDocente = docenteRepository.findById(idDocente);
+        Optional<User> foundUser = userRepository.findById(idUsuario);
         Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
 
         if (!foundAlumno.isPresent())
             return ResponseEntity.status(404)
                     .body("Huella del alumno no encontrada.");
 
-        if (!foundDocente.isPresent())
+        if (!foundUser.isPresent())
             return ResponseEntity.status(404)
                     .body("Huella del docente no encontrada.");
 
+        if (foundUser.get().getRole().equals(Roles.USUARIO)) {
+            return ResponseEntity.status(403).build();
+        }
         Alumno alumno = foundAlumno.get();
 
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
@@ -266,30 +260,15 @@ public class AlumnoController {
             return ResponseEntity.status(403).body("No se encontró un usuario con el correo " + auth.getPrincipal());
 
         User user = usersFound.get(0);
-        Docente docente = user.getDocente();
-        List<CursoDocente> cursoDocenteFound = cursoDocenteRepository.findByDocente(docente);
-
-        if (cursoDocenteFound.isEmpty())
-            return ResponseEntity.status(403)
-                    .body("El docente con el correo " + auth.getPrincipal() + " no tiene cursos a cargo");
+        
+        if (user.getRole().equals(Roles.USUARIO))
+            return ResponseEntity.status(403).build();
 
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
 
             Alumno alumno = found.get();
             MqttResponseAsistenciaWrapper wrapper = mqttService.asistir(alumno);
-            boolean access = false;
-
-            for (CursoDocente cd : cursoDocenteFound) {
-                if (cd.getCurso().equals(alumno.getCurso())) {
-                    access = true;
-                    break;
-                }
-            }
-
-            if (!access)
-                return ResponseEntity.status(403)
-                        .body("El docente con el correo " + auth.getPrincipal() + " no tiene el curso a cargo");
 
             switch (wrapper.response()) {
                 case NO_HORARIO:

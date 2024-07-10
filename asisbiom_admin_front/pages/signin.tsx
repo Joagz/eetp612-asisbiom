@@ -3,7 +3,7 @@ import { Button, FormControl, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { deleteCookie, setCookie } from "cookies-next";
 import { useRouter } from "next/router";
-import { FormEventHandler, useState } from "react";
+import { useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
 export function SignIn() {
@@ -36,13 +36,18 @@ export function SignIn() {
           setCookie(process.env.NEXT_PUBLIC_JWT_COOKIE, authHeader, {
             maxAge: 86000,
           });
+          setCookie("username", res.data.nombreCompleto, {
+            maxAge: 86000,
+          });
           router.replace("/");
         }
       })
       .catch((err) => {
         setError(true);
-        if (process.env.NEXT_PUBLIC_JWT_COOKIE)
+        if (process.env.NEXT_PUBLIC_JWT_COOKIE) {
           deleteCookie(process.env.NEXT_PUBLIC_JWT_COOKIE);
+          deleteCookie("username");
+        }
       });
   }
 

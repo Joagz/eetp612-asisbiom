@@ -56,7 +56,8 @@ public class SecurityConfig {
 
                         // Alumnos
                         .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/alumno/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/alumno/**")
+                        .hasAnyAuthority("DEVELOPER", "DIRECTIVO", "SECRETARIO")
                         .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
                         .hasAnyAuthority("DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR")
                         .requestMatchers(HttpMethod.PUT, "/api/alumno/**")

@@ -1,6 +1,6 @@
 package eetp612.com.ar.asisbiom.config;
 
-import eetp612.com.ar.asisbiom.user.Role;
+import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.user.User;
 import eetp612.com.ar.asisbiom.user.UserRepository;
 
@@ -44,9 +44,9 @@ public class AsisbiomUsernamePwdAuthenticationProvider implements Authentication
         }
     }
 
-    private List<GrantedAuthority> getGrantedAuthorities(Role role) {
+    private List<GrantedAuthority> getGrantedAuthorities(Roles role) {
         List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority(role.getRole().name().toUpperCase()));
+        grantedAuthorities.add(new SimpleGrantedAuthority(role.name().toUpperCase()));
         return grantedAuthorities;
     }
 

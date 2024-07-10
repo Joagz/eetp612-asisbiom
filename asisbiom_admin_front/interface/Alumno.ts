@@ -1,6 +1,8 @@
+import Curso from "./Curso";
+
 export default interface Alumno {
   id: number;
-  curso: string;
+  curso: Curso;
   nombreCompleto: string;
   telefono: string;
   correoElectronico: string;

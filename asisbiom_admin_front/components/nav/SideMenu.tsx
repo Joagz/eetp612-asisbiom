@@ -12,13 +12,14 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
             <NavButton href="/alumnos/registrar">Registrar</NavButton>
             <NavButton href="/alumnos/listado">Buscar Alumno</NavButton>
           </DropdownBtn>
-          <DropdownBtn title="Notas">
-            <NavButton href="/listado">Registro</NavButton>
+          <DropdownBtn title="Docentes">
+            <NavButton href="/docentes">Listado</NavButton>
+            <NavButton href="/docentes/autorizar">Autorizar</NavButton>
           </DropdownBtn>
+          <NavButton href="/nota/listado">Notas</NavButton>
         </>
       )}
-      <NavButton href="/asistencia-diaria">Asistencia Diaria</NavButton>
-      <NavButton href="/">Estadisticas</NavButton>
+      <NavButton href="/stats">Estadisticas</NavButton>
       <NavButton href="/info">Acerca de</NavButton>
     </div>
   );

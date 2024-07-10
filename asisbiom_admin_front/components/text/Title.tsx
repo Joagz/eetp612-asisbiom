@@ -3,7 +3,7 @@ import { Open_Sans } from "next/font/google";
 
 const open_sans = Open_Sans({ subsets: ["latin"], weight: "variable" });
 
-type Props = { children: string, className?: string};
+type Props = { children: any, className?: string};
 
 export function Title({ children, className }: Props) {
   return (

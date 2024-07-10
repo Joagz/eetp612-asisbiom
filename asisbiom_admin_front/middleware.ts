@@ -2,17 +2,7 @@ import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
-import jwt_decode, { jwtDecode } from "jwt-decode";
-import axios from "axios";
 
-function parseJwt(token: string) {
-  if (!token) {
-    return;
-  }
-  const base64Url = token.split(".")[1];
-  const base64 = base64Url.replace("-", "+").replace("_", "/");
-  return JSON.parse(atob(base64));
-}
 interface PermissionType {
   url: string;
   roles: string[];
@@ -27,59 +17,67 @@ const permissions: PermissionType[] = [
     url: "/alumnos",
     roles: ["DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR", "PROFESOR"],
   },
+  {
+    url: "/nota",
+    roles: ["DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR"],
+  },
+  {
+    url: "/docentes",
+    roles: ["DEVELOPER", "DIRECTIVO"],
+  },
 ];
 
-// This function can be marked `async` if using `await` inside
-export function middleware(request: NextRequest) {
-  if (process.env.NEXT_PUBLIC_JWT_COOKIE) {
-    const jwt: RequestCookie | undefined = cookies().get(
-      process.env.NEXT_PUBLIC_JWT_COOKIE
-    )!;
+function parseJwt(token: string) {
+  if (!token) {
+    return;
+  }
+  const base64Url = token.split(".")[1];
+  const base64 = base64Url.replace("-", "+").replace("_", "/");
+  return JSON.parse(atob(base64));
+}
 
-    if (jwt) {
-      return axios
-        .get(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/v1/jwt-credentials-check`,
-          {
-            headers: {
-              Authorization: jwt.value,
-            },
-          }
-        )
-        .then((res) => {
-          if (request.nextUrl.pathname == "/signin")
-            return NextResponse.redirect(new URL("/", request.url));
+export async function middleware(request: NextRequest) {
+  try {
+    if (process.env.NEXT_PUBLIC_JWT_COOKIE) {
+      const jwt: RequestCookie | undefined = cookies().get(
+        process.env.NEXT_PUBLIC_JWT_COOKIE
+      );
 
-          const decoded: { roles: string } = parseJwt(jwt.value);
+      if (jwt) {
+        const jwtValue = jwt.value;
+        const decoded: { roles: string } = parseJwt(jwtValue);
 
-          for (let i = 0; i < permissions.length; i++) {
-            if (request.nextUrl.pathname.includes(permissions[i].url))
-              if (
-                permissions[i].roles.find((role) => role == decoded.roles) !=
-                null
-              )
-                return NextResponse.next();
-          }
-        })
-        .catch((err) => {
+        // Check if user has permission for the current URL
+        const hasPermission = permissions.some((permission) =>
+          request.nextUrl.pathname.startsWith(permission.url) &&
+          permission.roles.includes(decoded.roles)
+        );
+
+        if (!hasPermission) {
           return NextResponse.redirect(
             new URL(
               `/forbidden?forbidden_url=${request.nextUrl.pathname}&rollback=/`,
               request.url
             )
           );
-        });
-    }
+        }
 
-    if (request.nextUrl.pathname == "/signin") return NextResponse.next();
-    
-    return NextResponse.redirect(new URL("/signin", request.url));
+        return NextResponse.next();
+      }
+
+      if (request.nextUrl.pathname === "/signin") {
+        return NextResponse.next();
+      }
+
+      return NextResponse.redirect(new URL("/signin", request.url));
+    }
+  } catch (error) {
+    console.error("Error en el middleware:", error);
   }
 
-  throw new Error();
+  throw new Error("Configuración Inválida");
 }
 
-// See "Matching Paths" below to learn more
 export const config = {
-  matcher: ["/alumnos/:path*", "/docentes/:path*", "/form/:path*", "/signin"],
+  matcher: ["/alumnos/:path*", "/docentes/:path*", "/form/:path*", "/signin", "/nota/:path*"],
 };

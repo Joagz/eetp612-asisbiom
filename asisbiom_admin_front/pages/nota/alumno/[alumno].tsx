@@ -1,28 +1,36 @@
 import { MainLayoutFixedHeight, Overline, Title } from "@/components";
 import { useApi } from "@/hooks/useApi";
 import Alumno from "@/interface/Alumno";
-import ListAlumnosCurso from "@/interface/ListAlumnosCurso";
 import { Close, InfoOutlined } from "@mui/icons-material";
 import {
+  Button,
   Checkbox,
   Chip,
-  Divider,
   FormControl,
   FormControlLabel,
   InputLabel,
   MenuItem,
   Select,
   TextField,
+  Typography,
 } from "@mui/material";
+import { setCookie } from "cookies-next";
 import { useRouter } from "next/router";
-import { NextResponse } from "next/server";
 import { useEffect, useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
+interface Nota {
+  asunto: string,
+  contenido: string,
+  vencimiento: number,
+  nivel_alerta: number,
+}
+
 export function NuevaNota({ id }: { id: number }) {
-  const [isVencimientoEnabled, setVencimientoEnabled] = useState(true);
+  const [isVencimientoEnabled, setVencimientoEnabled] = useState(false);
   const [showChip, setShowChip] = useState(false);
   const [alumno, setAlumno] = useState<Alumno>();
+  const router = useRouter();
 
   const {
     register,
@@ -37,7 +45,24 @@ export function NuevaNota({ id }: { id: number }) {
     useApi<Alumno>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${id}` }).then(res => setAlumno(res.data))
   }, []);
 
-  function submitevent(data: any) { }
+  function submitevent(data: any) {
+
+    console.log(data)
+
+    useApi<Nota>({
+      url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${id}`, method: "POST", body: {
+        asunto: data.asunto,
+        contenido: data.contenido,
+        nivel_alerta: data.nivel_alerta,
+        vencimiento: data.vencimiento
+      }
+    }).then(res => {
+      router.replace(`/nota/msg?success=true&alumno=${alumno!.nombreCompleto}`);
+    }).catch(err => {
+      router.replace(`/nota/msg?success=false&alumno=${alumno!.nombreCompleto}`);
+    });
+
+  }
 
   function deleteChip() {
     localStorage.setItem("enable-note-info-chip", "off");
@@ -56,16 +81,22 @@ export function NuevaNota({ id }: { id: number }) {
           control={control}
           className="px-4 flex flex-col xl:w-1/2 md:w-3/4 w-full gap-4"
         >
-          <TextField placeholder="Asunto"></TextField>
-          <TextField multiline rows={4} placeholder="Contenido"></TextField>
+          <TextField
+            {...register("asunto", { required: true })}
+            placeholder="Asunto" error={errors.asunto != undefined}></TextField>
+          {errors.asunto && <Typography color={"red"} fontSize={15}>Este campo es necesario</Typography>}
+          <TextField
+            {...register("contenido", { required: true })}
+            multiline rows={4} placeholder="Contenido" error={errors.contenido != undefined}></TextField>
+          {errors.contenido && <Typography color={"red"} fontSize={15}>Este campo es necesario</Typography>}
           <FormControl fullWidth>
-            <InputLabel id="nivel-alerta-select-label">
+            <InputLabel id="nivel_alerta-select-label">
               Nivel de alerta
             </InputLabel>
             <Select
-              {...register("nivel-alerta", { required: true })}
+              {...register("nivel_alerta", { required: true })}
               label="Nivel de Alerta"
-              labelId="nivel-alerta-select-label"
+              labelId="nivel_alerta-select-label"
               defaultValue={0}
             >
               <MenuItem value={0}>Predeterminado</MenuItem>
@@ -108,12 +139,12 @@ export function NuevaNota({ id }: { id: number }) {
           <FormControl disabled={!isVencimientoEnabled} fullWidth>
             <InputLabel id="vencimiento-select-label">Vencimiento</InputLabel>
             <Select
-              {...register("vencimiento", { required: true })}
+              {...register("vencimiento", { required: false })}
               label="Vencimiento"
               labelId="vencimiento-select-label"
-              defaultValue={1}
             >
               <MenuItem disabled>Despues de</MenuItem>
+              <MenuItem value={0}>Nunca</MenuItem>
               <MenuItem value={1}>Un Día</MenuItem>
               <MenuItem value={3}>Tres Días</MenuItem>
               <MenuItem value={7}>Una Semana</MenuItem>
@@ -123,6 +154,7 @@ export function NuevaNota({ id }: { id: number }) {
               <MenuItem value={365}>Tres Trimestres</MenuItem>
             </Select>
           </FormControl>
+          <Button variant="outlined" type="submit">Enviar</Button>
         </Form>
       </MainLayoutFixedHeight>
     );
