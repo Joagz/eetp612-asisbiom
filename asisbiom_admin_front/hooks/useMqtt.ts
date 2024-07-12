@@ -21,9 +21,9 @@ export enum SensorActions {
 }
 
 export type MqttDataPacket = {
-  sensorId: string;
-  accion: SensorActions;
-  idAlumno: number;
+  action: SensorActions;
+  sensorId: number;
+  alumnoId: number;
 };
 
 // let _client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);

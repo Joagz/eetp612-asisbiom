@@ -39,7 +39,6 @@ interface AlumnoData {
 interface SensorData {
   id: number;
   ip: string;
-  sensorId: string;
   ubicacion: string;
 }
 
@@ -110,9 +109,9 @@ const registrar = () => {
               method: "POST",
             }).then((alumnoApiRes: any) => {
               const dataPacket: MqttDataPacket = {
-                accion: SensorActions.REGISTER,
-                idAlumno: alumnoApiRes.data.id,
-                sensorId: sensorApiRes.data.sensorId,
+                action: SensorActions.REGISTER,
+                alumnoId: alumnoApiRes.data.id,
+                sensorId: sensorApiRes.data.id,
               };
               useApi({
                 url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
@@ -165,7 +164,7 @@ const registrar = () => {
                         Dirección IP: {sensor.ip}
                       </Typography>
                       <Typography variant="body1" fontWeight={700}>
-                        Nombre: {sensor.sensorId}
+                        Id: {sensor.id}
                       </Typography>
                       <Typography variant="body2">
                         Se encuentra en {sensor.ubicacion}

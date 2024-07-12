@@ -7,20 +7,26 @@ Adafruit_Fingerprint finger = Adafruit_Fingerprint(&sensorSerial);
 static WiFiClient espClient;
 static PubSubClient client(espClient);
 
-void setup() {
+void setup()
+{
   Serial.begin(115200);
-  while (!Serial) {
+  while (!Serial)
+  {
     delay(100);
   }
 
   finger.begin(57600);
 
 #ifdef FINGERPRINT_SENSOR_CONN
-  if (finger.verifyPassword()) {
+  if (finger.verifyPassword())
+  {
     Serial.println("Sensor de huella digital encontrado!");
-  } else {
+  }
+  else
+  {
     Serial.println("Sensor no encontrado...");
-    while (1) {
+    while (1)
+    {
       Serial.print(".");
       delay(1000);
     }
@@ -47,7 +53,8 @@ void setup() {
 
   WiFi.begin(DEFAULT_WIFI_SSID, DEFAULT_WIFI_PWD);
 
-  while (WiFi.status() != WL_CONNECTED) {
+  while (WiFi.status() != WL_CONNECTED)
+  {
     delay(500);
     Serial.println("Conectando a wifi predeterminado..");
   }
@@ -62,7 +69,8 @@ void setup() {
 
   res = wiFiManager.autoConnect(WIFI_SSID_DEFAULT, WIFI_PWD_DEFAULT);
 
-  if (!res) {
+  if (!res)
+  {
     Serial.println("Falla al conectar! reiniciando...");
     delay(2000);
     ESP.restart();
@@ -77,62 +85,69 @@ void setup() {
   initMqttClient();
 }
 
-void loop() {
+void loop()
+{
   client.loop();
 }
 
-void initMqttClient() {
+void initMqttClient()
+{
   client.setServer(mqttServer, mqttPort);
   client.setCallback(callback_for_idinfo);
 
-  while (!client.connected()) {
-    if (client.connect("ESP32Client", mqttUser, mqttPassword)) {
+  while (!client.connected())
+  {
+    if (client.connect("ESP32Client", mqttUser, mqttPassword))
+    {
       break;
     }
   }
 
   client.subscribe(MQTT_TOPIC_SENSOR_IN);
 }
-void callback_for_idinfo(char *topic, byte *payload, unsigned int length) {
-  char values[4][16] = { { '\0' }, { '\0' }, { '\0' }, { '\0' } };  //64bytes
 
-  Serial.println("Mensaje nuevo !");
-  // Extraer el mensaje y formatearlo, colocarlo dentro de 'values'
-  for (int i = 0, k = 0, j = 0; i < length; i++) {
-    if ((char)payload[i] == 0x2B) {
-      k++;
-      j = 0;
-    } else {
-      values[k][j] = (char)payload[i];
-      j++;
-    }
-  }
-
+void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
+{
   mqtt_message message;
-  message.message_id = atoi(values[0]);
-  message.sensor_id = values[1];
-  message.action = atoi(values[2]);
-  message.student_id = atoi(values[3]);
 
-  if (LAST_KEY >= message.message_id) {
+  uint32_t mid = 0, sid = 0, aid = 0, stid = 0;
+
+  mid   = mid   | payload[0]  | payload[1]  | payload[2]  | payload[3];
+  sid   = sid   | payload[5]  | payload[6]  | payload[7]  | payload[8];
+  aid   = aid   | payload[9]  | payload[10] | payload[10] | payload[11];
+  stid  = stid  | payload[12] | payload[13] | payload[14] | payload[15];
+
+  message.message_id  = mid;
+  message.sensor_id   = sid;
+  message.action      = aid;
+  message.student_id  = stid;
+
+  if (LAST_KEY >= message.message_id)
+  {
     return;
   }
-  Serial.println("Enviando mensaje !");
+
+  Serial.print("Message ID: ");
   Serial.println(message.message_id);
+  Serial.print("Sensor ID: ");
   Serial.println(message.sensor_id);
+  Serial.print("Action ID: ");
   Serial.println(message.action);
+  Serial.print("Student ID: ");
   Serial.println(message.student_id);
 
   LAST_KEY = message.message_id;
 
-  if (strcmp(message.sensor_id, SENSOR_ID) == 0) {
+  if (message.sensor_id == SENSOR_ID)
+  {
     // ver accion que realizamos
-    switch (message.action) {
+    switch (message.action)
+    {
       case MQTT_ACTION_AUTH:
         Serial.println("MQTT_ACTION_AUTH");
         client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_AUTH");
 #ifdef FINGERPRINT_SENSOR_CONN
-        getFingerprintID(finger);
+        int id = getFingerprintID(finger);
 
         // ejecutar lectura
 #endif

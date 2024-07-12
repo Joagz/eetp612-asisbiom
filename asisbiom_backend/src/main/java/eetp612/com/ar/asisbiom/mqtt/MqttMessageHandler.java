@@ -10,8 +10,8 @@ import org.springframework.messaging.MessagingException;
 
 public class MqttMessageHandler implements MessageHandler {
 
-    private static final String messageFormatRegex = "[A-Za-z0-9]+\\+[A-Za-z0-9]+\\+[A-Za-z0-9]";
-    private static final Stack<MqttSensorMessage> messages = new Stack<>();
+    // private static final String messageFormatRegex = "[A-Za-z0-9]+\\+[A-Za-z0-9]+\\+[A-Za-z0-9]";
+    // private static final Stack<MqttSensorMessage> messages = new Stack<>();
 
     /*
      * En el servidor MQTT los sensores envían datos de tiempo a través de un canal.
@@ -26,47 +26,35 @@ public class MqttMessageHandler implements MessageHandler {
      * mensaje deberá terminar obligatoriamente con un carácter nulo ("\0")
      * 
      */
-    private MqttSensorMessage parse(String message) {
+    // private MqttSensorMessage parse(String message) {
 
-        if (!message.matches(messageFormatRegex)) {
-            return null;
-        }
+    //     if (!message.matches(messageFormatRegex)) {
+    //         return null;
+    //     }
 
-        StringBuilder sb = new StringBuilder();
-        char[] charArr = message.toCharArray();
-        List<String> parsed = new ArrayList<>();
-        MqttSensorMessage parsedMessage = new MqttSensorMessage();
+    //     StringBuilder sb = new StringBuilder();
+    //     char[] charArr = message.toCharArray();
+    //     List<String> parsed = new ArrayList<>();
+    //     MqttSensorMessage parsedMessage = new MqttSensorMessage();
 
-        for (char c : charArr) {
-            if (c == '+') {
-                parsed.add(sb.toString());
-                sb.delete(0, sb.length());
-                break;
-            }
-            sb.append(c);
-        }
+    //     parsedMessage.setMessageId(Integer.parseInt(parsed.get(0)));
+    //     parsedMessage.setSensorId(Integer.parseInt(parsed.get(1)));
+    //     parsedMessage.setAccion(Integer.parseInt(parsed.get(2)));
+    //     parsedMessage.setIdAlumno(Integer.parseInt(parsed.get(3)));
 
-        parsedMessage.setMessageId(Integer.parseInt(parsed.get(0)));
-        parsedMessage.setSensorId(parsed.get(1));
-        parsedMessage.setAccion(Integer.parseInt(parsed.get(2)));
-        parsedMessage.setIdAlumno(Integer.parseInt(parsed.get(3)));
+    //     return parsedMessage;
 
-        return parsedMessage;
-
-    }
+    // }
 
 
     @Override
     public void handleMessage(Message<?> message) throws MessagingException {
-        MqttSensorMessage msg = parse(message.getPayload().toString());
-        System.out.println(msg);
-
-        messages.add(msg);
+        System.out.println(message.getPayload().toString());
     }
 
-    public static Stack<MqttSensorMessage> getMessages() {
-        return messages;
-    }
+    // public static Stack<MqttSensorMessage> getMessages() {
+    //     return messages;
+    // }
 
 }
 

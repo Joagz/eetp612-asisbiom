@@ -27,10 +27,6 @@ public class Sensor {
 
     private String ip;
 
-    // Id del sensor figurando en el servidor MQTT
-    @Column(name = "id_sensor")
-    private String sensorId;
-
     // Ejemplo: "TALLERES"
     private String ubicacion;
 

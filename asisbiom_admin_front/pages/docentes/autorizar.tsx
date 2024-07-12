@@ -71,6 +71,7 @@ const Autorizar = () => {
                         labelId="Cargo"
                         defaultValue={params.get("cargo") || "PROFESOR"}
                     >
+                        <MenuItem value={"USUARIO"}>USUARIO</MenuItem>
                         <MenuItem value={"PROFESOR"}>PROFESOR</MenuItem>
                         <MenuItem value={"PRECEPTOR"}>PRECEPTOR</MenuItem>
                         <MenuItem value={"SECRETARIO"}>SECRETARIO</MenuItem>

@@ -21,6 +21,10 @@ enum SensorAction {
     AUTH, REGISTER, CONFIRM, PING
 }
 
+record MqttSensorInput(int sensorId, int alumnoId, SensorAction action) {
+
+}
+
 @RestController
 @RequestMapping("/api/sensor")
 public class MqttController {
@@ -39,31 +43,46 @@ public class MqttController {
     }
 
     @PostMapping("/send-message")
-    public ResponseEntity<?> sendMessageToMqtt(@RequestBody MqttSensorMessage message) {
+    public ResponseEntity<?> sendMessageToMqtt(@RequestBody MqttSensorInput message) {
         try {
-            mqttService.sendMessage(message);
+
+            MqttSensorMessage finalMessage = new MqttSensorMessage();
+            finalMessage.setAccion(MqttUtils.integerToByteArray(message.action().ordinal()));
+            finalMessage.setSensorId(MqttUtils.integerToByteArray(message.sensorId()));
+            finalMessage.setIdAlumno(MqttUtils.integerToByteArray(message.alumnoId()));
+
+            System.out.println("message: "+message);
+            System.out.println("finalmessage: "+finalMessage);
+
+            System.out.println("Enviando mensaje...");
+
+            mqttService.sendMessage(finalMessage);
         } catch (Exception e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError().body("No se pudo enviar!");
         }
         return ResponseEntity.ok().body(message);
     }
 
-    @PostMapping("/ping")
-    public ResponseEntity<?> ping(@RequestBody MqttSensorMessage message) {
-        MqttSensorMessage res = null;
-        try {
-            message.setAccion(SensorAction.PING.ordinal());
-            int id = mqttService.sendMessage(message);
-            while (MqttMessageHandler.getMessages().peek().getMessageId() != id)
-                ;
-            if (MqttMessageHandler.getMessages().peek().getAccion().equals(SensorAction.PING.ordinal())) {
-                res = MqttMessageHandler.getMessages().pop();
-            }
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().body("No se pudo enviar!");
-        }
-        return ResponseEntity.ok().body(res);
-    }
+    // @PostMapping("/ping")
+    // public ResponseEntity<?> ping(@RequestBody MqttSensorMessage message) {
+    // MqttSensorMessage res = null;
+    // try {
+    // message.setAccion(MqttUtils.integerToByteArray(SensorAction.PING.ordinal()));
+    // int id = mqttService.sendMessage(message);
+    // while
+    // (MqttUtils.fromByteArray(MqttMessageHandler.getMessages().peek().getMessageId())
+    // != id)
+    // ;
+    // if (MqttMessageHandler.getMessages().peek().getAccion()
+    // .equals(MqttUtils.integerToByteArray(SensorAction.PING.ordinal()))) {
+    // res = MqttMessageHandler.getMessages().pop();
+    // }
+    // } catch (Exception e) {
+    // return ResponseEntity.internalServerError().body("No se pudo enviar!");
+    // }
+    // return ResponseEntity.ok().body(res);
+    // }
 
     @PostMapping("")
     public ResponseEntity<?> create(@RequestBody Sensor sensor) {

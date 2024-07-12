@@ -4,6 +4,7 @@
  */
 package eetp612.com.ar.asisbiom.mqtt;
 
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Comparator;
@@ -54,11 +55,34 @@ public class MqttService {
     }
 
     public int sendMessage(MqttSensorMessage message) throws Exception {
-        String msgString = COUNTER + "+" + message.getSensorId() + "+" + message.getAccion() + "+"
-                + message.getIdAlumno();
-        engine.setMessage(msgString);
+        byte MESSAGE[] = new byte[16];
+
+        byte[] msg_id = MqttUtils.integerToByteArray(COUNTER);
+
+        MESSAGE[0]  = msg_id[0];
+        MESSAGE[1]  = msg_id[1];
+        MESSAGE[2]  = msg_id[2];
+        MESSAGE[3]  = msg_id[3];
+
+        MESSAGE[4]  = message.getSensorId()[0];
+        MESSAGE[5]  = message.getSensorId()[1];
+        MESSAGE[6]  = message.getSensorId()[2];
+        MESSAGE[7]  = message.getSensorId()[3];
+
+        MESSAGE[8]  = message.getAccion()[0];
+        MESSAGE[9]  = message.getAccion()[1];
+        MESSAGE[10] = message.getAccion()[2];
+        MESSAGE[11] = message.getAccion()[3];
+
+        MESSAGE[12] = message.getIdAlumno()[0];
+        MESSAGE[13] = message.getIdAlumno()[1];
+        MESSAGE[14] = message.getIdAlumno()[2];
+        MESSAGE[15] = message.getIdAlumno()[3];
+        
+        engine.setMessage(MESSAGE);
         engine.call();
         COUNTER++;
+        System.out.println("Mensaje enviado!");
         return COUNTER;
     }
 

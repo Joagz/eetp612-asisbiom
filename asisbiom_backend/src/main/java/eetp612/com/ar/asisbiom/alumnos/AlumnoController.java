@@ -204,22 +204,21 @@ public class AlumnoController {
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 
-    @PostMapping("/retirar/{idUsuario}/{idAlumno}")
-    public ResponseEntity<?> retirar(@PathVariable("idDocente") Integer idUsuario,
-            @PathVariable("idAlumno") Integer idAlumno) {
+    @PostMapping("/retirar/{idAlumno}")
+    public ResponseEntity<?> retirar(Authentication authentication, @PathVariable("idAlumno") Integer idAlumno) {
 
-        Optional<User> foundUser = userRepository.findById(idUsuario);
+        List<User> foundUser = userRepository.findByEmail(authentication.getName());
         Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
 
         if (!foundAlumno.isPresent())
             return ResponseEntity.status(404)
-                    .body("Huella del alumno no encontrada.");
+                    .body("Alumno no encontrada.");
 
-        if (!foundUser.isPresent())
+        if (foundUser.isEmpty())
             return ResponseEntity.status(404)
-                    .body("Huella del docente no encontrada.");
+                    .body("Docente no encontrado.");
 
-        if (foundUser.get().getRole().equals(Roles.USUARIO)) {
+        if (foundUser.get(0).getRole().equals(Roles.USUARIO)) {
             return ResponseEntity.status(403).build();
         }
         Alumno alumno = foundAlumno.get();
@@ -260,7 +259,7 @@ public class AlumnoController {
             return ResponseEntity.status(403).body("No se encontró un usuario con el correo " + auth.getPrincipal());
 
         User user = usersFound.get(0);
-        
+
         if (user.getRole().equals(Roles.USUARIO))
             return ResponseEntity.status(403).build();
 
@@ -287,6 +286,25 @@ public class AlumnoController {
 
         return ResponseEntity.notFound().build();
     }
+
+    @PostMapping("/desasistir/{id}")
+    public ResponseEntity<?> desasistir(@PathVariable("id") Integer id) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
+        if (found.isPresent()) {
+
+            Alumno alumno = found.get();
+            List<Asistencia> asistenciasFound = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+            
+            if(asistenciasFound.isEmpty()){
+                return ResponseEntity.ok().build();
+            }
+            
+            asistenciaRepository.delete(asistenciasFound.get(0));  
+        }
+
+        return ResponseEntity.ok().build();
+    }
+
 
     @GetMapping("/documento/{dni}")
     public ResponseEntity<?> findByDocumento(@PathVariable("dni") String dni) {

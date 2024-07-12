@@ -20,10 +20,10 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length);
 void initMqttClient();
 
 typedef struct {
-    int message_id;
-    char *sensor_id;
-    int action;
-    int student_id;
+    uint32_t message_id;
+    uint32_t sensor_id;
+    uint32_t action;
+    uint32_t student_id;
 } mqtt_message;
 
 #define MQTT_ACTION_AUTH 0

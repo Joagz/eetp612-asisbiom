@@ -12,9 +12,9 @@ public class MqttSensorEngine implements Callable<Void> {
     public static final String TOPIC_IN = "mqtt_sensor_in";
     private final IMqttClient client;
 
-    private String message = null;
+    private byte[] message = new byte[16];
 
-    public void setMessage(String message) {
+    public void setMessage(byte[] message) {
         this.message = message;
     }
 
@@ -32,8 +32,8 @@ public class MqttSensorEngine implements Callable<Void> {
             System.out.println("El mensaje está vacío");
             return null;
         }
-        
-        MqttMessage msg = new MqttMessage(message.getBytes());
+        MqttUtils.printHex(message);
+        MqttMessage msg = new MqttMessage(message);
         msg.setQos(0);
         msg.setRetained(true);
         client.publish(TOPIC_IN, msg);

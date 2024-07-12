@@ -10,7 +10,7 @@ interface Nota {
   contenido: string,
   alumno: Alumno,
   fecha: string,
-  vencimiento: string
+  vencimiento?: string
 };
 
 export function listado() {
@@ -59,7 +59,7 @@ export function listado() {
                   <TableCell>{row.asunto}</TableCell>
                   <TableCell>{row.contenido.substring(0, 20)}...</TableCell>
                   <TableCell>{row.fecha[2]} / {row.fecha[1]} / {row.fecha[0]} </TableCell>
-                  <TableCell>{row.vencimiento[2]} / {row.vencimiento[1]} / {row.vencimiento[0]} </TableCell>
+                  <TableCell>{row.vencimiento == null ? "Nunca" : `${row.vencimiento[2]} / ${row.vencimiento[1]} / ${row.vencimiento[0]}`} </TableCell>
                   <TableCell className="bg-slate-100">{row.alumno.dni}</TableCell>
                   <TableCell className="bg-slate-100">{row.alumno.nombreCompleto}</TableCell>
                   <TableCell className="bg-slate-50 flex justify-around">

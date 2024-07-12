@@ -1,5 +1,4 @@
 import { MainLayout, Overline } from "@/components";
-import axios from "axios";
 import { useEffect, useState } from "react";
 import Curso from "@/interface/Curso";
 import { useApi } from "@/hooks/useApi";
@@ -25,7 +24,6 @@ import { getCookie } from "cookies-next";
 const EditCurso = ({ curso }: { curso: string }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
   const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false);
-  const [toDelete, setToDelete] = useState<number[]>([]);
   const [throwAlert, setThrowAlert] = useState<{
     status: boolean;
     message: string;
@@ -53,111 +51,12 @@ const EditCurso = ({ curso }: { curso: string }) => {
     });
   }, []);
 
-  // TODO: CRUD
-  function deleteAlumno(alumno: number) {
-    setHasBeenEdited(true);
-    if (toDelete.find((a) => a == alumno) == null) {
-      setThrowAlert({
-        status: true,
-        message: "Borrando alumno ¿está seguro?",
-        response: false,
-        alumnoId: alumno,
-      });
-    }
-  }
+  // TODO: MUCHO TRABAJO!!!
 
-  useEffect(() => {
-    if (throwAlert?.response && throwAlert?.alumnoId)
-      setToDelete(toDelete.concat([...toDelete, throwAlert!.alumnoId]));
-  }, [throwAlert]);
-
-  function editCurso() {
-    toDelete.forEach((alumno) => {
-      axios
-        .delete(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/curso/remover/${alumno}`,
-          {
-            headers: {
-              Authorization: getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!),
-            },
-          }
-        )
-        .then((res) => console.log(res.data));
-    });
-
-    if (hasBeenEdited) {
-      alumnos.forEach((alumno) => {
-        if (alumno.presente && toDelete.find((a) => a == alumno.id) == null)
-          axios
-            .post(
-              `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}`,
-              {
-                headers: {
-                  Authorization: getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE!),
-                },
-              }
-            )
-            .then((res) => {
-              switch (res.data.response) {
-                case MqttResponse.RETIRAR:
-                  setThrowAlert({
-                    message: `Retirando alumno... ¿Está seguro?`,
-                    status: true,
-                    isJustOkeyAlert: false,
-                    response: false,
-                    alumnoId: alumno.id,
-                  });
-                  break;
-                case MqttResponse.NO_HORARIO:
-                  setThrowAlert({
-                    message: `No hay horarios para este curso hoy`,
-                    status: true,
-                    isJustOkeyAlert: true,
-                  });
-                  break;
-                case MqttResponse.OK:
-                  setThrowAlert({
-                    message: `Alumno asistido correctamente`,
-                    status: true,
-                    isJustOkeyAlert: true,
-                  });
-                  break;
-              }
-            });
-      });
-
-      setThrowAlert({
-        message: "Guardado correctamente.",
-        isJustOkeyAlert: true,
-        status: true,
-        doSomething: () => {
-          router.reload();
-        },
-      });
-    }
-  }
-
-  function editAlumno(
-    row: number,
-    retirado: boolean,
-    tardanza: boolean,
-    presente: boolean
-  ) {
-    setHasBeenEdited(true);
-    let edit = alumnos[row];
-    if (edit) {
-      let index = alumnos.indexOf(edit);
-      edit.tardanza = tardanza;
-      edit.retirado = retirado;
-      edit.presente = presente;
-      const newArr: any[] = [
-        ...alumnos.slice(0, row),
-        edit,
-        ...alumnos.slice(row + 1, alumnos.length),
-      ];
-      setAlumnos(newArr);
-    }
-  }
+  function asistirhandler(id: number) { }
+  function tardanzahandler(id: number) { }
+  function retirarhandler(id: number) { }
+  function deletehandler(id: number) { }
 
   return (
     <MainLayout title={`Editar ${curso}`}>
@@ -184,6 +83,7 @@ const EditCurso = ({ curso }: { curso: string }) => {
                     response: true,
                     alumnoId: throwAlert.alumnoId,
                   });
+                  if (throwAlert.doSomething) throwAlert.doSomething();
                 }}
                 variant="contained"
                 color="error"
@@ -223,17 +123,6 @@ const EditCurso = ({ curso }: { curso: string }) => {
             endIcon={<Visibility />}
           >
             Ver Curso
-          </Button>
-
-          <Button
-            className="w-fit"
-            variant="contained"
-            color="success"
-            size="large"
-            onClick={() => editCurso()}
-            endIcon={<Save />}
-          >
-            Guardar cambios
           </Button>
         </div>
         <Grid container spacing={3}>
@@ -275,31 +164,16 @@ const EditCurso = ({ curso }: { curso: string }) => {
                   {alumnos.map((row: AlumnoStats, index: number) => (
                     <TableRow
                       key={index}
-                      className={`${
-                        toDelete.find((a) => a == row.id) != null
-                          ? "bg-red-300"
-                          : ""
-                      }`}
                     >
                       <TableCell>{row.nombreCompleto}</TableCell>
                       <TableCell>
                         {" "}
                         <Button
-                          disabled={
-                            toDelete.find((a) => a == index + 1) != null
-                          }
                           className="m-0"
                           color={row.presente ? "success" : "error"}
                           size="small"
                           variant="contained"
-                          onClick={() =>
-                            editAlumno(
-                              index,
-                              row.retirado,
-                              row.tardanza,
-                              !row.presente
-                            )
-                          }
+                          onClick={() => asistirhandler(row.id)}
                         >
                           {row.presente ? "Sí" : "No"}
                         </Button>
@@ -308,21 +182,14 @@ const EditCurso = ({ curso }: { curso: string }) => {
                         {" "}
                         <Button
                           disabled={
-                            !row.presente ||
-                            toDelete.find((a) => a == index + 1) != null
+                            !row.presente
                           }
                           className="m-0"
                           color={row.tardanza ? "success" : "error"}
                           size="small"
                           variant="contained"
                           onClick={() =>
-                            editAlumno(
-                              index,
-                              row.retirado,
-                              !row.tardanza,
-                              row.presente
-                            )
-                          }
+                            tardanzahandler(row.id)}
                         >
                           {row.tardanza ? "Sí" : "No"}
                         </Button>
@@ -331,28 +198,21 @@ const EditCurso = ({ curso }: { curso: string }) => {
                         {" "}
                         <Button
                           disabled={
-                            !row.presente ||
-                            toDelete.find((a) => a == index + 1) != null
+                            !row.presente
                           }
                           className="m-0"
                           color={row.retirado ? "success" : "error"}
                           size="small"
                           variant="contained"
                           onClick={() =>
-                            editAlumno(
-                              index,
-                              !row.retirado,
-                              row.tardanza,
-                              row.presente
-                            )
-                          }
+                            retirarhandler(row.id)}
                         >
                           {row.retirado ? "Sí" : "No"}
                         </Button>
                       </TableCell>
                       <TableCell>
                         <IconButton
-                          onClick={() => deleteAlumno(row.id)}
+                          onClick={() => deletehandler(row.id)}
                           color="error"
                         >
                           <Delete />

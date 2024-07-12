@@ -13,10 +13,10 @@ import lombok.ToString;
 public class MqttSensorMessage {
     
     @Nullable
-    private Integer messageId;
-    private String sensorId;
-    private Integer idAlumno;
-    private Integer accion;
+    private byte messageId[];
+    private byte sensorId[];
+    private byte idAlumno[];
+    private byte accion[];
     // Podríamos incluir algo que ayude a verificar la integridad del mensaje
 
 }

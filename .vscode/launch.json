@@ -6,6 +6,13 @@
     "configurations": [
         {
             "type": "java",
+            "name": "MqttUtils",
+            "request": "launch",
+            "mainClass": "eetp612.com.ar.asisbiom.mqtt.MqttUtils",
+            "projectName": "asisbiom"
+        },
+        {
+            "type": "java",
             "name": "Current File",
             "request": "launch",
             "mainClass": "${file}"
