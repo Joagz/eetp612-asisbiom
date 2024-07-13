@@ -62,7 +62,10 @@ public class ScheduleConfig {
                         a.setHorarioRetiro(h.getHorarioSalida());
                     }
 
-                    if (minutesBetween <= 15) {
+                    // Removemos todas las asistencias válidas de la 
+                    // lista, ya que a las que queden se les colocará 
+                    // inasistencia en el conteo
+                    if (minutesBetween <= 15 && a.isEnabled()) {
                         horarios.remove(i);
                         break;
                     }

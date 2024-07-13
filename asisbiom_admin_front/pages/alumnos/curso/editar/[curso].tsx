@@ -14,26 +14,21 @@ import {
   TableRow,
   TableCell,
   TableHead,
-  Typography,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
 } from "@mui/material";
 import AlumnoStats from "@/interface/AlumnoStats";
 import MqttResponse from "@/interface/MqttResponse";
-import { useRouter } from "next/router";
-import { getCookie } from "cookies-next";
+import MqttResponseAsistenciaWrapper from "@/interface/MqttResponseAsistenciaWrapper";
 
 const EditCurso = ({ curso }: { curso: string }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
-  const [hasBeenEdited, setHasBeenEdited] = useState<boolean>(false);
-  const [throwAlert, setThrowAlert] = useState<{
-    status: boolean;
-    message: string;
-    response?: boolean;
-    alumnoId?: number;
-    isJustOkeyAlert?: boolean;
-    doSomething?: () => void;
-  }>();
   const [data, setData] = useState<Curso>({} as Curso);
-  const router = useRouter();
+  const [retirarDialogOpen, setRetirarDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const year = curso?.slice(0, 1);
@@ -51,63 +46,78 @@ const EditCurso = ({ curso }: { curso: string }) => {
     });
   }, []);
 
-  // TODO: MUCHO TRABAJO!!!
+  function asistirhandler(alumno: AlumnoStats, index: number) {
+    useApi<MqttResponseAsistenciaWrapper>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?set=true`, method: "POST" })
+      .then(res => {
+        if (res.data.response === MqttResponse.OK) {
+          alumno.presente = true;
+          setAlumnos([...alumnos.slice(0, index), alumno, ...alumnos.slice(index + 1, alumnos.length)]);
+        }
+      }
+      )
+  }
 
-  function asistirhandler(id: number) { }
-  function tardanzahandler(id: number) { }
-  function retirarhandler(id: number) { }
-  function deletehandler(id: number) { }
+  function desasistirhandler(alumno: AlumnoStats, index: number) {
+    useApi<MqttResponseAsistenciaWrapper>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${alumno.id}?set=false`, method: "POST" })
+      .then(res => {
+        if (res.data.response === MqttResponse.OK) {
+          alumno.presente = false;
+          setAlumnos([...alumnos.slice(0, index), alumno, ...alumnos.slice(index + 1, alumnos.length)]);
+        }
+      }
+      )
+  }
+
+  function tardanzahandler(alumno: AlumnoStats, index: number) {
+    useApi<MqttResponseAsistenciaWrapper>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/tardanza/${alumno.id}?set=${!alumno.tardanza}`, method: "POST" })
+      .then(res => {
+        if (res.data.response === MqttResponse.OK) {
+          alumno.tardanza = !alumno.tardanza;
+          setAlumnos([...alumnos.slice(0, index), alumno, ...alumnos.slice(index + 1, alumnos.length)]);
+        }
+      }
+      )
+  }
+
+  function retirarconfirmation() {
+    if (!retirarDialogOpen)
+      setRetirarDialogOpen(true);
+  }
+
+  function deleteconfirmation() {
+    if (!deleteDialogOpen)
+      setDeleteDialogOpen(true);
+  }
+
+  function retirarhandler(alumno: AlumnoStats, index: number) {
+
+    useApi<MqttResponseAsistenciaWrapper>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" })
+      .then(res => {
+        if (res.data.response === MqttResponse.OK) {
+          alumno.retirado = true;
+          setAlumnos([...alumnos.slice(0, index), alumno, ...alumnos.slice(index + 1, alumnos.length)]);
+        }
+      })
+
+    setRetirarDialogOpen(false);
+  }
+
+  function deletehandler(alumno: AlumnoStats, index: number) {
+    useApi<MqttResponseAsistenciaWrapper>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/remover/${alumno.id}`, method: "DELETE" })
+      .then(res => {
+        if (res.data.response === MqttResponse.OK) {
+          setAlumnos([...alumnos.slice(0, index), ...alumnos.slice(index + 1, alumnos.length)]);
+        }
+      })
+
+    setRetirarDialogOpen(false);
+
+  }
 
   return (
     <MainLayout title={`Editar ${curso}`}>
-      {throwAlert?.status && (
-        <div className="z-[1000] absolute bg-slate-100 flex gap-3 justify-center items-center flex-col z-100 -translate-x-1/2 -translate-y-1/2 top-1/2 left-1/2 p-12 shadow-lg border-2 rounded-md">
-          <Typography variant="h6">{throwAlert.message}</Typography>
-          {throwAlert.isJustOkeyAlert ? (
-            <Button
-              variant="contained"
-              onClick={() => {
-                setThrowAlert({ status: false, message: throwAlert.message });
-                if (throwAlert.doSomething) throwAlert.doSomething();
-              }}
-            >
-              Aceptar
-            </Button>
-          ) : (
-            <div className="flex gap-4">
-              <Button
-                onClick={() => {
-                  setThrowAlert({
-                    message: throwAlert.message,
-                    status: false,
-                    response: true,
-                    alumnoId: throwAlert.alumnoId,
-                  });
-                  if (throwAlert.doSomething) throwAlert.doSomething();
-                }}
-                variant="contained"
-                color="error"
-              >
-                Si
-              </Button>
-              <Button
-                onClick={() => {
-                  setThrowAlert({
-                    message: throwAlert.message,
-                    status: false,
-                    response: false,
-                    alumnoId: throwAlert.alumnoId,
-                  });
-                }}
-                variant="contained"
-                color="success"
-              >
-                No
-              </Button>
-            </div>
-          )}
-        </div>
-      )}
+
+
       <article className="py-20 px-6 flex flex-col gap-8">
         <IconButton href="/alumnos" className="w-fit">
           <ArrowBack></ArrowBack>
@@ -162,72 +172,90 @@ const EditCurso = ({ curso }: { curso: string }) => {
                 </TableHead>
                 <TableBody>
                   {alumnos.map((row: AlumnoStats, index: number) => (
-                    <TableRow
-                      key={index}
-                    >
-                      <TableCell>{row.nombreCompleto}</TableCell>
-                      <TableCell>
-                        {" "}
-                        <Button
-                          className="m-0"
-                          color={row.presente ? "success" : "error"}
-                          size="small"
-                          variant="contained"
-                          onClick={() => asistirhandler(row.id)}
-                        >
-                          {row.presente ? "Sí" : "No"}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        {" "}
-                        <Button
-                          disabled={
-                            !row.presente
-                          }
-                          className="m-0"
-                          color={row.tardanza ? "success" : "error"}
-                          size="small"
-                          variant="contained"
-                          onClick={() =>
-                            tardanzahandler(row.id)}
-                        >
-                          {row.tardanza ? "Sí" : "No"}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        {" "}
-                        <Button
-                          disabled={
-                            !row.presente
-                          }
-                          className="m-0"
-                          color={row.retirado ? "success" : "error"}
-                          size="small"
-                          variant="contained"
-                          onClick={() =>
-                            retirarhandler(row.id)}
-                        >
-                          {row.retirado ? "Sí" : "No"}
-                        </Button>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          onClick={() => deletehandler(row.id)}
-                          color="error"
-                        >
-                          <Delete />
-                        </IconButton>
-                      </TableCell>
-                      <TableCell>
-                        <IconButton
-                          // TODO: crear pag. para editar
-                          href={`/alumos/editar/${row.id}`}
-                          color="inherit"
-                        >
-                          <Edit />
-                        </IconButton>
-                      </TableCell>
-                    </TableRow>
+                    <>
+                      <ConfirmationDialog
+                        title={"RETIRAR ALUMNO"}
+                        content={"Esta acción es irreversible. Una vez que haya aceptado el estado del alumno no podrá ser cambiado."}
+                        handleConfirm={() => retirarhandler(row, index)}
+                        handleClose={() => setRetirarDialogOpen(false)}
+                        open={retirarDialogOpen} />
+                      <ConfirmationDialog
+                        title={"REMOVER ALUMNO"}
+                        content={"Esta acción es irreversible. Una vez que haya aceptado el estado del alumno no podrá ser cambiado."}
+                        handleConfirm={() => deletehandler(row, index)}
+                        handleClose={() => setDeleteDialogOpen(false)}
+                        open={deleteDialogOpen} />
+                      <TableRow
+                        key={index}
+                      >
+                        <TableCell>{row.nombreCompleto}</TableCell>
+                        <TableCell>
+                          {" "}
+                          <Button
+                            className="m-0"
+                            color={row.presente ? "success" : "error"}
+                            size="small"
+                            variant="contained"
+                            onClick={
+                              row.presente ?
+                                () => desasistirhandler(row, index)
+                                : () => asistirhandler(row, index)}>
+                            {row.presente ? "Sí" : "No"}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          {" "}
+                          <Button
+                            disabled={
+                              !row.presente
+                            }
+                            className="m-0"
+                            color={row.tardanza ? "success" : "error"}
+                            size="small"
+                            variant="contained"
+                            onClick={() =>
+                              tardanzahandler(row, index)}
+                          >
+                            {row.tardanza ? "Sí" : "No"}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          {" "}
+                          <Button
+                            disabled={
+                              !row.presente || row.retirado
+                            }
+                            className="m-0"
+                            color={row.retirado ? "success" : "error"}
+                            size="small"
+
+                            variant="contained"
+                            onClick={() =>
+                              retirarconfirmation()}
+                          >
+                            {row.retirado ? "Sí" : "No"}
+                          </Button>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton
+                            onClick={() => deleteconfirmation()}
+                            color="error"
+                          >
+                            <Delete />
+                          </IconButton>
+                        </TableCell>
+                        <TableCell>
+                          <IconButton
+                            // TODO: crear pag. para editar
+                            href={`/alumos/editar/${row.id}`}
+                            color="inherit"
+                          >
+                            <Edit />
+                          </IconButton>
+                        </TableCell>
+                      </TableRow>
+                    </>
+
                   ))}
                 </TableBody>
               </Table>
@@ -238,6 +266,36 @@ const EditCurso = ({ curso }: { curso: string }) => {
     </MainLayout>
   );
 };
+
+function ConfirmationDialog({ title, content, handleClose, handleConfirm, open }:
+  { title: string, content: string, handleClose: () => void, handleConfirm: () => void, open: boolean }) {
+
+  return (
+    <>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {title}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            {content}
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions className="p-4">
+          <Button variant="contained" color="inherit" onClick={handleClose}>CANCELAR</Button>
+          <Button variant="contained" color="error" onClick={handleConfirm} autoFocus>
+            CONFIRMAR
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+}
 
 EditCurso.getInitialProps = async ({ query }: any) => {
   const { curso } = query;

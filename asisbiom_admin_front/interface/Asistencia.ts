@@ -9,4 +9,5 @@ export default interface Asistencia {
   retirado: boolean;
   razonRetiro: string;
   dia: number;
+  enabled: boolean;
 }

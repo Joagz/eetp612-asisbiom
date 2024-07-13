@@ -5,26 +5,6 @@
  */
 package eetp612.com.ar.asisbiom.alumnos;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import eetp612.com.ar.asisbiom.mqtt.MqttService;
-import eetp612.com.ar.asisbiom.stats.StatsService;
-import eetp612.com.ar.asisbiom.user.User;
-import eetp612.com.ar.asisbiom.user.UserRepository;
-import eetp612.com.ar.asisbiom.asistencias.Asistencia;
-import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
-import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
-import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
-import eetp612.com.ar.asisbiom.cursos.Curso;
-import eetp612.com.ar.asisbiom.cursos.CursoRepository;
-import eetp612.com.ar.asisbiom.docentes.Roles;
-import eetp612.com.ar.asisbiom.general.DateUtils;
-import eetp612.com.ar.asisbiom.horarios.Horario;
-import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
-import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -44,6 +24,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+import eetp612.com.ar.asisbiom.asistencias.Asistencia;
+import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
+import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
+import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
+import eetp612.com.ar.asisbiom.cursos.Curso;
+import eetp612.com.ar.asisbiom.cursos.CursoRepository;
+import eetp612.com.ar.asisbiom.docentes.Roles;
+import eetp612.com.ar.asisbiom.general.DateUtils;
+import eetp612.com.ar.asisbiom.horarios.Horario;
+import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
+import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
+import eetp612.com.ar.asisbiom.mqtt.MqttService;
+import eetp612.com.ar.asisbiom.stats.StatsService;
+import eetp612.com.ar.asisbiom.user.User;
+import eetp612.com.ar.asisbiom.user.UserRepository;
 
 record AlumnosCurso(
         Curso curso,
@@ -250,61 +250,84 @@ public class AlumnoController {
     }
 
     @PostMapping("/asistir/{id}")
-    public ResponseEntity<?> asistir(@PathVariable("id") Integer id,
-            @RequestParam(required = false) boolean comingFromClient) {
+    public ResponseEntity<?> asistir(@PathVariable("id") Integer id, @RequestParam("set") boolean set) {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<User> usersFound = userRepository.findByEmail(auth.getPrincipal().toString());
-        if (usersFound.isEmpty())
-            return ResponseEntity.status(403).body("No se encontró un usuario con el correo " + auth.getPrincipal());
-
-        User user = usersFound.get(0);
-
-        if (user.getRole().equals(Roles.USUARIO))
-            return ResponseEntity.status(403).build();
+        // TODO: ver si el usuario que se encuentra tiene este curso a cargo
 
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
-
             Alumno alumno = found.get();
-            MqttResponseAsistenciaWrapper wrapper = mqttService.asistir(alumno);
 
-            switch (wrapper.response()) {
-                case NO_HORARIO:
-                    return ResponseEntity.ok().body(wrapper);
-                case OK:
-                    statsService.addAlumnoToPresentes();
-                    return ResponseEntity.ok().body(wrapper);
-                case RETIRAR:
-                    if (!comingFromClient)
-                        return ResponseEntity.status(200).header("Accept-confirm", "confirm-retirar")
-                                .body(wrapper);
-                default:
-                    break;
+            List<Asistencia> asistenciasFound = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+            if (set && asistenciasFound.isEmpty()) {
+                MqttResponseAsistenciaWrapper wrapper = mqttService.asistir(alumno);
+                switch (wrapper.response()) {
+                    case NO_HORARIO:
+                        return ResponseEntity.accepted().body(wrapper);
+                    case OK:
+                        statsService.addAlumnoToPresentes();
+                        return ResponseEntity.ok().body(wrapper);
+                    case RETIRAR:
+
+                        return ResponseEntity.accepted().body(wrapper);
+                    default:
+                        break;
+                }
+            } else if (!asistenciasFound.isEmpty()) {
+                Asistencia toDisable = asistenciasFound.get(0);
+                toDisable.setEnabled(set);
+
+                MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(
+                        asistenciaRepository.save(toDisable), MqttResponse.OK);
+
+                return ResponseEntity.ok().body(wrapper);
             }
+        }
+
+        MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(null, MqttResponse.OK);
+        return ResponseEntity.ok().body(wrapper);
+    }
+
+    @PostMapping("/tardanza/{id}")
+    public ResponseEntity<?> tardanza(@PathVariable("id") Integer id, @RequestParam("set") boolean set) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
+
+        if (found.isPresent()) {
+            Alumno alumno = found.get();
+            List<Asistencia> asistenciasFound = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
+
+            if (asistenciasFound.isEmpty()) {
+                return ResponseEntity.ok().build();
+            }
+
+            Asistencia toUpdate = asistenciasFound.get(0);
+            toUpdate.setTardanza(set);
+
+            MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(asistenciaRepository.save(toUpdate), MqttResponse.OK);
+            return ResponseEntity.ok().body(wrapper);
         }
 
         return ResponseEntity.notFound().build();
     }
 
-    @PostMapping("/desasistir/{id}")
-    public ResponseEntity<?> desasistir(@PathVariable("id") Integer id) {
-        Optional<Alumno> found = alumnoRepository.findById(id);
-        if (found.isPresent()) {
+    @DeleteMapping("/remover/{idAlumno}")
+    public ResponseEntity<?> removerAlumno(@PathVariable Integer idAlumno) {
 
-            Alumno alumno = found.get();
-            List<Asistencia> asistenciasFound = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
-            
-            if(asistenciasFound.isEmpty()){
-                return ResponseEntity.ok().build();
-            }
-            
-            asistenciaRepository.delete(asistenciasFound.get(0));  
+        Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
+        if (foundAlumno.isPresent()) {
+            Alumno alumno = foundAlumno.get();
+            alumno.setCurso(null);
+
+            alumnoRepository.save(alumno);
+
+            return ResponseEntity.ok().body(alumno);
         }
 
-        return ResponseEntity.ok().build();
-    }
+        return ResponseEntity.notFound().build();
 
+    }
 
     @GetMapping("/documento/{dni}")
     public ResponseEntity<?> findByDocumento(@PathVariable("dni") String dni) {

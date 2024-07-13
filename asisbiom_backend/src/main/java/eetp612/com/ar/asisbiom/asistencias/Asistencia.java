@@ -66,4 +66,7 @@ public class Asistencia {
     @Column(name = "dia")
     private Dia dia;
 
+    @Column(name = "enabled")
+    private boolean enabled;
+
 }
