@@ -8,7 +8,7 @@ type Props = { children: any, className?: string};
 export function Title({ children, className }: Props) {
   return (
     <Typography
-      className={`${open_sans.className} text-6xl ${className}`}
+      className={`${open_sans.className} text-4xl ${className}`}
       fontWeight={600}
       variant="h1"
     >

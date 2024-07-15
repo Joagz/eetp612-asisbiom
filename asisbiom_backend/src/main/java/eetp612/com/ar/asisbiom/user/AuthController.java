@@ -1,6 +1,7 @@
 package eetp612.com.ar.asisbiom.user;
 
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import eetp612.com.ar.asisbiom.docentes.Roles;
@@ -27,22 +28,28 @@ public class AuthController {
     private UserRepository userRepository;
 
     @Autowired
-    private PasswordEncoder encoder;    
+    private PasswordEncoder encoder;
 
     // Registrar un nuevo usuario
     @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody UserDto user) {
+    public ResponseEntity<?> register(@RequestBody UserDto user,
+            @RequestParam(defaultValue = "false", required = false, name = "is_sensor") boolean isSensor) {
 
         if (!userRepository.findByEmail(user.email()).isEmpty()) {
             return ResponseEntity.badRequest().body("El correo electrónico está en uso.");
         }
 
-        if (!userRepository.findByPhone(user.phone()).isEmpty()) {
-            return ResponseEntity.badRequest().body("El teléfono está en uso.");
+        if (!isSensor)
+            if (!userRepository.findByPhone(user.phone()).isEmpty()) {
+                return ResponseEntity.badRequest().body("El teléfono está en uso.");
+            }
+
+        if (!isSensor && !Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
+            return ResponseEntity.badRequest().body("Correo electrónico no válido.");
         }
 
-        if (!Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
-            return ResponseEntity.badRequest().body("Correo electrónico no válido.");
+        if (isSensor && Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
+            return ResponseEntity.badRequest().body("El sensor no puede usar un correo como ID.");
         }
 
         User toSave = new User(encoder.encode(user.pwd()), Roles.valueOf(user.id_role()),

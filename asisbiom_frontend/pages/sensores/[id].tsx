@@ -7,10 +7,6 @@ const SensorById = () => {
     const router = useRouter();
     const sensorId = router.query.id;
 
-    
-
-
-
     return (
         <PrincipalLayout title={`Sensor ${sensorId}`}>
             <div className='flex justify-center items-center flex-col'>

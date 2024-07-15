@@ -33,12 +33,8 @@ export function SignIn() {
       .then((res: any) => {
         let authHeader: any = res.headers.get("authorization");
         if (authHeader && process.env.NEXT_PUBLIC_JWT_COOKIE) {
-          setCookie(process.env.NEXT_PUBLIC_JWT_COOKIE, authHeader, {
-            maxAge: 86000,
-          });
-          setCookie("username", res.data.nombreCompleto, {
-            maxAge: 86000,
-          });
+          setCookie(process.env.NEXT_PUBLIC_JWT_COOKIE, authHeader, {});
+          setCookie("username", res.data.nombreCompleto, {});
           router.replace("/");
         }
       })

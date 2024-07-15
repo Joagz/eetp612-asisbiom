@@ -1,0 +1,10 @@
+export enum Roles {
+    USUARIO="USUARIO",
+    PROFESOR="PROFESOR",
+    PRECEPTOR="PRECEPTOR",
+    SECRETARIO="SECRETARIO",
+    DIRECTIVO="DIRECTIVO",
+    DEVELOPER="DEVELOPER",
+    SENSOR="SENSOR"
+}
+export default Roles;

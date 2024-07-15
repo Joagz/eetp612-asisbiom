@@ -1,6 +1,7 @@
 import { Card, CardContainer, PrincipalLayout } from "@/components";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import { useApi } from "@/hooks/useApi";
 
 type Props = {};
 
@@ -8,10 +9,10 @@ const InicioSensores = (props: Props) => {
   const [sensors, setSensors] = useState<any[]>([]);
 
   useMemo(() => {
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/sensor`)
+    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor` })
       .then((res) => setSensors(res.data));
   }, []);
+  
   return (
     <PrincipalLayout justify="start" title={"Inicio"}>
       <div className="text-center lg:text-2xl pb-3">
@@ -23,8 +24,8 @@ const InicioSensores = (props: Props) => {
           {sensors.map((sensor) => (
             <Card
               key={sensor.id}
-              href={`/sensores/${sensor.sensorId}`}
-              title={sensor.sensorId}
+              href={`/sensores/${sensor.id}`}
+              title={"SENSOR N." + sensor.id}
               info={sensor.ubicacion}
             />
           ))}

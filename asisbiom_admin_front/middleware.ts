@@ -22,6 +22,10 @@ const permissions: PermissionType[] = [
     roles: ["DEVELOPER", "DIRECTIVO", "SECRETARIO", "PRECEPTOR"],
   },
   {
+    url: "/sensor",
+    roles: ["DEVELOPER", "DIRECTIVO"],
+  },
+  {
     url: "/docentes",
     roles: ["DEVELOPER", "DIRECTIVO"],
   },
@@ -79,5 +83,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/alumnos/:path*", "/docentes/:path*", "/form/:path*", "/signin", "/nota/:path*"],
+  matcher: ["/alumnos/:path*", "/docentes/:path*", "/form/:path*", "/signin", "/nota/:path*", "/sensor/:path*"],
 };
