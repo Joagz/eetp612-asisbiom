@@ -8,7 +8,10 @@ package eetp612.com.ar.asisbiom.mqtt;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+import java.util.Stack;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,74 +28,75 @@ record MqttSensorInput(int sensorId, int alumnoId, SensorAction action) {
 
 }
 
+record MqttSensorOutput(int sensorId, int alumnoId, int action, int messageId)
+{
+
+}
+
 @RestController
 @RequestMapping("/api/sensor")
 public class MqttController {
 
-    @Autowired
-    private MqttRepository mqttRepository;
+        @Autowired
+        private MqttRepository mqttRepository;
 
-    @Autowired
-    private MqttService mqttService;
+        @Autowired
+        private MqttService mqttService;
 
-    @GetMapping("/{id}")
-    public ResponseEntity<?> getBySensorId(@PathVariable Integer id) {
-        if (mqttRepository.findById(id).isPresent())
-            return ResponseEntity.ok().body(mqttRepository.findById(id).get());
-        return ResponseEntity.notFound().build();
-    }
-
-    @PostMapping("/send-message")
-    public ResponseEntity<?> sendMessageToMqtt(@RequestBody MqttSensorInput message) {
-        try {
-
-            MqttSensorMessage finalMessage = new MqttSensorMessage();
-            finalMessage.setAccion(MqttUtils.integerToByteArray(message.action().ordinal()));
-            finalMessage.setSensorId(MqttUtils.integerToByteArray(message.sensorId()));
-            finalMessage.setIdAlumno(MqttUtils.integerToByteArray(message.alumnoId()));
-
-            System.out.println("message: "+message);
-            System.out.println("finalmessage: "+finalMessage);
-
-            System.out.println("Enviando mensaje...");
-
-            mqttService.sendMessage(finalMessage);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError().body("No se pudo enviar!");
+        @GetMapping("/{id}")
+        public ResponseEntity<?> getBySensorId(@PathVariable Integer id) {
+            if (mqttRepository.findById(id).isPresent())
+                return ResponseEntity.ok().body(mqttRepository.findById(id).get());
+            return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok().body(message);
+
+    @GetMapping("/get-messages/{id}")
+    public ResponseEntity<?> getSensorMessageBySensorId(@PathVariable("id") int id) {
+        Optional<Sensor> found = mqttRepository.findById(id);
+
+        if (!found.isPresent()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Stack<MqttMessage> messages = MqttUtils.getMessageStack();
+
+        List<MqttSensorOutput> out = new ArrayList<>();
+
+        messages.stream().filter(message -> MqttUtils.fromByteArray(message.getSensorId()) == id)
+        .forEach(message -> out.add(new MqttSensorOutput(
+            MqttUtils.fromByteArray(message.getSensorId()),
+             MqttUtils.fromByteArray(message.getIdAlumno()),
+              MqttUtils.fromByteArray(message.getAccion()),
+               MqttUtils.fromByteArray(message.getMessageId()))));
+        return ResponseEntity.ok().body(out);
     }
 
-    // @PostMapping("/ping")
-    // public ResponseEntity<?> ping(@RequestBody MqttSensorMessage message) {
-    // MqttSensorMessage res = null;
-    // try {
-    // message.setAccion(MqttUtils.integerToByteArray(SensorAction.PING.ordinal()));
-    // int id = mqttService.sendMessage(message);
-    // while
-    // (MqttUtils.fromByteArray(MqttMessageHandler.getMessages().peek().getMessageId())
-    // != id)
-    // ;
-    // if (MqttMessageHandler.getMessages().peek().getAccion()
-    // .equals(MqttUtils.integerToByteArray(SensorAction.PING.ordinal()))) {
-    // res = MqttMessageHandler.getMessages().pop();
-    // }
-    // } catch (Exception e) {
-    // return ResponseEntity.internalServerError().body("No se pudo enviar!");
-    // }
-    // return ResponseEntity.ok().body(res);
-    // }
+        @PostMapping("/send-message")
+        public ResponseEntity<?> sendMessageToMqtt(@RequestBody MqttSensorInput message) {
+            try {
 
-    @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody Sensor sensor) {
-        Sensor saved = mqttRepository.save(sensor);
-        return ResponseEntity.ok().body(saved);
-    }
+                MqttMessage finalMessage = new MqttMessage();
+                finalMessage.setAccion(MqttUtils.integerToByteArray(message.action().ordinal()));
+                finalMessage.setSensorId(MqttUtils.integerToByteArray(message.sensorId()));
+                finalMessage.setIdAlumno(MqttUtils.integerToByteArray(message.alumnoId()));
 
-    @GetMapping
-    public List<Sensor> findAll() {
-        return mqttRepository.findAll();
-    }
+                mqttService.sendMessage(finalMessage);
+            } catch (Exception e) {
+                e.printStackTrace();
+                return ResponseEntity.internalServerError().body("No se pudo enviar!");
+            }
+            return ResponseEntity.ok().body(message);
+        }
+
+        @PostMapping("")
+        public ResponseEntity<?> create(@RequestBody Sensor sensor) {
+            Sensor saved = mqttRepository.save(sensor);
+            return ResponseEntity.ok().body(saved);
+        }
+
+        @GetMapping
+        public List<Sensor> findAll() {
+            return mqttRepository.findAll();
+        }
 
 }

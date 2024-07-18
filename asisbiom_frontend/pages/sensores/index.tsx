@@ -1,6 +1,5 @@
 import { Card, CardContainer, PrincipalLayout } from "@/components";
-import React, { useEffect, useMemo, useState } from "react";
-import axios from "axios";
+import React, { useMemo, useState } from "react";
 import { useApi } from "@/hooks/useApi";
 
 type Props = {};

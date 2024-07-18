@@ -29,8 +29,6 @@ import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 @Service
 public class MqttService {
 
-    private static Integer COUNTER = 0;
-
     @Autowired
     private AsistenciaRepository asistenciaRepository;
 
@@ -43,7 +41,7 @@ public class MqttService {
     private MqttSensorEngine engine;
 
     public MqttService() throws MqttException {
-        IMqttClient publisher = new MqttClient("tcp://localhost:1887", "test");
+        IMqttClient publisher = new MqttClient("tcp://localhost:1887", "java-application");
         MqttConnectOptions options = new MqttConnectOptions();
         options.setAutomaticReconnect(true);
         options.setCleanSession(true);
@@ -53,23 +51,23 @@ public class MqttService {
         engine = new MqttSensorEngine(publisher);
     }
 
-    public int sendMessage(MqttSensorMessage message) throws Exception {
+    public int sendMessage(MqttMessage message) throws Exception {
         byte MESSAGE[] = new byte[16];
 
-        byte[] msg_id = MqttUtils.integerToByteArray(COUNTER);
+        byte[] msg_id = MqttUtils.integerToByteArray(MqttUtils.getCounter());
 
-        MESSAGE[0]  = msg_id[0];
-        MESSAGE[1]  = msg_id[1];
-        MESSAGE[2]  = msg_id[2];
-        MESSAGE[3]  = msg_id[3];
+        MESSAGE[0] = msg_id[0];
+        MESSAGE[1] = msg_id[1];
+        MESSAGE[2] = msg_id[2];
+        MESSAGE[3] = msg_id[3];
 
-        MESSAGE[4]  = message.getSensorId()[0];
-        MESSAGE[5]  = message.getSensorId()[1];
-        MESSAGE[6]  = message.getSensorId()[2];
-        MESSAGE[7]  = message.getSensorId()[3];
+        MESSAGE[4] = message.getSensorId()[0];
+        MESSAGE[5] = message.getSensorId()[1];
+        MESSAGE[6] = message.getSensorId()[2];
+        MESSAGE[7] = message.getSensorId()[3];
 
-        MESSAGE[8]  = message.getAccion()[0];
-        MESSAGE[9]  = message.getAccion()[1];
+        MESSAGE[8] = message.getAccion()[0];
+        MESSAGE[9] = message.getAccion()[1];
         MESSAGE[10] = message.getAccion()[2];
         MESSAGE[11] = message.getAccion()[3];
 
@@ -77,12 +75,11 @@ public class MqttService {
         MESSAGE[13] = message.getIdAlumno()[1];
         MESSAGE[14] = message.getIdAlumno()[2];
         MESSAGE[15] = message.getIdAlumno()[3];
-        
+
         engine.setMessage(MESSAGE);
         engine.call();
-        COUNTER++;
-        System.out.println("Mensaje enviado!");
-        return COUNTER;
+        MqttUtils.addToCounter();
+        return MqttUtils.getCounter();
     }
 
     public MqttResponse retirar(Alumno alumno, Asistencia asistencia) {

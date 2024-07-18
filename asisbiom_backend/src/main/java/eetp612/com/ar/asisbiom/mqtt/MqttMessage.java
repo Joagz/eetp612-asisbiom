@@ -10,13 +10,16 @@ import lombok.ToString;
 
 @Data
 @ToString
-public class MqttSensorMessage {
+public class MqttMessage {
     
+
+    // cada uno de estos campos tiene 2 bytes
+    // El total serían 64 bits por mensaje
+
     @Nullable
     private byte messageId[];
     private byte sensorId[];
     private byte idAlumno[];
     private byte accion[];
-    // Podríamos incluir algo que ayude a verificar la integridad del mensaje
 
 }
