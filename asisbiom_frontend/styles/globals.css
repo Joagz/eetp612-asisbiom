@@ -17,11 +17,11 @@ body {
 
 .bg-img-default {
   background-image: url("/eetp612.png");
-  opacity: 40%;
+  opacity: 20%;
   background-size: contain;
   background-repeat: no-repeat;
   background-position: center;
-  background-size: 70%;
+  background-size: 50%;
   z-index: -1000;
 }
 

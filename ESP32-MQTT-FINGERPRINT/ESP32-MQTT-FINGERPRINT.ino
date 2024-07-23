@@ -210,8 +210,21 @@ void setup()
   initMqttClient();
 }
 
+int id = 0;
+
 void loop()
 {
+  mqtt_message message;
+
+  message.message_id  = id;
+  message.sensor_id   = 1;
+  message.action      = 0;
+  message.student_id  = 3;
+  id++;
+  send_mqtt_message_out(message);
+
+  sleep(5);
+  
   client.loop();
   // AUTH LOOP
 #ifdef FINGERPRINT_SENSOR_CONN

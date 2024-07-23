@@ -20,8 +20,9 @@ export const PrincipalLayout = ({ title, children, justify = "center" }: Props) 
       <main className={`px-3 ${montserrat.className} h-screen overflow-x-hidden py-10 flex items-center justify-${justify} flex-col gap-3`}>
         <div className='bg-img-default top-0 left-0 fixed h-full w-full'></div>
         {children}
+        <br />
         <div>
-          <h2 className="font-black lg:text-xl">EETP N.612 "Eudocio de los Santos Giménez"</h2>
+          <p className="font-black text-[10px]">EETP N.612 "Eudocio de los Santos Giménez"</p>
           <p>Coronda, Santa fe</p>
         </div>
 
