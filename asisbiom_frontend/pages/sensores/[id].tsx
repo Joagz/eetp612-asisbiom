@@ -1,20 +1,39 @@
-import Head from 'next/head'
-import React from 'react'
-import { useRouter } from 'next/router'
+import { useEffect, useState } from 'react'
 import { PrincipalLayout } from '@/components';
+import { useApi } from '@/hooks/useApi';
+import mqtt, { MqttClient } from 'mqtt';
+import useMqtt from '@/hooks/useMqtt';
 
-const SensorById = () => {
-    const router = useRouter();
-    const sensorId = router.query.id;
+const options = {
+    userName: 'SensorFront',
+    password: '',
+    clientId: 'nextjs',
+    reconnectPeriod: 1000000,
+};
+
+const mqttUri = 'wss://localhost:8084';
+
+const SensorById = ({ id }: { id: number }) => {
+    const [messages, setMessages] = useState(['init']);
+    useMqtt({uri: mqttUri, options: options})
 
     return (
-        <PrincipalLayout title={`Sensor ${sensorId}`}>
+        <PrincipalLayout title={`Sensor ${id}`}>
             <div className='flex justify-center items-center flex-col'>
-                <h1 className='text-2xl font-bold'>EETP N. 612</h1>
+                <ul>
+                    {messages.map((message) => (
+                        <li key={Math.random()}>{message.toString()}</li>
+                    ))}
+                </ul>                <h1 className='text-2xl font-bold'>EETP N. 612</h1>
                 <p>Por favor coloque su dedo...</p>
             </div>
         </PrincipalLayout>
     )
 }
+
+SensorById.getInitialProps = async ({ query }: any) => {
+    const { id } = query;
+    return { id };
+};
 
 export default SensorById
