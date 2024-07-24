@@ -34,9 +34,11 @@ public class MqttSensorEngine implements Callable<Void> {
         }
         MqttUtils.printHex(message);
         MqttMessage msg = new MqttMessage(message);
-        msg.setQos(0);
+        msg.setQos(2);
         msg.setRetained(true);
         client.publish(TOPIC_IN, msg);
+        
+        setMessage(null);
 
         return null;
     }

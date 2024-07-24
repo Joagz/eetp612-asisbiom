@@ -108,18 +108,7 @@ const registrar = () => {
               },
               method: "POST",
             }).then((alumnoApiRes: any) => {
-              const dataPacket: MqttDataPacket = {
-                action: SensorActions.REGISTER,
-                alumnoId: alumnoApiRes.data.id,
-                sensorId: sensorApiRes.data.id,
-              };
-              useApi({
-                url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`,
-                body: dataPacket,
-                method: "POST",
-              }).then((response: any) => {
-                router.reload();
-              });
+              router.reload();
             });
           })
           .catch((err) => {

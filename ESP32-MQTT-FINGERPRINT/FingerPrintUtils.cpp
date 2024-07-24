@@ -153,7 +153,6 @@ int getFingerprintID(Adafruit_Fingerprint finger) {
       Serial.println("Image taken");
       break;
     case FINGERPRINT_NOFINGER:
-      Serial.println("No finger detected");
       return -1;
     case FINGERPRINT_PACKETRECIEVEERR:
       Serial.println("Communication error");

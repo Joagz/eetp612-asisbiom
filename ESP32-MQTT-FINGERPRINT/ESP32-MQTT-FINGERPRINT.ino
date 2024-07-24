@@ -1,12 +1,13 @@
 #include "FingerPrintUtils.h"
 #include "MqttUtils.h"
 #include "ServerUtils.h"
+#include <HardwareSerial.h>
 
-HardwareSerial sensorSerial(2);
+#define sensorSerial Serial2
+
 Adafruit_Fingerprint finger = Adafruit_Fingerprint(&sensorSerial);
 static WiFiClient espClient;
 static PubSubClient client(espClient);
-
 
 void send_mqtt_message_out(mqtt_message message)
 {
@@ -82,41 +83,33 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
   Serial.print("Sensor ID: ");
   Serial.println(message.sensor_id);
   Serial.print("Action ID: ");
-  Serial.println(message.action);
+  Serial.println(message.action); 
   Serial.print("Student ID: ");
   Serial.println(message.student_id);
 
-  LAST_KEY = message.message_id;
-
+  // prevenimos que el sensor se bloquee
+  if(LAST_KEY == message.student_id)
+    return;
+    
+  LAST_KEY = message.student_id;
   if (message.sensor_id == SENSOR_ID)
   {
     // ver accion que realizamos
     switch (message.action)
     {
-      case MQTT_ACTION_AUTH:
-        Serial.println("MQTT_ACTION_AUTH");
-        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_AUTH");
-#ifdef FINGERPRINT_SENSOR_CONN
-        int id = getFingerprintID(finger);
-
-        // ejecutar lectura
-#endif
-        break;
       case MQTT_ACTION_REGISTER:
         Serial.println("MQTT_ACTION_REGISTER");
-        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_REGISTER");
         // Codigo para registrar huella
         Serial.print("REGISTRAR ALUMNO CON ID: ");
         Serial.println(message.student_id);
 
 #ifdef FINGERPRINT_SENSOR_CONN
-        while (!enrollFingerprint(atoi(message.student_id), finger))
+        while (!enrollFingerprint(message.student_id, finger))
           ;
 #endif
         return;
       case MQTT_ACTION_CONFIRM:
         Serial.println("MQTT_ACTION_CONFIRM");
-        client.publish(MQTT_TOPIC_SENSOR_OUT, "MQTT_ACTION_CONFIRM");
         break;
       case MQTT_ACTION_PING:
         Serial.println("MQTT_ACTION_PING");
@@ -140,9 +133,11 @@ void setup()
     delay(100);
   }
 
-  finger.begin(57600);
 
 #ifdef FINGERPRINT_SENSOR_CONN
+  sensorSerial.begin(57600, SERIAL_8N1, 16, 17);
+  finger.begin(57600);
+
   if (finger.verifyPassword())
   {
     Serial.println("Sensor de huella digital encontrado!");
@@ -213,29 +208,20 @@ void setup()
 int id = 0;
 
 void loop()
-{
-  mqtt_message message;
-
-  message.message_id  = id;
-  message.sensor_id   = 1;
-  message.action      = 0;
-  message.student_id  = 3;
-  id++;
-  send_mqtt_message_out(message);
-
-  sleep(5);
-  
+{    
   client.loop();
+
   // AUTH LOOP
 #ifdef FINGERPRINT_SENSOR_CONN
   int id = getFingerprintID(finger);
 
+  if(id < 0)
+    return;
   mqtt_message message;
   message.message_id = 0;
   message.action=MQTT_ACTION_AUTH;
   message.student_id = id;
-  message.sensor_id = SENSOR_ID
+  message.sensor_id = SENSOR_ID;
   send_mqtt_message_out(message);
 #endif
-  
 }

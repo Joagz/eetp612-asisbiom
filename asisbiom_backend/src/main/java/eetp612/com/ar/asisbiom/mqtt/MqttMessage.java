@@ -11,7 +11,6 @@ import lombok.ToString;
 @Data
 @ToString
 public class MqttMessage {
-    
 
     // cada uno de estos campos tiene 2 bytes
     // El total serían 64 bits por mensaje
@@ -21,5 +20,15 @@ public class MqttMessage {
     private byte sensorId[];
     private byte idAlumno[];
     private byte accion[];
+
+    public MqttMessage() {
+    }
+
+    public MqttMessage(byte[] messageId, byte[] sensorId, byte[] idAlumno, byte[] accion) {
+        this.messageId = messageId;
+        this.sensorId = sensorId;
+        this.idAlumno = idAlumno;
+        this.accion = accion;
+    }
 
 }

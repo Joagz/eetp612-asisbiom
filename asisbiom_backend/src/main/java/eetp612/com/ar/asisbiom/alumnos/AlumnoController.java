@@ -38,9 +38,12 @@ import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+import eetp612.com.ar.asisbiom.mqtt.MqttMessage;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
 import eetp612.com.ar.asisbiom.mqtt.MqttService;
+import eetp612.com.ar.asisbiom.mqtt.MqttUtils;
+import eetp612.com.ar.asisbiom.mqtt.SensorAction;
 import eetp612.com.ar.asisbiom.stats.StatsService;
 import eetp612.com.ar.asisbiom.user.User;
 import eetp612.com.ar.asisbiom.user.UserRepository;
@@ -53,6 +56,11 @@ record AlumnosCurso(
 @RestController
 @RequestMapping("/api/alumno")
 public class AlumnoController {
+    static MqttMessage nullMsg = new MqttMessage(
+            MqttUtils.integerToByteArray(0),
+            MqttUtils.integerToByteArray(0),
+            MqttUtils.integerToByteArray(0),
+            MqttUtils.integerToByteArray(0));
 
     @Autowired
     private AlumnoRepository alumnoRepository;
@@ -201,6 +209,22 @@ public class AlumnoController {
         alumnoRepository.save(alumno);
         conteoRepository.save(new ConteoAsistencia(alumno));
         statsService.addAlumno();
+
+        MqttMessage message = new MqttMessage();
+        message.setAccion(MqttUtils.integerToByteArray(SensorAction.REGISTER.ordinal()));
+        message.setIdAlumno(MqttUtils.integerToByteArray(alumno.getId()));
+        MqttUtils.addToCounter();
+        message.setMessageId(MqttUtils.integerToByteArray(MqttUtils.getCounter()));
+        message.setSensorId(MqttUtils.integerToByteArray(1)); // por el momento
+
+        try {
+            mqttService.sendMessage(message);
+            mqttService.sendMessage(nullMsg);
+
+        } catch (Exception e) {
+            System.out.println("NO SE PUDO ENVIAR EL MENSAJE -->" + e.getLocalizedMessage());
+        }
+
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
     }
 
@@ -305,7 +329,8 @@ public class AlumnoController {
             Asistencia toUpdate = asistenciasFound.get(0);
             toUpdate.setTardanza(set);
 
-            MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(asistenciaRepository.save(toUpdate), MqttResponse.OK);
+            MqttResponseAsistenciaWrapper wrapper = new MqttResponseAsistenciaWrapper(
+                    asistenciaRepository.save(toUpdate), MqttResponse.OK);
             return ResponseEntity.ok().body(wrapper);
         }
 

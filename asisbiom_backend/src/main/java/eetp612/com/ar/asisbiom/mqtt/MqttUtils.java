@@ -10,19 +10,19 @@ public class MqttUtils {
     private static Integer COUNTER = 0;
     private static Stack<MqttMessage> messageStack = new Stack<>();
 
-    static Stack<MqttMessage> getMessageStack() {
+    public static Stack<MqttMessage> getMessageStack() {
         return messageStack;
     }
 
-    static void addToMessageStack(MqttMessage message) {
+    public static void addToMessageStack(MqttMessage message) {
         messageStack.add(message);
     }
 
-    static void addToCounter() {
+    public static void addToCounter() {
         COUNTER++;
     }
 
-    static int getCounter() {
+    public static int getCounter() {
         return COUNTER;
     }
 
