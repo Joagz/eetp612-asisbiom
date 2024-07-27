@@ -12,8 +12,10 @@ static const char *WIFI_SSID_DEFAULT = "fingerprint_sensor";
 static const char *WIFI_PWD_DEFAULT = "1675230706";
 
 #define DEFAULT_OUT_MESSAGE_SIZE 64
-#define DEFAULT_WIFI_SSID "Flia Premet"
-#define DEFAULT_WIFI_PWD "eljoaqui"
+#define DEFAULT_WIFI_SSID "DEFAULT_WIFI_SSID"
+#define DEFAULT_WIFI_PWD "DEFAULT_WIFI_PWD"
+
 #define USE_DEFAULT_WIFI 1
+#define FINGERPRINT_SENSOR_CONN 1
 
 #endif

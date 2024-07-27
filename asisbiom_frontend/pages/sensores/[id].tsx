@@ -45,7 +45,7 @@ const SensorById = ({ id }: { id: number }) => {
         id: number, horaInicio: number, horaFin: number, materia: {
             id: number, nombre: string
         }
-    }[]>();
+    }[]>([]);
 
     const [stats, setStats] = useState<{
         tardanzas: number,
@@ -55,7 +55,14 @@ const SensorById = ({ id }: { id: number }) => {
         inasistencias2: number,
         inasistencias3: number
     }>();
-
+    const [notas, setNotas] = useState<{
+        id: number;
+        nivel_urgencia: number;
+        asunto: string;
+        fecha: string;
+        vencimiento: string;
+        contenido: string;
+    }[]>([]);
     const [asistido, setAsistido] = useState<boolean>(false);
 
     useEffect(() => {
@@ -77,10 +84,14 @@ const SensorById = ({ id }: { id: number }) => {
                     useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/materia/${alumnoRes.data.curso.id}` })
                         .then(cursoRes => {
                             setMaterias(cursoRes.data)
-                        })
+                        }).catch(err => { setMaterias([]) })
                     useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats/${alumnoRes.data.id}` })
                         .then(statsRes => {
                             setStats(statsRes.data[0]);
+                        })
+                    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${alumnoRes.data.id}` })
+                        .then(notasRes => {
+                            setNotas(notasRes.data);
                         })
                     useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${res.data.alumnoId}?set=true`, method: "POST" }).then(
                         assistRes => {
@@ -125,10 +136,11 @@ const SensorById = ({ id }: { id: number }) => {
                                 <p className='ml-6 font-medium'>3er Trimestre: {stats?.inasistencias3}</p>
                                 <p className='ml-6 font-medium'>Tardanzas: {stats?.tardanzas}</p>
                                 <p className='ml-6 font-medium'>Retirado {stats?.retiros} veces</p>
-                                
+
                                 <br />
                                 <p className='font-bold text-lg'>Materias de hoy</p>
-                                <table className='w-full'>
+                                {materias.length == 0 && <p>No hay materias hoy.</p>}
+                                {materias?.length > 0 && <table className='w-full'>
                                     <thead>
                                         <tr>
                                             <th className='text-left'>Nombre</th>
@@ -145,27 +157,23 @@ const SensorById = ({ id }: { id: number }) => {
                                             </tr>
                                         ))}
                                     </tbody>
-                                </table>
+                                </table>}
                             </div>
                         </div>
-                        <div className="w-full max-h-full gap-2 overflow-auto flex-col flex text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2">
-                            <div className='bg-slate-900 rounded-md p-2'>
-                                <span className='font-medium'>Esto es una nota predeterminada</span>
-                                <p className='text-sm'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis temporibus amet itaque dolore libero possimus voluptatibus provident ipsam! Odit, distinctio.</p>
+                        {notas &&
+                            <div className="w-full max-h-full gap-2 overflow-auto flex-col flex text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2">
+                                {notas.map(nota =>
+                                    <div className={`${nota.nivel_urgencia == 0 && 'bg-slate-900'}
+                                                    ${nota.nivel_urgencia == 1 && 'bg-green-900'}
+                                                    ${nota.nivel_urgencia == 2 && 'bg-yellow-900'}
+                                                    ${nota.nivel_urgencia == 3 && 'bg-red-900'}
+                                                    rounded-md p-2`}>
+                                        <span className='font-medium'>{nota.asunto}</span>
+                                        <p className='text-sm'>{nota.contenido}</p>
+                                    </div>
+                                )}
                             </div>
-                            <div className='bg-green-900 rounded-md p-2'>
-                                <span className='font-medium'>Esto es una nota de baja prioridad</span>
-                                <p className='text-sm'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis temporibus amet itaque dolore libero possimus voluptatibus provident ipsam! Odit, distinctio.</p>
-                            </div>
-                            <div className='bg-yellow-900 rounded-md p-2'>
-                                <span className='font-medium'>Esto es una nota de prioridad media</span>
-                                <p className='text-sm'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis temporibus amet itaque dolore libero possimus voluptatibus provident ipsam! Odit, distinctio.</p>
-                            </div>
-                            <div className='bg-red-900 rounded-md p-2'>
-                                <span className='font-medium'>Esto es una nota importante</span>
-                                <p className='text-sm'>Lorem ipsum dolor sit amet consectetur adipisicing elit. Veritatis temporibus amet itaque dolore libero possimus voluptatibus provident ipsam! Odit, distinctio.</p>
-                            </div>
-                        </div>
+                        }
                     </div>
                     :
                     <>

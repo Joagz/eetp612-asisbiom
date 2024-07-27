@@ -14,7 +14,6 @@
 #define MQTT_TOPIC_SENSOR_IN "mqtt_sensor_in"
 #define MQTT_TOPIC_SENSOR_OUT "mqtt_sensor_out"
 
-
 void callback_debug(char *topic, byte *payload, unsigned int length);
 void callback_for_idinfo(char *topic, byte *payload, unsigned int length);
 void initMqttClient();

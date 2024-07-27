@@ -5,6 +5,7 @@
  */
 package eetp612.com.ar.asisbiom.alumnos;
 
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -16,6 +17,8 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -38,6 +41,7 @@ import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
+import eetp612.com.ar.asisbiom.horarios.HorarioUtils;
 import eetp612.com.ar.asisbiom.mqtt.MqttMessage;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
@@ -99,28 +103,6 @@ public class AlumnoController {
             return found.get();
 
         return null;
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> edit(@PathVariable("id") Integer id, @RequestBody AlumnoDto alumno) {
-
-        Optional<Alumno> found = alumnoRepository.findById(id);
-        if (found.isPresent()) {
-            Alumno edit = found.get();
-            List<Curso> foundCurso = cursoRepository.findByCurso(alumno.curso());
-
-            if (!foundCurso.isEmpty()) {
-                edit.setCorreoElectronico(alumno.correoElectronico());
-                edit.setCurso(foundCurso.get(0));
-                edit.setDni(alumno.dni());
-                edit.setNombreCompleto(alumno.nombreCompleto());
-                edit.setTelefono(alumno.telefono());
-
-                return ResponseEntity.ok().body("Editado correctamente");
-            }
-        }
-        return ResponseEntity.badRequest().body("Por favor revisa los parámetros");
-
     }
 
     @DeleteMapping("/{id}")

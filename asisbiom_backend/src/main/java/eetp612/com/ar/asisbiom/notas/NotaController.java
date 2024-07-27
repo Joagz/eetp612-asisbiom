@@ -35,6 +35,18 @@ public class NotaController {
         return notaRepository.findAll();
     }
 
+    @GetMapping("/{id_alumno}")
+    private ResponseEntity<?> getNote(@PathVariable("id_alumno") int id_alumno) {
+        Optional<Alumno> found = alumnoRepository.findById(id_alumno);
+        if (found.isPresent()) {
+            List<Nota> notas = notaRepository.findByAlumno(found.get());
+            notas.sort(
+                    (arg0, arg1) -> arg1.getFecha().compareTo(arg0.getFecha()) + arg1.getId().compareTo(arg0.getId()));
+            return ResponseEntity.ok().body(notas);
+        }
+        return ResponseEntity.notFound().build();
+    }
+
     @PostMapping("/{id_alumno}")
     private ResponseEntity<?> newNote(@PathVariable("id_alumno") int id_alumno, @RequestBody NotaDto dto) {
 

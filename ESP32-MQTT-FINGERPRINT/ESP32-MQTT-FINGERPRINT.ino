@@ -140,31 +140,27 @@ void setup()
   if (finger.verifyPassword())
   {
     Serial.println("Sensor de huella digital encontrado!");
+
+    Serial.print(F("Estado: 0x"));
+    Serial.println(finger.status_reg, HEX);
+    Serial.print(F("ID del sistema: 0x"));
+    Serial.println(finger.system_id, HEX);
+    Serial.print(F("Capacidad: "));
+    Serial.println(finger.capacity);
+    Serial.print(F("Nivel de seguridad: "));
+    Serial.println(finger.security_level);
+    Serial.print(F("Dir. del disp.: "));
+    Serial.println(finger.device_addr, HEX);
+    Serial.print(F("Tam. de paquete: "));
+    Serial.println(finger.packet_len);
+    Serial.print(F("Baud: "));
+    Serial.println(finger.baud_rate);
   }
   else
   {
     Serial.println("Sensor no encontrado... ");
-    while (1)
-    {
-      Serial.print(".");
-      delay(1000);
-    }
   }
 
-  Serial.print(F("Estado: 0x"));
-  Serial.println(finger.status_reg, HEX);
-  Serial.print(F("ID del sistema: 0x"));
-  Serial.println(finger.system_id, HEX);
-  Serial.print(F("Capacidad: "));
-  Serial.println(finger.capacity);
-  Serial.print(F("Nivel de seguridad: "));
-  Serial.println(finger.security_level);
-  Serial.print(F("Dir. del disp.: "));
-  Serial.println(finger.device_addr, HEX);
-  Serial.print(F("Tam. de paquete: "));
-  Serial.println(finger.packet_len);
-  Serial.print(F("Baud: "));
-  Serial.println(finger.baud_rate);
 #endif
 
 #ifdef USE_DEFAULT_WIFI
@@ -179,7 +175,7 @@ void setup()
     retries++;
   }
   // si se excede el tiempo de espera simplemente conectamos con WIFIMANAGER
-  if (retries > 10)
+  if (retries >= 10)
   {
     WiFiManager wiFiManager;
     wiFiManager.resetSettings();
@@ -228,15 +224,6 @@ int id = 0;
 void loop()
 {
   client.loop();
-
-  mqtt_message message;
-  message.message_id = id;
-  message.action = MQTT_ACTION_AUTH;
-  message.student_id = 1;
-  message.sensor_id = SENSOR_ID;
-  send_mqtt_message_out(message);
-  id++;
-  delay(5000);
 
   // AUTH LOOP
 #ifdef FINGERPRINT_SENSOR_CONN
