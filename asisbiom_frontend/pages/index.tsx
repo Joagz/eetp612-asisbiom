@@ -16,6 +16,7 @@ export default function Home() {
           />
         </CardContainer>
       </div>
+      <a className='text-xs border rounded-md transition-all p-1 hover:bg-[#ffffff33]' href='/autenticar'>Autorizar Dispositivo</a>
     </PrincipalLayout>
   );
 }

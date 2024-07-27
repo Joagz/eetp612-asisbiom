@@ -50,9 +50,7 @@ public class ConteoAsistencia {
 
     @Column(name = "inasistencias_3")
     private Float inasistencias3;
-
     
-
     public ConteoAsistencia(Alumno alumno) {
         this.alumno = alumno;
         this.tardanzas = 0;

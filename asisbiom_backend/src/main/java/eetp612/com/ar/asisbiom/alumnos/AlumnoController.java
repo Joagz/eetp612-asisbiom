@@ -134,6 +134,22 @@ public class AlumnoController {
         return conteoRepository.findAll();
     }
 
+    @GetMapping("/stats/{alumno_id}")
+    public ResponseEntity<?> findAllAndStatsByIdAlumno(@PathVariable("alumno_id") int id) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
+        if (found.isPresent()) {
+            List<ConteoAsistencia> list = conteoRepository.findByAlumno(found.get());
+
+            if (list.isEmpty()) {
+                list.add(conteoRepository.save(new ConteoAsistencia(found.get())));
+            }
+
+            return ResponseEntity.ok().body(list);
+        }
+        return ResponseEntity.notFound().build();
+
+    }
+
     @GetMapping("/{curso}/{div}")
     public List<Alumno> getByCursoDiv(@PathVariable("curso") Integer curso, @PathVariable("div") Character div) {
         List<Curso> cursos = cursoRepository.findByCursoAndDivisionOrderByCursoAsc(curso, div);
