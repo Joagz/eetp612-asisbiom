@@ -5,7 +5,6 @@
  */
 package eetp612.com.ar.asisbiom.alumnos;
 
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -17,15 +16,12 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PostAuthorize;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -41,7 +37,6 @@ import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
-import eetp612.com.ar.asisbiom.horarios.HorarioUtils;
 import eetp612.com.ar.asisbiom.mqtt.MqttMessage;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponse;
 import eetp612.com.ar.asisbiom.mqtt.MqttResponseAsistenciaWrapper;
