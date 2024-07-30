@@ -30,7 +30,8 @@ import eetp612.com.ar.asisbiom.user.UserRepository;
 public class ScheduleConfig {
 
     // Tiempo máximo para contar una asistencia
-    static final int TIEMPO_MAXIMO_ENTRADA = 30;
+    static final int TIEMPO_MAXIMO_ENTRADA_MINS = 30;
+    static final int RACHA_INASISTENCIA_MAX_DIAS = 3;
 
     @Autowired
     private ConteoRepository conteoRepository;
@@ -69,7 +70,7 @@ public class ScheduleConfig {
         conteoRepository.findAll().forEach(conteo -> {
             usuarios.forEach(usuario -> {
 
-                if (conteo.getRacha() >= 3) {
+                if (conteo.getRacha() >= RACHA_INASISTENCIA_MAX_DIAS) {
                     Notification notification = notificationService.createNotification(usuario,
                             defaultNotificationForAbsentStudentStreak(conteo.getAlumno(), conteo.getRacha()));
                     notification.setUrgencia(1);
@@ -114,11 +115,11 @@ public class ScheduleConfig {
                     // Removemos todas las asistencias válidas de la
                     // lista, ya que a las que queden se les colocará
                     // inasistencia en el conteo
-                    if (minutesBetween <= TIEMPO_MAXIMO_ENTRADA && asistencia.isEnabled()) {
+                    if (minutesBetween <= TIEMPO_MAXIMO_ENTRADA_MINS && asistencia.isEnabled()) {
                         horarios.remove(i);
                         turnos_ausente--;
                         break;
-                    } else if (minutesBetween > TIEMPO_MAXIMO_ENTRADA && asistencia.isEnabled()) {
+                    } else if (minutesBetween > TIEMPO_MAXIMO_ENTRADA_MINS && asistencia.isEnabled()) {
                         // A pesar de llegar tarde, el alumno asistió
                         turnos_ausente--;
                         break;
