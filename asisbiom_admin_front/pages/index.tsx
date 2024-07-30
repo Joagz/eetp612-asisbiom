@@ -1,4 +1,3 @@
-import { Open_Sans } from "next/font/google";
 import { MainLayout, Overline, Paragraph, Title } from "@/components";
 import { Card, CardContent, Paper } from "@mui/material";
 import {

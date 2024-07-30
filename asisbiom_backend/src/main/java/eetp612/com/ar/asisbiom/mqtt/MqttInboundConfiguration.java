@@ -1,5 +1,6 @@
 package eetp612.com.ar.asisbiom.mqtt;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.integration.annotation.ServiceActivator;
@@ -13,6 +14,9 @@ import org.springframework.messaging.MessageHandler;
 @Configuration
 public class MqttInboundConfiguration {
 
+    @Value("${asisbiom.hostnames.mqtt}")
+    private String asisbiomMqttUrl;
+    
     @Bean
     public MessageChannel mqttInputChannel() {
         return new DirectChannel();
@@ -21,7 +25,7 @@ public class MqttInboundConfiguration {
     @Bean
     public MessageProducer inbound() {
         MqttPahoMessageDrivenChannelAdapter adapter =
-                new MqttPahoMessageDrivenChannelAdapter("tcp://localhost:1887", "springclient",
+                new MqttPahoMessageDrivenChannelAdapter(asisbiomMqttUrl, "springclient",
                                                  "mqtt_sensor_out");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());

@@ -50,7 +50,12 @@ public class ConteoAsistencia {
 
     @Column(name = "inasistencias_3")
     private Float inasistencias3;
+
+    @Column(name = "inasistencias_streak")
+    private boolean inasistenciasEnRacha;
     
+    private int racha;
+
     public ConteoAsistencia(Alumno alumno) {
         this.alumno = alumno;
         this.tardanzas = 0;
@@ -59,6 +64,7 @@ public class ConteoAsistencia {
         this.inasistencias1 = 0f;
         this.inasistencias2 = 0f;
         this.inasistencias3 = 0f;
+        this.inasistenciasEnRacha = false;
     }
 
 

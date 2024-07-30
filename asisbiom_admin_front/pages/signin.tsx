@@ -35,6 +35,7 @@ export function SignIn() {
         if (authHeader && process.env.NEXT_PUBLIC_JWT_COOKIE) {
           setCookie(process.env.NEXT_PUBLIC_JWT_COOKIE, authHeader, {});
           setCookie("username", res.data.nombreCompleto, {});
+          setCookie("email", res.data.email, {});
           router.replace("/");
         }
       })

@@ -1,12 +1,13 @@
-import { Dispatch, SetStateAction, useEffect, useMemo, useState } from "react";
+import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { ExitToApp, MenuRounded, Person } from "@mui/icons-material";
-import { AppBar, Toolbar, IconButton, Typography, Button } from "@mui/material";
+import { ExitToApp, MenuRounded, Notifications } from "@mui/icons-material";
+import { AppBar, Toolbar, IconButton, Typography, Button, Menu, Divider } from "@mui/material";
 import { SideMenu } from "./SideMenu";
 import Link from "next/link";
 import { deleteCookie, getCookie } from "cookies-next";
 import { useRouter } from "next/router";
-import axios from "axios";
+import { useApi } from "../../hooks";
+import INotification from "@/interface/INotification";
 
 type Props = {
   menuOpen: boolean;
@@ -18,17 +19,33 @@ export const NavBar = ({ menuOpen, setMenuOpen }: Props) => {
   const [isLoggedIn, setLoggedIn] = useState<boolean>(false);
   const [isLoginPage, setLoginPage] = useState<boolean>(false);
   const [username, setUsername] = useState<string>();
+  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notifications, setNotifications] = useState<INotification[]>([]);
+  const open = Boolean(anchorEl);
+
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
   useEffect(() => {
-
-
     if (router.pathname == process.env.NEXT_PUBLIC_AUTH_PATH)
       setLoginPage(true);
     if (process.env.NEXT_PUBLIC_JWT_COOKIE) {
       let cookie = getCookie(process.env.NEXT_PUBLIC_JWT_COOKIE);
       if (cookie) {
         setLoggedIn(true);
+        const email = getCookie("email");
+        const username = getCookie("username");
+        setUsername(username);
+
+        // fetchear notificaciones
+        useApi<INotification[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/notification/${email}` })
+          .then(res => setNotifications(res.data));
       }
-      setUsername(getCookie("username"));
     }
   }, []);
 
@@ -62,13 +79,46 @@ export const NavBar = ({ menuOpen, setMenuOpen }: Props) => {
           {!isLoginPage && (
             <>
               {isLoggedIn ? (
-                <div className="flex gap-12">
-                  <div onClick={() => logoutHandler()} className="flex gap-2 justify-center items-center h-10 p-2 px-4 
+                <div className="flex gap-6 justify-center items-center">
+                  <div className="flex gap-2 justify-center items-center">
+                    <IconButton id="basic-button" onClick={handleClick}>
+                      <Notifications color="disabled" />
+                    </IconButton>
+                    <Menu
+                      id="basic-menu"
+                      anchorEl={anchorEl}
+                      open={open}
+                      onClose={handleClose}
+                      MenuListProps={{
+                        'aria-labelledby': 'basic-button',
+                      }}
+                    >
+                      {
+                        notifications.map(noti => (
+                          <>
+                            <div className={`p-2 w-[500px] ${noti.urgencia == 1 && 'bg-yellow-100'} ${noti.urgencia == 2 && 'bg-red-100'}`}>
+                              <Typography fontSize={16}>{noti.content}</Typography>
+                              <Typography variant="caption">{noti.dateStr}</Typography>
+                            </div>
+                            <Divider></Divider>
+                          </>
+
+                        ))
+                      }
+
+                      {notifications.length == 0 && <div className={`p-2`}>
+                        <Typography fontSize={16}>No hay notificaciones aún</Typography>
+                      </div>
+                      }
+                    </Menu>
+                  </div>
+                  <div onClick={() => logoutHandler()} className="flex gap-2  justify-center items-center h-8 p-1 px-4 
                   text-blue-50 bg-blue-500 rounded-[100px] hover:bg-blue-700 
                   hover:text-white cursor-pointer">
-                    <Typography>{username}</Typography>
-                    <ExitToApp />
+                    <Typography className="text-xs">{username}</Typography>
+                    <ExitToApp fontSize="small" />
                   </div>
+
                 </div>
               ) : (
                 <Button
