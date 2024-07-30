@@ -132,5 +132,22 @@ En base a esto podemos graficar una curva de Lorenz.
 
 Suponemos que tenemos una lista de valores, con alumnos de $1$ al $n$, ordenados en base a $I_n$ de menor a mayor, esto quiere decir que el alumno con el puntaje más bajo es el alumno 1, y así.
 
-Realizamos la sumatoria acumulada de los valores de $I_n$, nos dará una lista de números correspondiente a la suma hasta el alumno $n$ de los valores de $I_n$. Luego dividimos la lista obtenida por el valor más alto de $I_n$.
+Realizamos la sumatoria acumulada de los valores de $I_n$
 
+$$
+S_n = \sum_{k = 1}^{n}{I_k}
+$$
+
+si evaluamos la suma con $n = \{ 1, 2, 3, ..., n \}$ nos dará una lista $S$ de números corespondiente a la suma acumulada hasta el alumno $n$ de los valores de $I_n$
+
+$S_1 = \sum_{k=1}^{1}I_k$
+
+$S_2 = \sum_{k=1}^{2}I_k$
+
+$S_3 = \sum_{k=1}^{3}I_k$
+
+...
+
+$S_n = \sum_{k=1}^{n}I_k$
+
+luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos los puntos $\( n, \frac{S}{S_n} \)$  formarán la curva de Lorenz.
