@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 
-
 record MqttSensorInput(int sensorId, int alumnoId, SensorAction action) {
 
 }
@@ -46,6 +45,17 @@ public class MqttController {
         return ResponseEntity.notFound().build();
     }
 
+    @PostMapping("parse")
+    public MqttSensorOutput parseMessage(@RequestBody String message) {
+        MqttMessage parsed = MqttUtils.parseMessage(message.substring(0, 32));
+
+        return new MqttSensorOutput(
+                MqttUtils.fromByteArray(parsed.getSensorId()),
+                MqttUtils.fromByteArray(parsed.getIdAlumno()),
+                MqttUtils.fromByteArray(parsed.getAccion()),
+                MqttUtils.fromByteArray(parsed.getMessageId()));
+    }
+
     @GetMapping("/last-message/{id}")
     public ResponseEntity<?> getSensorLastMessageById(@PathVariable("id") int id) {
         Optional<Sensor> found = mqttRepository.findById(id);
@@ -63,10 +73,10 @@ public class MqttController {
         }
 
         return ResponseEntity.ok().body(new MqttSensorOutput(
-            MqttUtils.fromByteArray(message.getSensorId()),
-            MqttUtils.fromByteArray(message.getIdAlumno()),
-            MqttUtils.fromByteArray(message.getAccion()),
-            MqttUtils.fromByteArray(message.getMessageId())));
+                MqttUtils.fromByteArray(message.getSensorId()),
+                MqttUtils.fromByteArray(message.getIdAlumno()),
+                MqttUtils.fromByteArray(message.getAccion()),
+                MqttUtils.fromByteArray(message.getMessageId())));
     }
 
     @GetMapping("/get-messages/{id}")
@@ -88,6 +98,23 @@ public class MqttController {
                         MqttUtils.fromByteArray(message.getAccion()),
                         MqttUtils.fromByteArray(message.getMessageId()))));
         return ResponseEntity.ok().body(out);
+    }
+
+    @PostMapping("/confirm-retirar/{sensor_id}/{alumno_id}")
+    public ResponseEntity<?> confirmRetirar(@PathVariable("sensor_id") int sensor_id, @PathVariable("alumno_id") int alumno_id) {
+        try {
+
+            MqttMessage finalMessage = new MqttMessage();
+            finalMessage.setAccion(MqttUtils.integerToByteArray(SensorAction.CONFIRM.ordinal()));
+            finalMessage.setSensorId(MqttUtils.integerToByteArray(sensor_id));
+            finalMessage.setIdAlumno(MqttUtils.integerToByteArray(alumno_id));
+
+            mqttService.sendMessage(finalMessage);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("No se pudo enviar!");
+        }
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping("/send-message")

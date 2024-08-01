@@ -28,6 +28,14 @@ typedef struct {
 #define MQTT_ACTION_PING                  0x03
 #define MQTT_ACTION_PUT_FINGER            0x04
 #define MQTT_ACTION_REMOVE_FINGER         0x05
+
 #define MQTT_ACTION_COMPLETED             0x06
 #define MQTT_ACTION_CONFIRMATION_COMPLETE 0x07
+#define MQTT_ACTION_REGISTER_COMPLETE     0x08
+
+#define MQTT_ERROR_AUTH_FAILED            0xF0
+#define MQTT_ERROR_REGISTER_FAILED        0xF1
+#define MQTT_ERROR_CONFIRM_FAILED         0xF2
+
+
 #endif

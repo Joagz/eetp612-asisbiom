@@ -1,6 +1,7 @@
 package eetp612.com.ar.asisbiom.user;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,6 +24,18 @@ public class UserController {
     @GetMapping
     public List<User> findAll() {
         return userRepository.findAll();
+    }
+
+    @GetMapping("/by-id/{id}")
+    public ResponseEntity<?> findById(@PathVariable("id") int id) {
+        Optional<User> found = userRepository.findById(id);
+        
+        if(found.isPresent())
+        {
+            return ResponseEntity.ok().body(found.get());
+        }
+
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/{email}")

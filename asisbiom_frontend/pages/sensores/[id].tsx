@@ -6,7 +6,7 @@ import Alumno from '@/interface/Alumno';
 import MqttMessage from '@/interface/MqttMessage';
 import User from '@/interface/User';
 import Roles from '@/interface/Roles';
-import { Close, Warning } from '@mui/icons-material';
+import { Close, Done, ExitToApp, Warning } from '@mui/icons-material';
 import { Alert, Button } from '@mui/material';
 import { useRouter } from 'next/router';
 
@@ -30,7 +30,7 @@ const options: any = {
     rejectUnauthorized: false,
 };
 
-enum MqttActions {
+enum MqttCodes {
     MQTT_ACTION_AUTH,
     MQTT_ACTION_REGISTER,
     MQTT_ACTION_CONFIRM,
@@ -38,7 +38,13 @@ enum MqttActions {
     MQTT_ACTION_PUT_FINGER,
     MQTT_ACTION_REMOVE_FINGER,
     MQTT_ACTION_COMPLETED,
-    MQTT_ACTION_CONFIRMATION_COMPLETE
+    MQTT_ACTION_CONFIRMATION_COMPLETE,
+    MQTT_ACTION_REGISTER_COMPLETE,
+
+    // Errors
+    MQTT_ERROR_AUTH_FAILED = 0xF0,
+    MQTT_ERROR_REGISTER_FAILED = 0xF1,
+    MQTT_ERROR_CONFIRM_FAILED = 0xF2
 }
 
 const SensorById = ({ id }: { id: number }) => {
@@ -83,7 +89,17 @@ const SensorById = ({ id }: { id: number }) => {
         contenido: string;
     }[]>([]);
     const [asistido, setAsistido] = useState<boolean>(false);
-    const [retirar, setRetirar] = useState<boolean>(false);
+    const [retirado, setRetirado] = useState<boolean>(false);
+    const [onAction, setOnAction] = useState<boolean>(false);
+    const [showBtn, setShowBtn] = useState<boolean>(false);
+
+    function retirarAlumno(alumno: number) {
+        setRetirado(false);
+        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/confirm-retirar/${id}/${alumno}`, method: "POST" }).then(res => {
+            console.log(res.data);
+        })
+    }
+
 
     useEffect(() => {
         const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_URL!, options);
@@ -94,64 +110,96 @@ const SensorById = ({ id }: { id: number }) => {
         });
 
         client.on("message", (topic, message) => {
-            const recv = message.toString();
-            useApi<MqttMessage>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/last-message/${id}` }).then(res => {
-                // Conseguir la data del alumno
-                if (res.data.sensorId != id) {
-                    return;
-                }
+            console.log(message.toString())
+            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/parse`, body: message.toString(), method: "POST" }).then(res => {
+                switch (res.data.action) {
+                    case (MqttCodes.MQTT_ACTION_COMPLETED):
+                        setMessage("Alumno registrado con éxito! Bienvenido/a");
+                        setOnAction(true);
+                        break;
 
-                if (res.data.action == MqttActions.MQTT_ACTION_AUTH) {
-                    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${res.data.alumnoId}` }).then(alumnoRes => {
-                        setAlumno(alumnoRes.data)
+                    case (MqttCodes.MQTT_ACTION_AUTH):
+                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${res.data.alumnoId}` }).then(alumnoRes => {
+                            setAlumno(alumnoRes.data)
 
-                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/materia/${alumnoRes.data.curso.id}` })
-                            .then(cursoRes => {
-                                setMaterias(cursoRes.data)
-                            }).catch(err => { setMaterias([]) })
-                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats/${alumnoRes.data.id}` })
-                            .then(statsRes => {
-                                setStats(statsRes.data[0]);
-                            })
-                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${alumnoRes.data.id}` })
-                            .then(notasRes => {
-                                setNotas(notasRes.data);
-                            })
-                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${res.data.alumnoId}?set=true`, method: "POST" }).then(
-                            assistRes => {
-                                console.log(assistRes.data)
-                                setAsistido(assistRes.data.response == "OK")
-                            }
-                        )
-                    })
-                } else if (res.data.action == MqttActions.MQTT_ACTION_PUT_FINGER) {
-                    setMessage("Por favor coloque el dedo en el sensor.");
-                } else if (res.data.action = MqttActions.MQTT_ACTION_REMOVE_FINGER) {
-                    setMessage("Retire el dedo del sensor.");
-                } else if (res.data.action == MqttActions.MQTT_ACTION_CONFIRM) {
-                    if (!alumno) {
-                        setMessage("No se puede retirar a un alumno ya que no hay alumno registrado en este momento.");
-                        return;
-                    }
-                    setMessage("Esperando confirmación de un miembro del personal.");
-                    setRetirar(true);
-                } else if (res.data.action == MqttActions.MQTT_ACTION_CONFIRMATION_COMPLETE) {
-                    // buscar usuario
-                    if (alumno && retirar) {
-
-                        useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/${res.data.alumnoId}` })
-                            .then(res => {
-                                if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR].includes(res.data.role)) {
-                                    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => (
-                                        setMessage(`Alumno ${alumno.nombreCompleto} retirado con éxito`)
-                                    )).catch(err =>
-                                        setMessage("No se pudo retirar al alumno")
-                                    )
+                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/materia/${alumnoRes.data.curso.id}` })
+                                .then(cursoRes => {
+                                    setMaterias(cursoRes.data)
+                                }).catch(err => { setMaterias([]) })
+                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats/${alumnoRes.data.id}` })
+                                .then(statsRes => {
+                                    setStats(statsRes.data[0]);
+                                })
+                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${alumnoRes.data.id}` })
+                                .then(notasRes => {
+                                    setNotas(notasRes.data);
+                                })
+                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${res.data.alumnoId}?set=true`, method: "POST" }).then(
+                                assistRes => {
+                                    console.log(assistRes.data)
+                                    setAsistido(assistRes.data.response == "OK")
                                 }
-                            })
-                    } else setMessage("No se puede retirar a un alumno ya que no hay alumno registrado en este momento.")
-                } else if (res.data.action == MqttActions.MQTT_ACTION_COMPLETED) {
-                    setMessage("Alumno registrado con éxito! Bienvenido/a");
+                            )
+                        })
+                        break;
+                    case (MqttCodes.MQTT_ACTION_REGISTER):
+                        setMessage("Registrando nuevo alumno con ID " + res.data.alumnoId + ". Coloque su dedo por favor.");
+                        setOnAction(true);
+                        setShowBtn(false);
+                        break;
+
+                    case (MqttCodes.MQTT_ACTION_REGISTER_COMPLETE):
+                        setMessage("Alumno registrado con éxito! Bienvenido/a.");
+                        setOnAction(false);
+                        setShowBtn(true);
+
+                        break;
+
+                    case (MqttCodes.MQTT_ACTION_PUT_FINGER):
+                        setMessage("Por favor coloque el mismo dedo nuevamente.");
+                        setOnAction(true);
+                        break;
+
+                    case (MqttCodes.MQTT_ACTION_REMOVE_FINGER):
+                        setMessage("Retire el dedo del sensor.");
+                        setOnAction(true);
+                        return;
+
+                    case (MqttCodes.MQTT_ACTION_CONFIRM):
+                        setMessage("Esperando confirmación de un miembro del personal");
+                        setOnAction(true);
+                        return;
+
+                    case (MqttCodes.MQTT_ACTION_CONFIRMATION_COMPLETE):
+                        if (alumno) {
+                            console.log("Intentando retirar")
+                            useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/by-id/${res.data.alumnoId}` })
+                                .then(userRes => {
+                                    console.log(userRes.data);
+                                    if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
+                                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
+                                            setMessage(`Alumno ${alumno.nombreCompleto} retirado con éxito`);
+                                            setRetirado(true);
+                                            console.log("Retirado");
+                                        }
+                                        ).catch(err => {
+                                            setMessage("No se pudo retirar al alumno")
+                                            console.log("No se puede retirar")
+                                        })
+                                    } else {
+                                        setMessage("No se pudo retirar al alumno")
+                                        console.log("No se puede retirar")
+                                    }
+                                })
+                        }
+
+                        setShowBtn(true);
+                        setOnAction(true);
+                        break;
+
+                    case (MqttCodes.MQTT_ERROR_REGISTER_FAILED):
+                        setMessage("Error al registrar, intentando nuevamente en 5 segundos.")
+                        break;
                 }
 
             })
@@ -168,7 +216,7 @@ const SensorById = ({ id }: { id: number }) => {
     return (
         <PrincipalLayout disableFooter title={`Sensor ${id}`}>
             <div className='flex h-screen py-5 w-full justify-center items-center flex-col'>
-                {alumno && !retirar ?
+                {alumno && !onAction ?
                     <div className='flex gap-4 w-full h-full'>
                         <div className='flex flex-col gap-4 flex-1 min-w-64'>
                             <div className='w-full className="text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2"'>
@@ -210,6 +258,7 @@ const SensorById = ({ id }: { id: number }) => {
                                     </tbody>
                                 </table>}
                             </div>
+                            <Button color='warning' variant='contained' className='flex text-xl font-bold' onClick={() => retirarAlumno(alumno.id)}><ExitToApp /> Retirar Alumno</Button>
                         </div>
                         {notas.length > 0 &&
                             <div className="w-full max-h-full overflow-auto flex-col flex text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2">
@@ -218,7 +267,7 @@ const SensorById = ({ id }: { id: number }) => {
                                                     ${nota.nivel_urgencia == 1 && 'bg-green-900'}
                                                     ${nota.nivel_urgencia == 2 && 'bg-yellow-900'}
                                                     ${nota.nivel_urgencia == 3 && 'bg-red-900'}
-                                                    rounded-md p-2`}>
+                                                    rounded - md p - 2`}>
                                         <span className='font-medium'>{nota.asunto}</span>
                                         <p className='text-sm'>{nota.contenido}</p>
                                     </div>
@@ -226,15 +275,20 @@ const SensorById = ({ id }: { id: number }) => {
                             </div>
                         }
                     </div>
-                    : retirar && alumno ? <>
+                    : alumno && onAction ? <>
                         <div className='w-full h-[1px] bg-white'></div>
                         <div className='h-4' />
-                        <h1 className='text-2xl font-semibold'>EETP N. 612</h1>
-                        <h3 className='text-md font-semibold text-2xl'><Warning fontSize='large' /></h3>
+                        {/* <h1 className='text-2xl font-semibold'>EETP N. 612</h1> */}
+                        <h3 className='text-md font-semibold text-2xl'>{retirado ? <Done fontSize='large' /> : <Warning fontSize='large' />}</h3>
                         <div className='h-4' />
                         <div className='w-full h-[1px] bg-white'></div>
                         <div className='h-4' />
                         <p className='text-2xl font-bold'>{message}</p>
+                        {
+                            showBtn && <>
+                                <Button variant='outlined' className="mt-8" size='large' color='inherit' onClick={() => reload()}>Aceptar</Button>
+                            </>
+                        }
                     </> :
                         <>
                             <div className='w-full h-[1px] bg-white'></div>
@@ -245,6 +299,11 @@ const SensorById = ({ id }: { id: number }) => {
                             <div className='w-full h-[1px] bg-white'></div>
                             <div className='h-4' />
                             <p className='text-2xl font-bold'>{message}</p>
+                            {
+                                showBtn && <>
+                                    <Button variant='outlined' className="mt-8" size='large' color='inherit' onClick={() => reload()}>Aceptar</Button>
+                                </>
+                            }
                         </>
                 }
             </div>
