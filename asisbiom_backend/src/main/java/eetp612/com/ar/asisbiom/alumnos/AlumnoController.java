@@ -224,20 +224,12 @@ public class AlumnoController {
     @PostMapping("/retirar/{idAlumno}")
     public ResponseEntity<?> retirar(Authentication authentication, @PathVariable("idAlumno") Integer idAlumno) {
 
-        List<User> foundUser = userRepository.findByEmail(authentication.getName());
         Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
 
         if (!foundAlumno.isPresent())
             return ResponseEntity.status(404)
-                    .body("Alumno no encontrada.");
+                    .body("Alumno no encontrado.");
 
-        if (foundUser.isEmpty())
-            return ResponseEntity.status(404)
-                    .body("Docente no encontrado.");
-
-        if (foundUser.get(0).getRole().equals(Roles.USUARIO)) {
-            return ResponseEntity.status(403).build();
-        }
         Alumno alumno = foundAlumno.get();
 
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
@@ -272,6 +264,16 @@ public class AlumnoController {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<User> usersFound = userRepository.findByEmail(auth.getPrincipal().toString());
         // TODO: ver si el usuario que se encuentra tiene este curso a cargo
+
+        User user = usersFound.get(0);
+    
+        if(user.getRole().ordinal() < Roles.PRECEPTOR.ordinal())
+        {
+            return ResponseEntity.badRequest().body("El usuario no tiene permisos");
+        }
+
+        
+
 
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {

@@ -2,6 +2,7 @@ package eetp612.com.ar.asisbiom.schedule;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,6 +20,7 @@ import eetp612.com.ar.asisbiom.general.DateUtils;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 import eetp612.com.ar.asisbiom.horarios.HorarioUtils;
+import eetp612.com.ar.asisbiom.notas.NotaRepository;
 import eetp612.com.ar.asisbiom.notification.Notification;
 import eetp612.com.ar.asisbiom.notification.NotificationService;
 import eetp612.com.ar.asisbiom.stats.StatsService;
@@ -47,6 +49,9 @@ public class ScheduleConfig {
 
     @Autowired
     private StatsService statsService;
+
+    @Autowired
+    private NotaRepository notaRepository;
 
     @Autowired
     private NotificationService notificationService;
@@ -83,6 +88,13 @@ public class ScheduleConfig {
     // Esto hace el recuento de faltas al final del día
     @Scheduled(cron = "0 0 19 * * MON-FRI", zone = "GMT-3")
     public void asistenciaScheduler() throws InterruptedException {
+        
+        notaRepository.findAll().stream().forEach(nota -> {
+            if (nota.getVencimiento().isBefore(LocalDate.now())) {
+                notaRepository.delete(nota);
+            }
+        });
+
         conteoRepository.findAll().forEach(conteo -> {
 
             statsService.reset();

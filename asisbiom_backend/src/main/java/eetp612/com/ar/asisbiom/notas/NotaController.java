@@ -42,6 +42,7 @@ public class NotaController {
             List<Nota> notas = notaRepository.findByAlumno(found.get());
             notas.sort(
                     (arg0, arg1) -> arg1.getFecha().compareTo(arg0.getFecha()) + arg1.getId().compareTo(arg0.getId()));
+            notas.sort((arg0, arg1) -> arg1.getNivel_urgencia() - arg0.getNivel_urgencia());
             return ResponseEntity.ok().body(notas);
         }
         return ResponseEntity.notFound().build();
