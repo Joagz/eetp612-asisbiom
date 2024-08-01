@@ -212,7 +212,7 @@ const SensorById = ({ id }: { id: number }) => {
                             </div>
                         </div>
                         {notas.length > 0 &&
-                            <div className="w-full max-h-full gap-2 overflow-auto flex-col flex text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2">
+                            <div className="w-full max-h-full overflow-auto flex-col flex text-white hover:scale-95 transition-all snap-center border hover:bg-opacity-90 lg:p-7 p-3 rounded-lg bg-opacity-50 backdrop-blur-lg gap-2">
                                 {notas.map(nota =>
                                     <div className={`${nota.nivel_urgencia == 0 && 'bg-slate-900'}
                                                     ${nota.nivel_urgencia == 1 && 'bg-green-900'}

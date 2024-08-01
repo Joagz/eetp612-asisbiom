@@ -85,10 +85,11 @@ public class ScheduleConfig {
         });
     }
 
-    // Esto hace el recuento de faltas al final del día
+    // recuento de faltas al final del día
+    // borrar notas vencidas
     @Scheduled(cron = "0 0 19 * * MON-FRI", zone = "GMT-3")
     public void asistenciaScheduler() throws InterruptedException {
-        
+
         notaRepository.findAll().stream().forEach(nota -> {
             if (nota.getVencimiento().isBefore(LocalDate.now())) {
                 notaRepository.delete(nota);
