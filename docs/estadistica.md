@@ -1,15 +1,44 @@
-# Extracción de estadísticas ASISBIOM
+# Extracción de datos y estadísticas 
+### **Escuela**: EETP N.612 "Eudocio de los Santos Giménez". Coronda, Santa Fe. 
+### **Proyecto**: ASISBIOM (Asistencia Biométrica)
+### **Autor**: Joaquín Gómez
+### **Fecha de actualización** 03 - 08 - 2024
+## **Índice**
 
-En el proyecto proponemos un sistema de asistencia electrónico, lo que presenta las siguientes ventajas:
+- [Extracción de datos y estadísticas](#extracción-de-datos-y-estadísticas)
+    - [**Escuela**: EETP N.612 "Eudocio de los Santos Giménez". Coronda, Santa Fe.](#escuela-eetp-n612-eudocio-de-los-santos-giménez-coronda-santa-fe)
+    - [**Proyecto**: ASISBIOM (Asistencia Biométrica)](#proyecto-asisbiom-asistencia-biométrica)
+    - [**Autor**: Joaquín Gómez](#autor-joaquín-gómez)
+    - [**Fecha de actualización** 03 - 08 - 2024](#fecha-de-actualización-03---08---2024)
+  - [**Índice**](#índice)
+- [Introducción](#introducción)
+- [Porcentaje de asistencias](#porcentaje-de-asistencias)
+- [Porcentaje de tardanzas](#porcentaje-de-tardanzas)
+- [Horario de llegada promedio](#horario-de-llegada-promedio)
+- [Ordenamiento de alumnos por horario de llegada](#ordenamiento-de-alumnos-por-horario-de-llegada)
+  - [Distribución de puntualidad](#distribución-de-puntualidad)
+  - [Cómo medir la puntualidad en una escuela](#cómo-medir-la-puntualidad-en-una-escuela)
+  - [Índice de Gini](#índice-de-gini)
+- [Implementación técnica](#implementación-técnica)
+  - [Tiempo de recopilación de datos](#tiempo-de-recopilación-de-datos)
+  - [Autorización y acceso a la información](#autorización-y-acceso-a-la-información)
+- [Aclaraciones](#aclaraciones)
 
-* Conteo exacto de asistencias.
-* Horario de entrada y salida exactos de los alumnos.
-* Información de tardanzas.
-* Entre otros.
+# Introducción
 
-Aprovechamos esto haciendo un recuento de estadísticas para visualizar más fácilmente la información tomada por el sensor.
+**En el proyecto proponemos un sistema de asistencia electrónico a través de datos biométricos (implementación con huella digital), el cual presenta las siguientes ventajas:**
 
-## Porcentaje de asistencias
+* Conteo de asistencias automatizado.
+* Exactitud en la extracción de horarios de entrada y salida.
+* Automatización a la hora de la creación de planillas.
+* Mejoras en el rendimiento de la escuela.
+* Prevención de la falsificación o errores.
+* Reducción de gastos relacionados a los medios tradicionales para contar asistencias, planillas, etc.
+* Entre otras ventajas mencionadas en la documentación oficial.
+
+Dentro de este documento se aprovechará una de las ventajas, que es el conocimiento de datos de entrada y salida de alumnos (horarios de llegada) para medir la puntualidad y rendimiento de la escuela en éste sentido.
+
+# Porcentaje de asistencias
 
 El total de inasistencias de $n$ alumnos es la suma de las inasistencias 
 
@@ -39,7 +68,7 @@ $$
 \%A = \left( \frac{90,000 \cdot 100}{95,000} \right) \approx 94.736842105
 $$
 
-## Porcentaje de tardanzas
+# Porcentaje de tardanzas
 
 De la misma manera, podemos calcular el porcentaje de tardanzas. Deje que 
 
@@ -71,7 +100,7 @@ $$
 
 Esto quiere decir que del total de asistencias, en el 91.7% los alumnos fueron puntuales. 
 
-## Horario de llegada promedio
+# Horario de llegada promedio
 Para extraer el horario de llegada promedio, suponemos que tenemos un conjunto 
 
 $$
@@ -90,7 +119,7 @@ $$h_{prom} = \frac{\sum_{n=1}^{t} h_{prom_n}}{t}$$
 
 Esto nos daría el horario de llegada promedio (hay que tener en cuenta que el horario debe estar en un formato de número entero, por ejemplo, minutos $[m]$ desde las 00:00$[hs]$).
 
-## Ordenamiento de alumnos por horario de llegada
+# Ordenamiento de alumnos por horario de llegada
 
 Si definimos una función definida como la diferencia en el horario de llegada del alumno en el día respecto del horario de llegada esperado, llamémosla $h(t)$, donde $t$ se mide en días. La función nos da como salida la diferencia entre el horario de llegada esperado, y el horario de llegada real del alumno
 
@@ -126,7 +155,7 @@ suponiendo que ámbos alumnos son igual de puntuales, el puntaje $I_1$ > $I_2$. 
 
 Para ordenarlos bastaría con hacer una tabla donde utilizamos el valor de $I_n$ como índice.
 
-### Distribución de puntualidad
+## Distribución de puntualidad
 
 En base a esto podemos graficar una curva de Lorenz.
 
@@ -184,17 +213,17 @@ Luego vamos a aproximar estos puntos, modelando una función cúbica.
 
 ![image 4](./images/4.png) 
 
-Una curva perfectamente distribuida, es decir, cada alumno entra al mismo horario, se representaría con $f(x)=x$, o sea, una recta con pendiente $1$. Si revisamos la definición anteriormente dada, esto es cierto, ya que si tenemos una lista $l = \{1,1,1,1 ..., 1\}$, el resultado sería $r=\{ 1/n, 2/n, 3/n, ..., n/n \}$. Es decir, una función lineal entre 0 y 1.
+Una curva perfectamente distribuida, es decir, cada alumno entra al mismo horario, se representaría con $f(x)=x$, o sea, una recta con pendiente $1$. Si revisamos la definición anteriormente dada, esto es cierto, ya que si tenemos una lista $l = \{1,1,1,1 ..., 1\}$, el resultado sería $r=\{ 1/n, 2/n, 3/n, ..., n/n \}$. Es decir, una recta a 45 grados. (Véase la figura 5 y 6).
 
-La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia del horario de llegada de los alumnos y el horario de llegada estipulado. En este caso analizamos la diferencia del tiempo de llegada de los alumnos. La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que la media de alumnos (50%) representada en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, la media de los alumnos llega con $\approx4.437$ minutos de diferencia con respecto al horario máximo.
+La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia entre el horario de llegada de los alumnos y el horario de llegada estipulado. La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que el $50\%$ de alumnos, representad0 en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, el $50\%$ de los alumnos llega con ~$4.437$ minutos de diferencia. En el caso analizado hay que tener en cuenta que ningún alumno llegaría temprano ya que los valores analizados de $I_n$ son positivos.
 
 Podemos calcular la "desigualdad" existente entre los datos computados y una distribución perfecta, a continuación se explica cómo y qué significa.
 
-### Cómo medir la puntualidad en una escuela
+## Cómo medir la puntualidad en una escuela
 
 Es importante dentro de una institución la puntualidad de sus alumnos. Para analizar estos datos podemos hacer uso de varias técnicas. Anteriormente se observó la distribución de la diferencia en los horarios de llegada de los alumnos. Por si solo esto nos dice el porcentaje de alumnos que llega a un porcentaje del horario de llegada, pero no nos vale para definir la puntualidad de la escuela. Para ello vamos a necesitar varios datos, la curva de Lorenz, el índice de Gini y por último, los horarios de llegada reales de los alumnos, o al menos la diferencia del horario de llegada y el real.
 
-#### Índice de Gini
+## Índice de Gini
 
 El índice de Gini compara la curva de Lorenz que generamos, con una distribución perfecta, lo que hacemos es hallar el área entre la curva $f(x)$ y $g(x)$:
 
@@ -232,3 +261,29 @@ La interpretación de éste resultado nos puede dar una pista. Como se menciona,
 
 ![image 7](./images/7.png) 
 (Se aproximó el valor por debajo).
+
+# Implementación técnica
+
+La implementación de estos cálculos es bastante sencilla en el contexto de los lenguajes de programación actuales. El proyecto utiliza Java S.E junto con Spring Framework (como soporte para el backend), lo que nos va a permitir procesar los datos del lado del servidor.
+
+Para la implementación de las funciones dentro de la aplicación habrá una clase llamada **StatsService.java** que se encargará de:
+1.  Recopilar la información relacionada
+2.  Ordenar los datos para su procesamiento
+3.  Procesar los datos y guardarlos en la base de datos
+
+Para implementar funciones matemáticas haremos uso de la clase **Math.java**. Los algoritmos a implementar son bastante sencillos ya que constan de sumatorias. Se proporcionará una representación en formato JSON para que el frontend pueda representar los datos gráficamente.
+
+Cuando el usuario desee consultar estos datos simplemente accederá a un método definido en el controlados **StatsController.java**. Es necesario destacar lo siguiente:
+
+## Tiempo de recopilación de datos
+
+Tenemos que tener en cuenta que para poder obtener esta información necesitaremos un período de tiempo en el cual estos datos se consigan. La implementación que se llevará a cabo no procesará lo datos diariamente, sino que fijará una fecha la cual será a 30 días de haber registrado una nueva entrada en el servicio de estadísticas. El servicio de estadísticas estará disponible dentro de la aplicación principal como un panel de control, para poder acceder al servicio deberá entrar al panel con una cuenta de **DIRECTIVO** y habilitarlo. Cabe destacar que no obtendrá los datos hasta pasado un período de 30 días.
+
+Los datos a procesar serán acumulados en el período lectivo y serán reiniciados luego del mismo (usted tendrá un registro de los datos que se han conseguido durante ciclos lectivos anteriores, sin embargo no serán modificados una vez que hayan finalizado). El control de los datos es responsabilidad de la aplicación; dentro de éste documento se presentan los métodos que serán utilizados para procesarlos y a los que podrá acceder, además se le proporcionarán datos específicos de cada alumno dentro del ámbito escolar.
+
+## Autorización y acceso a la información
+
+Ningún cargo menor a **SECRETARIO** o **DIRECTIVO** tendrá acceso a las métricas mencionadas, pero esto no significa que la información no pueda ser compartida, sino que por motivos de cada escuela es posible que solo estos cargos quieran o puedan visualizarlos.
+
+# Aclaraciones
+Es necesario aclarar que este documento es informal. Dentro del mismo se presentan distintas formas y conceptos que pueden utilizarse para conocer mejor a las instituciones de las que formamos parte. Además, las ideas comentadas caben dentro del contexto del proyecto como una forma de mejorar la institución educativa; ayudar a recopilar, analizar y comprender su comportamiento; como también facilitar el trabajo de aquellos individuos que trabajan con la información que el actual proyecto utiliza como medio de acción. En la documentación y presentación del proyecto damos a entender los objetivos y los medios para lograrlos, este documento es una rama de la documentación principal dedicada especialmente al manejo de los datos que recibimos y que merece destacarse debido a que es una de las ventajas principales del proyecto.
