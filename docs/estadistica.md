@@ -145,15 +145,25 @@ $$
 
 si evaluamos la suma con $n = \{ 1, 2, 3, ..., n \}$ nos dará una lista $S$ de números corespondiente a la suma acumulada hasta el alumno $n$ de los valores de $I_n$
 
-$S_1 = \sum_{k = 1}^{n}{I_k}$
+$$
+S_1 = \sum_{k = 1}^{1}{I_k}
+$$
 
-$S_2 = \sum_{k = 2}^{n}{I_k}$
+$$
+S_2 = \sum_{k = 1}^{2}{I_k}
+$$
 
-$S_3 = \sum_{k = 3}^{n}{I_k}$
+$$
+S_3 = \sum_{k = 1}^{3}{I_k}
+$$
 
+$$
 ...
+$$
 
-$S_n = \sum_{k = 1}^{n}{I_k}$
+$$
+S_n = \sum_{k = 1}^{n}{I_k}
+$$
 
 luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos los puntos $( n, \frac{S}{S_n} )$  formarán la curva de Lorenz.
 
