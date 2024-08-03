@@ -2,10 +2,10 @@
 
 En el proyecto proponemos un sistema de asistencia electrónico, lo que presenta las siguientes ventajas:
 
-* Conteo exacto de asistencias
-* Horario de entrada y salida exactos de los alumnos
-* Información de tardanzas
-* Entre otros
+* Conteo exacto de asistencias.
+* Horario de entrada y salida exactos de los alumnos.
+* Información de tardanzas.
+* Entre otros.
 
 Aprovechamos esto haciendo un recuento de estadísticas para visualizar más fácilmente la información tomada por el sensor.
 
@@ -145,6 +145,15 @@ $$
 
 si evaluamos la suma con $n = \{ 1, 2, 3, ..., n \}$ nos dará una lista $S$ de números corespondiente a la suma acumulada hasta el alumno $n$ de los valores de $I_n$
 
+| Alumno     | Índice de puntualidad   |
+|------------|-------------------------|
+| 1          | $I_1$                   |
+| 2          | $I_2$                   |
+| ...        | ...                     |
+| $k$        | $I_k$                   |
+
+Donde $I$ es el Índice de puntualidad y $A$ es el alumno $n$, evaluando la suma:
+
 $$
 S_1 = \sum_{k = 1}^{1}{I_k}
 $$
@@ -165,7 +174,7 @@ $$
 S_n = \sum_{k = 1}^{n}{I_k}
 $$
 
-luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos los puntos $( n, \frac{S}{S_n} )$  formarán la curva de Lorenz.
+luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos los puntos $( \frac{k}{n}, \frac{S}{S_n} )$ para cada alumno $k$  formarán la curva de Lorenz.
 
 ![image 3](./images/3.png) 
 
@@ -177,7 +186,7 @@ Luego vamos a aproximar estos puntos, modelando una función cúbica.
 
 Una curva perfectamente distribuida, es decir, cada alumno entra al mismo horario, se representaría con $f(x)=x$, o sea, una recta con pendiente $1$. Si revisamos la definición anteriormente dada, esto es cierto, ya que si tenemos una lista $l = \{1,1,1,1 ..., 1\}$, el resultado sería $r=\{ 1/n, 2/n, 3/n, ..., n/n \}$. Es decir, una función lineal entre 0 y 1.
 
-La curva de Lorenz nos da información sobre la distribución de una variable. En este caso analizamos la diferencia del tiempo de llegada de los alumnos. La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que la media de alumnos (50%) representada en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, la media de los alumnos llega con $\approx4.437$ minutos de diferencia con respecto al horario máximo.
+La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia del horario de llegada de los alumnos y el horario de llegada estipulado. En este caso analizamos la diferencia del tiempo de llegada de los alumnos. La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que la media de alumnos (50%) representada en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, la media de los alumnos llega con $\approx4.437$ minutos de diferencia con respecto al horario máximo.
 
 Podemos calcular la "desigualdad" existente entre los datos computados y una distribución perfecta, a continuación se explica cómo y qué significa.
 
@@ -197,7 +206,7 @@ En esta imagen comparan los ingresos de una población, sin embargo vamos a inve
 
 Continuando con lo anteriormente dicho, el índice de Gini nos sirve para medir la desigualdad, éste índice tiene un rango entre $0\leq x \leq 1/2$ ya que puede ser a lo más el área de un triángulo rectangulo cuyos catetos son 1 y su hipotenusa es $\sqrt{2}$, o cero.
 
-Para calcular el índice de Gini hayamos el área entre $f(x)=x$ y $g(x)$ a través de una integral definida entre $0 < x < 1$.
+Para calcular el índice de Gini hallamos el área entre $f(x)=x$ y $g(x)$ a través de una integral definida entre $0 < x < 1$.
 
 $$
 \int_{0}^{1}\left(f\left(x\right)-g\left(x\right)\right)dx
@@ -214,12 +223,12 @@ g\left(x\right)=ax^{3}+bx^{2}+cx+d
 $$
 
 $$
-G=\int_{0}^{1}\left(x-g\left(x\right)\right)dx \approx 0.238886846345
+G=2\cdot\int_{0}^{1}\left[x-g\left(x\right)\right]dx \approx 0.477773693
 $$
 
-Entonces, el índice de Gini es aproximadamente $0.238886846345$.
+Entonces, el índice de Gini es aproximadamente $0.477773693$.
 
-La interpretación de éste resultado nos puede dar una pista. Como se menciona, no nos detalla en absoluto si los alumnos son puntuales, pero vamos a suponer que una escuela tiene una diferencia en el horario de llegada, en promedio, de 5 minutos de anticipacion. Ahora, en base a este dato, podemos calcular el índice de Gini, por ejemplo,  $G = 0.07$. En este caso se puede decir que la escuela es puntual ya que en promedio los alumnos llegan temprano, y además la distribución de sus horarios de llegada es bastante uniforme (una curva casi recta).
+La interpretación de éste resultado nos puede dar una pista. Como se menciona, no nos detalla en absoluto si los alumnos son puntuales, pero vamos a suponer que una escuela tiene una diferencia en el horario de llegada, en promedio, de 5 minutos de anticipacion. Ahora, en base a este dato, podemos calcular el índice de Gini, por ejemplo,  $G \approx 0.07$. En este caso se puede decir que la escuela es puntual ya que en promedio los alumnos llegan temprano, y además la distribución de sus horarios de llegada es bastante uniforme (una curva casi recta).
 
 ![image 7](./images/7.png) 
-(Se aproximó el valor,  para $G=0.07$ habría menos diferencia)
+(Se aproximó el valor por debajo).
