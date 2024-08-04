@@ -120,7 +120,8 @@ public class ConteoController {
                     }
 
                     InnerConteoAsistencia innerConteoAsistencia = new InnerConteoAsistencia(alumno.getId(),
-                            alumno.getNombreCompleto(), tardanza, retirado, presente && enabled, conteoAsistencia.getDiasHabiles(),
+                            alumno.getNombreCompleto(), tardanza, retirado, presente && enabled,
+                            conteoAsistencia.getDiasHabiles(),
                             conteoAsistencia.getInasistencias1(), conteoAsistencia.getInasistencias2(),
                             conteoAsistencia.getInasistencias3());
 
@@ -133,34 +134,72 @@ public class ConteoController {
         return ResponseEntity.notFound().build();
     }
 
-    @GetMapping("/cantidades")
+    @GetMapping("/cantidades/personal")
     public ResponseEntity<?> getRecuento() {
 
-        Optional<Stats> found = statsRepository.findById(StatsConfigs.INFO_CANTIDADES);
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.CANTIDAD_PERSONAL);
         if (!found.isPresent())
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_CANTIDADES).get());
+
+        return ResponseEntity.ok().body(found.get());
 
     }
 
-    @GetMapping("/cantidades/diaria")
-    public ResponseEntity<?> getRecuentoDiario() {
-        Optional<Stats> found = statsRepository.findById(StatsConfigs.INFO_DIARIA);
+    @GetMapping("/cantidades/alumnos")
+    public ResponseEntity<?> getAlumnos() {
+
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.CANTIDAD_ALUMNOS);
         if (!found.isPresent())
             return ResponseEntity.notFound().build();
-        return ResponseEntity.ok().body(statsRepository.findById(StatsConfigs.INFO_DIARIA).get());
+
+        return ResponseEntity.ok().body(found.get());
     }
 
-    // TODO: Remover
+    @GetMapping("/cantidades/personal-presentes")
+    public ResponseEntity<?> getRecuentoPresentes() {
+
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.CANTIDAD_PERSONAL_PRESENTES);
+        if (!found.isPresent())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok().body(found.get());
+
+    }
+
+    @GetMapping("/cantidades/alumnos-presentes")
+    public ResponseEntity<?> getAlumnosPresentes() {
+
+        Optional<Stats> found = statsRepository.findById(StatsConfigs.CANTIDAD_ALUMNOS_PRESENTES);
+        if (!found.isPresent())
+            return ResponseEntity.notFound().build();
+
+        return ResponseEntity.ok().body(found.get());
+    }
+
     @GetMapping("/_initialize")
     public String init() {
-        Optional<Stats> info_diaria = statsRepository.findById(StatsConfigs.INFO_DIARIA);
-        Optional<Stats> info_cantidad = statsRepository.findById(StatsConfigs.INFO_CANTIDADES);
+        Optional<Stats> cantidad_alumnos = statsRepository.findById(StatsConfigs.CANTIDAD_ALUMNOS);
+        Optional<Stats> cantidad_personal = statsRepository.findById(StatsConfigs.CANTIDAD_PERSONAL);
+        Optional<Stats> cantidad_alumnos_presentes = statsRepository.findById(StatsConfigs.CANTIDAD_ALUMNOS_PRESENTES);
+        Optional<Stats> cantidad_personal_presentes = statsRepository
+                .findById(StatsConfigs.CANTIDAD_PERSONAL_PRESENTES);
+        Optional<Stats> dias_habiles = statsRepository
+                .findById(StatsConfigs.DIAS_HABILES);
 
-        if (!info_cantidad.isPresent())
-            statsRepository.save(new Stats(StatsConfigs.INFO_CANTIDADES));
-        if (!info_diaria.isPresent())
-            statsRepository.save(new Stats(StatsConfigs.INFO_DIARIA));
+        if (!cantidad_alumnos.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.CANTIDAD_ALUMNOS));
+
+        if (!cantidad_personal.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.CANTIDAD_PERSONAL));
+
+        if (!cantidad_alumnos_presentes.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.CANTIDAD_ALUMNOS_PRESENTES));
+
+        if (!cantidad_personal_presentes.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.CANTIDAD_PERSONAL_PRESENTES));
+
+        if (!dias_habiles.isPresent())
+            statsRepository.save(new Stats(StatsConfigs.DIAS_HABILES));
 
         return "ok";
     }

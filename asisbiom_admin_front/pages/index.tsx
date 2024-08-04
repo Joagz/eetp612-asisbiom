@@ -1,28 +1,26 @@
 import { MainLayout, Overline, Paragraph, Title } from "@/components";
-import { Card, CardContent, Paper } from "@mui/material";
+import { Card, CardContent, Paper, Typography } from "@mui/material";
 import {
   AppRegistrationRounded,
   ChecklistRounded,
   ListRounded,
-  Man,
   Notes,
   People,
   Public,
   QueryStats,
+  School,
   SchoolRounded,
 } from "@mui/icons-material";
 import { useEffect, useState } from "react";
-import axios from "axios";
 import { getCookie } from "cookies-next";
+import { useApi } from "@/hooks";
 
 export function Home() {
-  const [cantidades, setCantidades] = useState<{
-    cant_personal: string;
-    cant_alumnos: string;
-  }>({} as any);
+  const [personal_presentes, setPersonal] = useState<number>(0);
+  const [alumnos_presentes, setAlumnos] = useState<number>(0);
   const [showActions, setShowActions] = useState<boolean>(false);
 
-  const [alumnosPresentes, setAlumnosPresentes] = useState<number>(0);
+  // const [alumnosPresentes, setAlumnosPresentes] = useState<number>(0);
 
   useEffect(() => {
     if (
@@ -31,22 +29,13 @@ export function Home() {
     )
       setShowActions(true);
 
-    axios
-      .get(`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades`)
-      .then((res) => {
-        setCantidades({
-          cant_personal: res.data.cantidadPersonal + "",
-          cant_alumnos: res.data.cantidadAlumnos + "",
-        });
-      });
+    useApi<{ tipo: string, valor: number }>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades/personal-presentes` }).then(
+      res => setPersonal(res.data.valor)
+    )
 
-    axios
-      .get(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades/diaria`
-      )
-      .then((res) => {
-        setAlumnosPresentes(res.data.cantidadAlumnos);
-      });
+    useApi<{ tipo: string, valor: number }>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/cantidades/alumnos-presentes` }).then(
+      res => setAlumnos(res.data.valor)
+    )
   }, []);
 
   return (
@@ -55,34 +44,27 @@ export function Home() {
         <div className="flex-col bg-eetp relative text-white gap-8 py-12 w-full flex justify-center items-center">
           <div className="z-10 bg-black opacity-30 absolute left-0 top-0 w-full h-full"></div>
           <div className="z-10 flex flex-col items-center">
-            <Overline>Sistema de Asistencias Biométrico</Overline>
+            <Overline>EETP N°612 "Eudocio de los Santos Giménez"</Overline>
             <Title className="text-center font-bold">
-              EETP N°612 "Eudocio de los Santos Giménez"
+              Sistema de Asistencias Biométrico
             </Title>
           </div>
           <div className="z-10 flex flex-wrap gap-6 justify-center items-center mx-4">
             <Card component={Paper} className="w-24">
               <CardContent className="flex flex-col justify-center items-center">
-                <People></People>
-                <Overline>{cantidades.cant_alumnos}</Overline>
-                <Paragraph>Alumnos</Paragraph>
+                <School />
+                <Overline>{alumnos_presentes}</Overline>
+                <Typography fontSize={14} textAlign={"center"}>Alumnos presentes</Typography>
               </CardContent>
             </Card>
             <Card component={Paper} className="w-24">
               <CardContent className="flex flex-col justify-center items-center">
-                <People></People>
-                <Overline>{alumnosPresentes}</Overline>
-                <Paragraph>Presentes</Paragraph>
+                <People />
+                <Overline>{personal_presentes}</Overline>
+                <Typography fontSize={14} textAlign={"center"}>Personal presente</Typography>
               </CardContent>
             </Card>
-            <Card component={Paper} className="w-24">
-              <CardContent className="flex flex-col justify-center items-center">
-                <Man></Man>
-                <Overline>{cantidades.cant_personal}</Overline>
-                <Paragraph>Personal</Paragraph>
-              </CardContent>
-            </Card>
-          </div>{" "}
+          </div>
         </div>
 
         <div className="px-12 w-full flex-col flex lg:flex-row justify-center gap-7 items-start">
@@ -171,7 +153,7 @@ export function Home() {
               <Overline>Sobre Nosotros</Overline>
             </a>
             <a
-              target="_blank" 
+              target="_blank"
               href="http://eetp612.com.ar/index.php"
               className="hover:bg-teal-200 transition-all w-full hover:scale-95 text-teal-900 rounded-md shadow flex gap-4 p-6 bg-slate-100"
             >

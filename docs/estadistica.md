@@ -104,18 +104,18 @@ Esto quiere decir que del total de asistencias, en el 91.7% los alumnos fueron p
 Para extraer el horario de llegada promedio, suponemos que tenemos un conjunto 
 
 $$
-H = \{h_{prom_1}, h_{prom_1}, h_{prom_3}, ... , h_{prom_n}\}
+H = \{h_{prom_1}, h_{prom_2}, h_{prom_3}, ... , h_{prom_n}\}
 $$
 
 donde $h_{prom_n}$ es el horario de llegada promedio del alumno $n$. Suponiendo que 
 
 $$
-h_{prom_n} =  \sum_{k=1}^{K_{a_n}} h_k
+h_{prom_n} = \frac{\sum_{k=1}^{K_{a_n}} h_k}{K_{a_n}}
 $$
 
 donde $h_k$ es el horario de llegada del alumno $n$ y $K_{a_n}$ es la cantidad de asistencias del alumno. El promedio de los horarios de llegada es
 
-$$h_{prom} = \frac{\sum_{n=1}^{t} h_{prom_n}}{t}$$
+$$h_{prom} = \frac{\sum_{k=1}^{n} h_{prom_k}}{n}$$
 
 Esto nos daría el horario de llegada promedio (hay que tener en cuenta que el horario debe estar en un formato de número entero, por ejemplo, minutos $[m]$ desde las 00:00$[hs]$).
 
