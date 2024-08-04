@@ -1,5 +1,6 @@
 package eetp612.com.ar.asisbiom.stats;
 
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -7,8 +8,15 @@ import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import eetp612.com.ar.asisbiom.alumnos.Alumno;
+import eetp612.com.ar.asisbiom.alumnos.AlumnoRepository;
+import eetp612.com.ar.asisbiom.asistencias.Asistencia;
+import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
+import eetp612.com.ar.asisbiom.general.Dia;
+import eetp612.com.ar.asisbiom.horarios.Horario;
+import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 
 @Service
 public class StatsService {
@@ -19,7 +27,16 @@ public class StatsService {
     private StatsRepository repository;
 
     @Autowired
+    private HorarioRepository horarioRepository;
+
+    @Autowired
+    private AsistenciaRepository asistenciaRepository;
+
+    @Autowired
     private ConteoRepository conteoRepository;
+
+    @Autowired
+    private AlumnoRepository alumnoRepository;
 
     // public StatsService() {
     // Optional<Stats> info_diaria = repository.findById(StatsConfigs.INFO_DIARIA);
@@ -127,6 +144,79 @@ public class StatsService {
         return (asistenciasPuntuales * 100) / diasHabilesTotales;
     }
 
-    
+    /*
+     * Obtener la diferencia promedio en el horario de llegada de toda la semana
+     * (se calcula con los datos registrados hasta la fecha actual)
+     */
+    public Integer diferenciaPromedioDeLlegada() {
+        return Math.divideExact(diferenciaPromedioDeLlegada(Dia.LUNES) +
+                diferenciaPromedioDeLlegada(Dia.MARTES) +
+                diferenciaPromedioDeLlegada(Dia.MIERCOLES) +
+                diferenciaPromedioDeLlegada(Dia.JUEVES) +
+                diferenciaPromedioDeLlegada(Dia.VIERNES), 5);
+    }
+
+    /*
+     * Obtener la diferencia promedio en el horario de llegada de un día de la
+     * semana (se calcula con los datos registrados hasta la fecha actual)
+     * 
+     * Esta métrica nos dará información sobre el horario de llegada
+     * promedio de todos los alumnos, con respecto del horario de llegada
+     * del horario dado.
+     * 
+     * Si el alumno llega siempre tarde, el resultado debería dar un promedio
+     * negativo, en el caso contrario, un número positivo. Si la mayoría de veces
+     * el alumno es puntual debería dar cerca de cero.
+     * 
+     * Este resultado nos da información del horario de llegada promedio en un día
+     * de todos los alumnos, si queremos tener el horario de llegada promedio total
+     * simplemente tome este valor para todos los días y dividalo entre el total
+     * de días
+     */
+    public Integer diferenciaPromedioDeLlegada(Dia dia) {
+
+        List<Alumno> alumnos = alumnoRepository.findAll();
+        List<Integer> hprom = new ArrayList<>();
+
+        // Calcularemos la diferencia promedio de llegada de todos los alumnos
+        for (Alumno alumno : alumnos) {
+            // Lo haremos respecto al horario de llegada esperado
+            List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), dia);
+            Horario horario = horarios.get(0);
+
+            // A su vez, con respecto a la cantidad de asistencias
+            List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndDia(alumno, dia);
+            List<Integer> minutos = new ArrayList<>();
+
+            for (Asistencia asistencia : asistencias) {
+                LocalTime horarioEntrada = asistencia.getHorarioEntrada();
+                LocalTime horarioEsperado = horario.getHorarioEntrada();
+
+                Integer horarioEntradaInt = (horarioEntrada.getHour() * 60 + horarioEntrada.getMinute());
+                Integer horarioEsperadoInt = (horarioEsperado.getHour() * 60 + horarioEsperado.getMinute());
+
+                // Agregamos la diferencia en los horario de entrada
+                minutos.add(horarioEsperadoInt - horarioEntradaInt);
+            }
+
+            Integer suma = 0;
+
+            for (Integer i : minutos) {
+                suma += i;
+            }
+
+            hprom.add(Math.divideExact(suma, minutos.size()));
+        }
+
+        // Hallamos la diferencia de llegada promedio
+
+        Integer suma = 0;
+
+        for (Integer i : hprom) {
+            suma += i;
+        }
+
+        return Math.divideExact(suma, hprom.size());
+    }
 
 }

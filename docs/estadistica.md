@@ -164,7 +164,7 @@ Suponemos que tenemos una lista de valores, con alumnos de $1$ al $n$, ordenados
 ![image 1](./images/1.png) 
 (los valores de $y_1$ corresponden $I_n$)
 
-En este caso despreciamos valores negativos, suponiendo que todos los alumnos son puntuales o llegan tarde. Si tenemos valores negativos (alumnos que llegaron más temprano), transformaremos los valores de $y_1$ sumando $y_1 - S[1]$, siendo $S$ la lista de valores, solo si el primer valor es negativo.
+En este caso despreciamos valores negativos, suponiendo que todos los alumnos son puntuales o llegan temprano. Si tenemos valores negativos (alumnos que llegaron más tarde), transformaremos los valores de $y_1$ sumando $y_1 - S[1]$, siendo $S$ la lista de valores, solo si el primer valor es negativo.
 
 Realizamos la sumatoria acumulada de los valores de $I_n$
 
@@ -205,6 +205,8 @@ $$
 
 luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos los puntos $( \frac{k}{n}, \frac{S}{S_n} )$ para cada alumno $k$  formarán la curva de Lorenz.
 
+La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia entre el horario de llegada de los alumnos y el horario de llegada estipulado. 
+
 ![image 3](./images/3.png) 
 
 en la imagen representamos la suma como una función de x, donde x es el número de iteraciones en la suma. Podemos graficar los puntos en $0\leq x \leq1$ dividiendo el índice del alumno $x_1$ por  el número de elementos de la lista $n$.
@@ -215,7 +217,7 @@ Luego vamos a aproximar estos puntos, modelando una función cúbica.
 
 Una curva perfectamente distribuida, es decir, cada alumno entra al mismo horario, se representaría con $f(x)=x$, o sea, una recta con pendiente $1$. Si revisamos la definición anteriormente dada, esto es cierto, ya que si tenemos una lista $l = \{1,1,1,1 ..., 1\}$, el resultado sería $r=\{ 1/n, 2/n, 3/n, ..., n/n \}$. Es decir, una recta a 45 grados. (Véase la figura 5 y 6).
 
-La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia entre el horario de llegada de los alumnos y el horario de llegada estipulado. La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que el $50\%$ de alumnos, representad0 en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, el $50\%$ de los alumnos llega con ~$4.437$ minutos de diferencia. En el caso analizado hay que tener en cuenta que ningún alumno llegaría temprano ya que los valores analizados de $I_n$ son positivos.
+La curva nos expresa el porcentaje de alumnos que llega a un porcentaje de esa diferencia de tiempo mencionada. Para explicarlo mejor, tenemos que el $50\%$ de alumnos, representad0 en $g(0.5)=0.147906270632$, esto quiere decir que el $50\%$ de los alumnos llega a un $14.7\%$ de la diferencia de horario más alta de la tabla (30 min.). En otras palabras, el $50\%$ de los alumnos llega con ~$4.437$ minutos de diferencia. En el caso analizado hay que tener en cuenta que ningún alumno llegaría tarde ya que los valores analizados de $I_n$ son positivos. En este caso la parte más *baja* de la curva representaría el porcentaje de alumnos que llega más tarde, ya que son los que tienen menor puntaje, la parte más *alta* son aquellos que tienen una puntuación más alta (llegaron más temprano).
 
 Podemos calcular la "desigualdad" existente entre los datos computados y una distribución perfecta, a continuación se explica cómo y qué significa.
 
@@ -229,7 +231,7 @@ El índice de Gini compara la curva de Lorenz que generamos, con una distribuci�
 
 ![image 5](./images/5.png) 
 
-En esta imagen comparan los ingresos de una población, sin embargo vamos a investigar la desigualdad en los horarios de llegada de los alumnos. Por ejemplo, en una escuela que está bien ordenada, el total de alumnos debería llegar un horario similar, en este caso la curva se va a asemejar a la "línea de igualdad", mientras que en el caso de una escuela que tiene un porcentaje de alumnos que llega muy temprano y otro que llega muy tarde, le corresponde una curva más empinada. Es necesario aclarar que ésta curve no mide si una escuela es puntual o no, lo que nos indica es si los alumnos de dicha escuela llegan al mismo tiempo, es decir, si los alumnos llegan siempre tarde la curva será casi recta, y podemos pensar que la escuela tiene una buena puntualidad aunque esto no sea cierto. Por eso debemos comparar todos los datos, incluyendo sobre todo el promedio del horario de llegada, el cuál nos dará una condición para determinar la puntualidad de la escuela.
+En esta imagen comparan los ingresos de una población, sin embargo vamos a investigar la desigualdad en los horarios de llegada de los alumnos. Por ejemplo, en una escuela que está bien ordenada, el total de alumnos debería llegar un horario similar, en este caso la curva se va a asemejar a la "línea de igualdad", mientras que en el caso de una escuela que tiene un porcentaje de alumnos que llega muy temprano y otro que llega muy tarde, le corresponde una curva más empinada. Es necesario aclarar que esta curva no mide si una escuela es puntual o no, lo que nos indica es si los alumnos de dicha escuela llegan al mismo tiempo, es decir, si los alumnos llegan siempre tarde la curva será casi recta, y podemos pensar que la escuela tiene una buena puntualidad aunque esto no sea cierto. Por eso debemos comparar todos los datos, incluyendo sobre todo el promedio del horario de llegada, el cuál nos dará una condición para determinar la puntualidad de la escuela.
 
 ![image 6](./images/6.png) 
 
@@ -238,11 +240,8 @@ Continuando con lo anteriormente dicho, el índice de Gini nos sirve para medir 
 Para calcular el índice de Gini hallamos el área entre $f(x)=x$ y $g(x)$ a través de una integral definida entre $0 < x < 1$.
 
 $$
-\int_{0}^{1}\left(f\left(x\right)-g\left(x\right)\right)dx
-$$
+G=2\cdot\int_{0}^{1}\left[f\left(x\right)-g\left(x\right]\right)dx=2\cdot\int_{0}^{1}\left[x-g\left(x\right]\right)dx
 
-$$
-\int_{0}^{1}\left(x-g\left(x\right)\right)dx
 $$
 
 En base a nuestra aproximación:
@@ -273,7 +272,7 @@ Para la implementación de las funciones dentro de la aplicación habrá una cla
 
 Para implementar funciones matemáticas haremos uso de la clase **Math.java**. Los algoritmos a implementar son bastante sencillos ya que constan de sumatorias. Se proporcionará una representación en formato JSON para que el frontend pueda representar los datos gráficamente.
 
-Cuando el usuario desee consultar estos datos simplemente accederá a un método definido en el controlados **StatsController.java**. Es necesario destacar lo siguiente:
+Cuando el usuario desee consultar estos datos simplemente accederá a un método definido en el controlador **StatsController.java**. Es necesario destacar lo siguiente:
 
 ## Tiempo de recopilación de datos
 

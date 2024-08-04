@@ -12,10 +12,11 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
+import eetp612.com.ar.asisbiom.general.Dia;
 
 @Repository
 public interface AsistenciaRepository extends JpaRepository<Asistencia, Integer> {
     List<Asistencia> findByAlumno(Alumno alumno);
-
+    List<Asistencia> findByAlumnoAndDia(Alumno alumno, Dia dia);
     List<Asistencia> findByAlumnoAndFecha(Alumno alumno, LocalDate fecha);
 }
