@@ -1,6 +1,6 @@
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 
-import { ExitToApp, MenuRounded, Notifications } from "@mui/icons-material";
+import { ExitToApp, Login, MenuRounded, Notifications } from "@mui/icons-material";
 import { AppBar, Toolbar, IconButton, Typography, Button, Menu, Divider } from "@mui/material";
 import { SideMenu } from "./SideMenu";
 import Link from "next/link";
@@ -121,13 +121,8 @@ export const NavBar = ({ menuOpen, setMenuOpen }: Props) => {
 
                 </div>
               ) : (
-                <Button
-                  color="info"
-                  variant="outlined"
-                  href="/signin"
-                >
-                  Iniciar Sesión
-                </Button>
+                <Button variant="outlined" href="/signin" startIcon={<Login />}>Ingresar</Button>
+
               )}
             </>
           )}

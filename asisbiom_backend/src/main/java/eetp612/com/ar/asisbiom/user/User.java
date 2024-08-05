@@ -39,7 +39,8 @@ public class User {
 
     private String dni;
 
-    public User(String pwd, Roles role, String email, String phone, String dni) {
+    public User(String pwd, Roles role, String email, String phone, String dni, String nombreCompleto) {
+        this.nombreCompleto=nombreCompleto;
         this.pwd = pwd;
         this.role = role;
         this.email = email;

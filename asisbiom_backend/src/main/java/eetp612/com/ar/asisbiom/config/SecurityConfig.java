@@ -80,8 +80,7 @@ public class SecurityConfig {
 
                                                 .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
                                                 .requestMatchers("/auth/v1/user").permitAll()
-                                                .requestMatchers("/auth/v1/register")
-                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name())
+                                                .requestMatchers("/auth/v1/register").permitAll()
 
                                                 .requestMatchers("/api/pdf/**").permitAll()
                                                 .requestMatchers("/api/pdf/private").authenticated()

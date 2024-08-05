@@ -60,10 +60,11 @@ public class AuthController {
 
         User toSave = new User(
                 encoder.encode(user.pwd()),
-                Roles.valueOf(user.id_role()),
-                user.email(),
+                Roles.USUARIO,
+                user.email().toLowerCase(),
                 user.phone(),
-                user.dni());
+                user.dni(),
+                user.nombre_completo());
 
         return ResponseEntity.ok().body(userRepository.save(toSave));
     }
@@ -71,7 +72,8 @@ public class AuthController {
     // Servirá para que el usuario recupere su token JWT
     @RequestMapping("/user")
     public User getUserDetailsAfterLogin(Authentication authentication) {
-        List<User> customers = userRepository.findByEmail(authentication.getName());
+        String email = authentication.getName().toLowerCase();
+        List<User> customers = userRepository.findByEmail(email);
         if (customers.size() > 0) {
             return customers.get(0);
         } else {
