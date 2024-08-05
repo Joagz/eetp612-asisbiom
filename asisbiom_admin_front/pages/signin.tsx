@@ -2,6 +2,7 @@ import { MainLayout, Overline } from "@/components";
 import { Button, FormControl, TextField, Typography } from "@mui/material";
 import axios from "axios";
 import { deleteCookie, setCookie } from "cookies-next";
+import Link from "next/link";
 import { useRouter } from "next/router";
 import { useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
@@ -65,7 +66,7 @@ export function SignIn() {
             <Overline>Iniciar Sesión</Overline>
             {error && (
               <Typography color={"red"}>
-                "Email o contraseña inválidos"
+                Email o contraseña inválidos
               </Typography>
             )}
             <FormControl>
@@ -75,7 +76,7 @@ export function SignIn() {
                 type="email"
               ></TextField>
               {errors.email && (
-                <Typography>Este campo es obligatorio</Typography>
+                <Typography color={"red"}>Este campo es obligatorio</Typography>
               )}
             </FormControl>
             <FormControl>
@@ -85,9 +86,10 @@ export function SignIn() {
                 type="password"
               ></TextField>
               {errors.password && (
-                <Typography>Este campo es obligatorio</Typography>
+                <Typography color={"red"}>Este campo es obligatorio</Typography>
               )}
             </FormControl>
+            <Typography>¿No tiene cuenta? <Link className="text-blue-600 hover:text-blue-900" href="/register">Cree una</Link></Typography>
             <Button type="submit" variant="contained">
               Ingresar
             </Button>

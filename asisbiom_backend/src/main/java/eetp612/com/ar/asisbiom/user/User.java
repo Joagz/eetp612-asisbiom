@@ -39,11 +39,12 @@ public class User {
 
     private String dni;
 
-    public User(String pwd, Roles role, String email, String phone) {
+    public User(String pwd, Roles role, String email, String phone, String dni) {
         this.pwd = pwd;
         this.role = role;
         this.email = email;
         this.phone = phone;
+        this.dni = dni;
     }
 
 }

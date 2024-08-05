@@ -6,9 +6,10 @@ type Props = {
   title: string;
   children: JSX.Element[] | JSX.Element;
   href?: string;
+  icon?: any
 };
 
-export function DropdownBtn({ children, title, href }: Props) {
+export function DropdownBtn({ children, title, href, icon}: Props) {
   const [menuButton, setMenuButton] = useState(false);
 
   return (
@@ -16,7 +17,8 @@ export function DropdownBtn({ children, title, href }: Props) {
       <Button
         size="small"
         color="inherit"
-        className="flex py-2 justify-between px-3 text-gray-500 w-full"
+        className="flex py-2 justify-start px-3 text-gray-500 w-full"
+        startIcon={icon}
         onClick={() => setMenuButton(!menuButton)}
         endIcon={!menuButton ? <ArrowDropDown /> : <ArrowDropUp />}
       >

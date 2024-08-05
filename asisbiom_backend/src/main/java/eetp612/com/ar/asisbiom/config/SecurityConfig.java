@@ -23,79 +23,82 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
-    @Bean
-    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .cors(corsCustomizer -> corsCustomizer
-                        .configurationSource(new CorsConfigurationSource() {
-                            @Override
-                            public CorsConfiguration getCorsConfiguration(
-                                    HttpServletRequest request) {
-                                // TODO: configurar con el endpoint de el front
-                                CorsConfiguration config = new CorsConfiguration();
-                                config.setAllowedOrigins(Arrays.asList(
-                                        "http://localhost:3000",
-                                        "http://localhost:3001"));
-                                config.setAllowedMethods(Arrays.asList("GET", "POST",
-                                        "PUT", "DELETE"));
-                                config.setAllowCredentials(true);
-                                config.setAllowedHeaders(Arrays.asList("*"));
-                                config.setExposedHeaders(
-                                        Arrays.asList("Authorization"));
-                                config.setMaxAge(3600L);
-                                return config;
-                            }
-                        }))
-                .csrf((csrf) -> csrf.disable())
-                .addFilterAfter(new JWTTokenGeneratorFilter(),
-                        BasicAuthenticationFilter.class)
-                .addFilterBefore(new JWTTokenValidatorFilter(),
-                        BasicAuthenticationFilter.class)
-                .authorizeHttpRequests(req -> req.requestMatchers(
+        @Bean
+        SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+                http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                                .cors(corsCustomizer -> corsCustomizer
+                                                .configurationSource(new CorsConfigurationSource() {
+                                                        @Override
+                                                        public CorsConfiguration getCorsConfiguration(
+                                                                        HttpServletRequest request) {
+                                                                // TODO: configurar con el endpoint de el front
+                                                                CorsConfiguration config = new CorsConfiguration();
+                                                                config.setAllowedOrigins(Arrays.asList(
+                                                                                "http://localhost:3000",
+                                                                                "http://localhost:3001"));
+                                                                config.setAllowedMethods(Arrays.asList("GET", "POST",
+                                                                                "PUT", "DELETE"));
+                                                                config.setAllowCredentials(true);
+                                                                config.setAllowedHeaders(Arrays.asList("*"));
+                                                                config.setExposedHeaders(
+                                                                                Arrays.asList("Authorization"));
+                                                                config.setMaxAge(3600L);
+                                                                return config;
+                                                        }
+                                                }))
+                                .csrf((csrf) -> csrf.disable())
+                                .addFilterAfter(new JWTTokenGeneratorFilter(),
+                                                BasicAuthenticationFilter.class)
+                                .addFilterBefore(new JWTTokenValidatorFilter(),
+                                                BasicAuthenticationFilter.class)
+                                .authorizeHttpRequests(req -> req.requestMatchers(
 
-                        // Estadistica
-                        "/api/estadistica/cantidades/**").permitAll()
-                        .requestMatchers("/api/estadistica").authenticated()
-                        .requestMatchers("/api/estadistica/_initialize")
-                        .hasAnyAuthority("DEVELOPER")
-                        .requestMatchers("/api/curso/_initialize").hasAnyAuthority("DEVELOPER")
-                        .requestMatchers(HttpMethod.GET, "/api/notification/**").authenticated()
+                                                // Estadistica
+                                                "/api/estadistica/cantidades/**").permitAll()
+                                                .requestMatchers("/api/estadistica").authenticated()
+                                                .requestMatchers("/api/estadistica/_initialize")
+                                                .hasAnyAuthority("DEVELOPER")
+                                                .requestMatchers("/api/curso/_initialize").hasAnyAuthority("DEVELOPER")
+                                                .requestMatchers(HttpMethod.GET, "/api/notification/**").authenticated()
 
-                        // Alumnos
-                        .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/alumno/**")
+                                                // Alumnos
+                                                .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
+                                                .requestMatchers(HttpMethod.POST, "/api/alumno/**")
 
-                        .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                Roles.SECRETARIO.name(),
-                                Roles.PRECEPTOR.name(), Roles.SENSOR.name())
+                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                                                Roles.SECRETARIO.name(),
+                                                                Roles.PRECEPTOR.name(), Roles.SENSOR.name())
 
-                        .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
-                        .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                Roles.SECRETARIO.name())
+                                                .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
+                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                                                Roles.SECRETARIO.name())
 
-                        .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
-                        .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                Roles.SECRETARIO.name(),
-                                Roles.PRECEPTOR.name())
+                                                .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
+                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                                                Roles.SECRETARIO.name(),
+                                                                Roles.PRECEPTOR.name())
 
-                        .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
-                        .requestMatchers("/auth/v1/user").permitAll()
-                        .requestMatchers("/auth/v1/register")
-                        .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name())
+                                                .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
+                                                .requestMatchers("/auth/v1/user").permitAll()
+                                                .requestMatchers("/auth/v1/register")
+                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name())
 
-                        .anyRequest().authenticated()
-                // TODO: secure requests...
+                                                .requestMatchers("/api/pdf/**").permitAll()
+                                                .requestMatchers("/api/pdf/private").authenticated()
 
-                )
-                .formLogin(form -> form.disable())
-                .httpBasic(Customizer.withDefaults());
+                                                .anyRequest().authenticated()
+                                // TODO: secure requests...
 
-        return http.build();
-    }
+                                )
+                                .formLogin(form -> form.disable())
+                                .httpBasic(Customizer.withDefaults());
 
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
+                return http.build();
+        }
+
+        @Bean
+        public PasswordEncoder passwordEncoder() {
+                return new BCryptPasswordEncoder();
+        }
 
 }

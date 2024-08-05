@@ -30,6 +30,8 @@ public class AuthController {
     @Autowired
     private PasswordEncoder encoder;
 
+    private int DNI_LENGTH = 8;
+
     // Registrar un nuevo usuario
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody UserDto user,
@@ -52,9 +54,16 @@ public class AuthController {
             return ResponseEntity.badRequest().body("El sensor no puede usar un correo como ID.");
         }
 
-        User toSave = new User(encoder.encode(user.pwd()), Roles.valueOf(user.id_role()),
+        if (user.dni().length() != DNI_LENGTH) {
+            return ResponseEntity.badRequest().body("El DNI debe tener 8 caracteres");
+        }
+
+        User toSave = new User(
+                encoder.encode(user.pwd()),
+                Roles.valueOf(user.id_role()),
                 user.email(),
-                user.phone());
+                user.phone(),
+                user.dni());
 
         return ResponseEntity.ok().body(userRepository.save(toSave));
     }
