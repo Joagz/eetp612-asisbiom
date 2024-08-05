@@ -241,7 +241,6 @@ Para calcular el índice de Gini hallamos el área entre $f(x)=x$ y $g(x)$ a tra
 
 $$
 G=2\cdot\int_{0}^{1}\left[f\left(x\right)-g\left(x\right]\right)dx=2\cdot\int_{0}^{1}\left[x-g\left(x\right]\right)dx
-
 $$
 
 En base a nuestra aproximación:
