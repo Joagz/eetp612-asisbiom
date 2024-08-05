@@ -3,7 +3,6 @@ package eetp612.com.ar.asisbiom.stats;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -156,6 +155,40 @@ public class StatsService {
                 diferenciaPromedioDeLlegada(Dia.VIERNES), 5);
     }
 
+    public Integer getDiferenciaHorarioPromedio(Alumno alumno, Dia dia) {
+        // Lo haremos respecto al horario de llegada esperado
+        List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), dia);
+
+        if (horarios.isEmpty()) {
+            return -1;
+        }
+
+        Horario horario = horarios.get(0);
+
+        // A su vez, con respecto a la cantidad de asistencias
+        List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndDia(alumno, dia);
+        List<Integer> minutos = new ArrayList<>();
+
+        for (Asistencia asistencia : asistencias) {
+            LocalTime horarioEntrada = asistencia.getHorarioEntrada();
+            LocalTime horarioEsperado = horario.getHorarioEntrada();
+
+            Integer horarioEntradaInt = (horarioEntrada.getHour() * 60 + horarioEntrada.getMinute());
+            Integer horarioEsperadoInt = (horarioEsperado.getHour() * 60 + horarioEsperado.getMinute());
+
+            // Agregamos la diferencia en los horario de entrada
+            minutos.add(horarioEsperadoInt - horarioEntradaInt);
+        }
+
+        Integer suma = 0;
+
+        for (Integer i : minutos) {
+            suma += i;
+        }
+
+        return Math.divideExact(suma, minutos.size());
+    }
+
     /*
      * Obtener la diferencia promedio en el horario de llegada de un día de la
      * semana (se calcula con los datos registrados hasta la fecha actual)
@@ -180,32 +213,7 @@ public class StatsService {
 
         // Calcularemos la diferencia promedio de llegada de todos los alumnos
         for (Alumno alumno : alumnos) {
-            // Lo haremos respecto al horario de llegada esperado
-            List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), dia);
-            Horario horario = horarios.get(0);
-
-            // A su vez, con respecto a la cantidad de asistencias
-            List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndDia(alumno, dia);
-            List<Integer> minutos = new ArrayList<>();
-
-            for (Asistencia asistencia : asistencias) {
-                LocalTime horarioEntrada = asistencia.getHorarioEntrada();
-                LocalTime horarioEsperado = horario.getHorarioEntrada();
-
-                Integer horarioEntradaInt = (horarioEntrada.getHour() * 60 + horarioEntrada.getMinute());
-                Integer horarioEsperadoInt = (horarioEsperado.getHour() * 60 + horarioEsperado.getMinute());
-
-                // Agregamos la diferencia en los horario de entrada
-                minutos.add(horarioEsperadoInt - horarioEntradaInt);
-            }
-
-            Integer suma = 0;
-
-            for (Integer i : minutos) {
-                suma += i;
-            }
-
-            hprom.add(Math.divideExact(suma, minutos.size()));
+            hprom.add(getDiferenciaHorarioPromedio(alumno, dia));
         }
 
         // Hallamos la diferencia de llegada promedio
@@ -217,6 +225,58 @@ public class StatsService {
         }
 
         return Math.divideExact(suma, hprom.size());
+    }
+
+    // Retorna un listado de el puntaje de cada alumno por día
+    public List<Long> getPuntaje() {
+        List<Alumno> alumnos = alumnoRepository.findAll();
+        List<Stats> foundDiasHabiles = repository.findByTipo(StatsConfigs.DIAS_HABILES);
+        List<Long> puntaje = new ArrayList<>();
+
+        if (foundDiasHabiles.isEmpty()) {
+            return null;
+        }
+
+        Long diasHabiles = foundDiasHabiles.get(0).getValor();
+
+        for (Dia dia : Dia.values()) {
+            for (Alumno alumno : alumnos) {
+                List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), dia);
+
+                if (horarios.isEmpty()) {
+                    continue;
+                }
+
+                Horario horario = horarios.get(0);
+
+                List<Asistencia> asistencias = asistenciaRepository.findByAlumno(alumno);
+
+                if (asistencias.isEmpty()) {
+                    continue;
+                }
+
+                int cantidadAsistencias = asistencias.size();
+
+                Long deltaX = Math.divideExact(cantidadAsistencias, diasHabiles);
+                Long suma = 0l;
+
+                for (Asistencia asistencia : asistencias) {
+                    LocalTime horarioEntrada = asistencia.getHorarioEntrada();
+                    LocalTime horarioEsperado = horario.getHorarioEntrada();
+
+                    Integer horarioEntradaInt = (horarioEntrada.getHour() * 60 + horarioEntrada.getMinute());
+                    Integer horarioEsperadoInt = (horarioEsperado.getHour() * 60 + horarioEsperado.getMinute());
+
+                    suma += (horarioEsperadoInt - horarioEntradaInt);
+                }
+
+                suma = suma * deltaX;
+
+                puntaje.add(suma);
+            }
+        }
+
+        return puntaje;
     }
 
 }
