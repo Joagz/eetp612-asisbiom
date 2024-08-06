@@ -85,6 +85,9 @@ public class SecurityConfig {
                                                 .requestMatchers("/api/pdf/**").permitAll()
                                                 .requestMatchers("/api/pdf/private").authenticated()
 
+                                                .requestMatchers("/swagger-ui/**").permitAll()
+                                                .requestMatchers("/api-docs/**").permitAll()
+
                                                 .anyRequest().authenticated()
                                 // TODO: secure requests...
 

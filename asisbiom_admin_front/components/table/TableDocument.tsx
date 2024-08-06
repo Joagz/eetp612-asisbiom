@@ -6,7 +6,6 @@ import { Paragraph } from "../text";
 
 type Props = {
   name: string;
-  info: string;
   link: string;
 };
 
@@ -22,9 +21,6 @@ export const TableDocument = (props: Props) => {
           <PictureAsPdf fontSize="small" />
           <Paragraph>{props.name}</Paragraph>
         </Link>
-      </TableCell>
-      <TableCell>
-        <Paragraph>{props.info}</Paragraph>
       </TableCell>
     </TableRow>
   );

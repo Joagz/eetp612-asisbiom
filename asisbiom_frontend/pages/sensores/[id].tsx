@@ -7,8 +7,10 @@ import MqttMessage from '@/interface/MqttMessage';
 import User from '@/interface/User';
 import Roles from '@/interface/Roles';
 import { Close, Done, ExitToApp, Warning } from '@mui/icons-material';
-import { Alert, Button } from '@mui/material';
+import { Alert, Button, Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, TextField, Typography } from '@mui/material';
 import { useRouter } from 'next/router';
+import React from 'react';
+import { FieldValues, Form, FormSubmitHandler, useForm } from 'react-hook-form';
 
 
 const clientId = "mqttjs_" + Math.random().toString(16).substr(2, 8);
@@ -177,15 +179,7 @@ const SensorById = ({ id }: { id: number }) => {
                                 .then(userRes => {
                                     console.log(userRes.data);
                                     if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
-                                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
-                                            setMessage(`Alumno ${alumno.nombreCompleto} retirado con éxito`);
-                                            setRetirado(true);
-                                            console.log("Retirado");
-                                        }
-                                        ).catch(err => {
-                                            setMessage("No se pudo retirar al alumno")
-                                            console.log("No se puede retirar")
-                                        })
+                                        setConfirmandoRetiro(true);
                                     } else {
                                         setMessage("No se pudo retirar al alumno")
                                         console.log("No se puede retirar")
@@ -213,9 +207,46 @@ const SensorById = ({ id }: { id: number }) => {
         };
     }, [])
 
+    const [razonRetiro, setRazonRetiro] = useState<string>();
+    const [confirmandoRetiro, setConfirmandoRetiro] = useState<boolean>(false);
+
     return (
         <PrincipalLayout disableFooter title={`Sensor ${id}`}>
             <div className='flex h-screen py-5 w-full justify-center items-center flex-col'>
+                <FormDialog setRazonRetiro={setRazonRetiro} setOpen={setConfirmandoRetiro} open={confirmandoRetiro} handleClose={function (retirar: boolean): void {
+                    if (!retirar) {
+                        setConfirmandoRetiro(false);
+                    }
+
+                    console.log("retirando..");
+
+                    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
+
+                        useApi<any>({
+                            url: `${process.env.NEXT_PUBLIC_API_URL}/api/retiro`, method: 'POST', body: {
+                                razon: razonRetiro, alumno: alumno.id, profesor: 0
+                            }
+                        }).then(res => {
+                            setRetirado(true);
+                            setMessage("Alumno retirado con éxito");
+                            console.log(res)
+                        }).catch(err => {
+                            setMessage(err.response.data)
+                            setRetirado(false);
+                            console.log("No se puede retirar")
+                        })
+
+                    }
+                    ).catch(err => {
+                        setMessage(err.response.data)
+                        setRetirado(false);
+                        console.log("No se puede retirar")
+                    })
+
+                    setOnAction(true);
+                    setShowBtn(true);
+
+                }} />
                 {alumno && !onAction ?
                     <div className='flex gap-4 w-full h-full'>
                         <div className='flex flex-col gap-4 flex-1 min-w-64'>
@@ -309,6 +340,54 @@ const SensorById = ({ id }: { id: number }) => {
             </div>
         </PrincipalLayout>
     )
+}
+
+function FormDialog({ setRazonRetiro, open, setOpen, handleClose }:
+    { setRazonRetiro: any, setOpen: any, open: boolean, handleClose: (retirar: boolean) => void }) {
+
+    const { control, register, handleSubmit, formState: { errors } } = useForm();
+
+    function onSubmit(data: any) {
+        setRazonRetiro(data.razon);
+        setOpen(false);
+        handleClose(true);
+    }
+
+    return (
+        <Dialog
+            open={open}
+            onClose={handleClose}
+        >
+            <Form control={control} onSubmit={handleSubmit(onSubmit) as unknown as FormSubmitHandler<FieldValues>}>
+                <DialogTitle>Razon de retiro</DialogTitle>
+                <DialogContent>
+                    <DialogContentText>
+                        Por favor escriba la razón por la que se retira al alumno
+                    </DialogContentText>
+                    <TextField
+                        autoFocus
+                        required
+                        margin="dense"
+                        id="name"
+                        label="Razón del retiro"
+                        type="text"
+                        fullWidth
+                        variant="standard"
+                        {...register("razon", { required: true })}
+                    />
+
+                    {errors.razon && <Typography>Debe colocar una razón</Typography>}
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => {
+                        setOpen(false)
+                        handleClose(false)
+                    }}>Cancelar</Button>
+                    <Button type="submit">Retirar</Button>
+                </DialogActions>
+            </Form>
+        </Dialog>
+    );
 }
 
 SensorById.getInitialProps = async ({ query }: any) => {

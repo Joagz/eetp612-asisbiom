@@ -18,11 +18,20 @@ import {
   TableDocument,
   Title,
 } from "@/components";
+import { useEffect, useState } from "react";
+import { useApi } from "@/hooks";
 
 export default function Info() {
+
+  const [urls, setUrls] = useState<string[]>();
+
+  useEffect(() => {
+    useApi<string[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/pdf` }).then(res => (setUrls(res.data)))
+  }, [])
+
   return (
     <MainLayout title="Acerca de">
-      <article className="flex-[2] p-4 flex flex-col gap-3">
+      <article className="flex-[2] p-8 flex flex-col gap-3">
         <div className="h-20"></div>
         <Overline>E.E.T.P N°612 "Eudocio de los Santos Giménez"</Overline>
         <Caption>Coronda, Santa Fe, Argentina.</Caption>
@@ -78,6 +87,9 @@ export default function Info() {
           además de mejorar la comunicación del equipo directivo con el
           alumnado, teniendo en cuenta todas las variables posibles.
         </Paragraph>
+        <Paragraph>
+          Puede consultar la documentación oficial del proyecto:
+        </Paragraph>
         <TableContainer>
           <Table className="w-full" size="small">
             <TableHead>
@@ -85,33 +97,21 @@ export default function Info() {
                 <TableCell>
                   <Paragraph>Documento</Paragraph>
                 </TableCell>
-                <TableCell>
-                  <Paragraph>Info.</Paragraph>
-                </TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
-              <TableDocument
-                name={"ASISBIOM v1.0"}
-                info={"Documentación principal del proyecto"}
-                link={"https://docs.google.com/document/d/1qhv-tIIdVhR_-fxgxOlSZAMJZNUhbwB4HbeLz8_zjK8/edit?usp=sharing"}
-              />
+              {urls?.map(url => (
+                <TableDocument
+                  name={url}
+                  link={`/api/pdf/${url}`}
+                />
+              ))}
             </TableBody>
           </Table>
         </TableContainer>
       </article>
       <aside className="flex-1 w-full p-4 flex flex-col gap-4">
         <div className="h-20"></div>
-        <div className="flex-1 flex flex-col gap-1">
-          <Overline>Notas</Overline>
-          <Paragraph>
-            A la hora de crear el proyecto se iba a usar Espressif IDF, un
-            framework dedicado al ESP32 (microcontrolador usado en el
-            dispositivo). Se decidió no hacer por problemas de compatibilidad
-            con el sensor. La decisión final fue de usar Arduino, y las
-            librerías correspondientes.
-          </Paragraph>
-        </div>
         <div className="flex-1 flex flex-col gap-1">
           <Overline>Alumnos responsables</Overline>
           <Paragraph>
@@ -121,7 +121,7 @@ export default function Info() {
             nuestro agradecimiento a los profesores Sebastián Leandro Pisatti y
             Horacio Gabriel Ceferino Graells. Ellos no solo nos proporcionaron
             el espacio para llevar a cabo el proyecto, sino que también nos
-            guiaron y apoyaron durante todo el proceso de desarrollo.
+            guiaron y apoyaron durante todo el proceso de creación.
           </Paragraph>
         </div>
         <div className="flex-1 flex flex-col gap-1">
@@ -149,6 +149,10 @@ export default function Info() {
           <Typography variant="body1" className="text-xs">
             <Link target="_blank"
               href="https://spring.io/">Spring Framework</Link>
+          </Typography>
+          <Typography variant="body1" className="text-xs">
+            <Link target="_blank"
+              href="https://mosquitto.org/">Mosquitto</Link>
           </Typography>
         </div>
       </aside>

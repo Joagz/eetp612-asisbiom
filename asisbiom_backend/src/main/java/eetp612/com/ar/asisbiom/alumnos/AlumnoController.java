@@ -239,18 +239,18 @@ public class AlumnoController {
                 DateUtils.getDay());
 
         if (asistencias.isEmpty()) {
-            return ResponseEntity.status(404)
-                    .body("No hay asistencias para este alumno, no se puede retirar.");
+            return ResponseEntity.status(400)
+                    .body("Este alumno no tiene asistencias hoy, no se retiró.");
         }
 
         if (horarioDeHoy.isEmpty()) {
-            return ResponseEntity.status(404)
-                    .body("No hay horarios hoy para este alumno.");
+            return ResponseEntity.status(400)
+                    .body("No hay horarios hoy para este alumno, no se retiró.");
         }
 
         if (LocalTime.now().isAfter(horarioDeHoy.get(0).getHorarioSalida())) {
             return ResponseEntity.status(400)
-                    .body("No se puede retirar, el horario se salida es anterior al actual.");
+                    .body("El horario se salida es anterior al actual, no se retiró.");
         }
 
         mqttService.retirar(foundAlumno.get(), asistencias.get(0));
@@ -266,14 +266,10 @@ public class AlumnoController {
         // TODO: ver si el usuario que se encuentra tiene este curso a cargo
 
         User user = usersFound.get(0);
-    
-        if(user.getRole().ordinal() < Roles.PRECEPTOR.ordinal())
-        {
+
+        if (user.getRole().ordinal() < Roles.PRECEPTOR.ordinal()) {
             return ResponseEntity.badRequest().body("El usuario no tiene permisos");
         }
-
-        
-
 
         Optional<Alumno> found = alumnoRepository.findById(id);
         if (found.isPresent()) {
