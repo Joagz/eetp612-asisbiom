@@ -148,11 +148,11 @@ public class StatsService {
      * (se calcula con los datos registrados hasta la fecha actual)
      */
     public Integer diferenciaPromedioDeLlegada() {
-        return Math.divideExact(diferenciaPromedioDeLlegada(Dia.LUNES) +
+        return (diferenciaPromedioDeLlegada(Dia.LUNES) +
                 diferenciaPromedioDeLlegada(Dia.MARTES) +
                 diferenciaPromedioDeLlegada(Dia.MIERCOLES) +
                 diferenciaPromedioDeLlegada(Dia.JUEVES) +
-                diferenciaPromedioDeLlegada(Dia.VIERNES), 5);
+                diferenciaPromedioDeLlegada(Dia.VIERNES)) / 5;
     }
 
     public Integer getDiferenciaHorarioPromedio(Alumno alumno, Dia dia) {
@@ -185,8 +185,9 @@ public class StatsService {
         for (Integer i : minutos) {
             suma += i;
         }
-
-        return Math.divideExact(suma, minutos.size());
+        if (minutos.size() == 0)
+            return -1;
+        return suma / minutos.size();
     }
 
     /*
@@ -223,8 +224,9 @@ public class StatsService {
         for (Integer i : hprom) {
             suma += i;
         }
-
-        return Math.divideExact(suma, hprom.size());
+        if (hprom.size() == 0)
+            return -1;
+        return suma / hprom.size();
     }
 
     // Retorna un listado de el puntaje de cada alumno por día
@@ -257,7 +259,10 @@ public class StatsService {
 
                 int cantidadAsistencias = asistencias.size();
 
-                Long deltaX = Math.divideExact(cantidadAsistencias, diasHabiles);
+                if (diasHabiles == 0)
+                    return null;
+
+                Long deltaX = (cantidadAsistencias / diasHabiles);
                 Long suma = 0l;
 
                 for (Asistencia asistencia : asistencias) {

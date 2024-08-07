@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.apache.poi.hpsf.Array;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -219,6 +220,38 @@ public class AlumnoController {
         }
 
         return new ResponseEntity<Alumno>(alumno, HttpStatus.OK);
+    }
+
+    @PostMapping("/registrarAll")
+    public ResponseEntity<?> register(@RequestBody List<AlumnoDto> alumnoDtoList) {
+        List<Alumno> alumnos = new ArrayList<>();
+
+        for (AlumnoDto alumnoDto : alumnoDtoList) {
+            Optional<Curso> found = cursoRepository.findById(alumnoDto.curso());
+            if (!found.isPresent())
+                return new ResponseEntity<>("Curso no encontrado.", HttpStatus.BAD_REQUEST);
+
+            Alumno alumno = alumnoDto.toAlumno(found.get());
+            alumnos.add(alumnoRepository.save(alumno));
+            conteoRepository.save(new ConteoAsistencia(alumno));
+            statsService.addAlumno();
+
+            MqttMessage message = new MqttMessage();
+            message.setAccion(MqttUtils.integerToByteArray(SensorAction.REGISTER.ordinal()));
+            message.setIdAlumno(MqttUtils.integerToByteArray(alumno.getId()));
+            MqttUtils.addToCounter();
+            message.setMessageId(MqttUtils.integerToByteArray(MqttUtils.getCounter()));
+            message.setSensorId(MqttUtils.integerToByteArray(1)); // por el momento
+
+            try {
+                mqttService.sendMessage(message);
+                mqttService.sendMessage(nullMsg);
+
+            } catch (Exception e) {
+                System.out.println("NO SE PUDO ENVIAR EL MENSAJE -->" + e.getLocalizedMessage());
+            }
+        }
+        return new ResponseEntity<>(alumnos, HttpStatus.OK);
     }
 
     @PostMapping("/retirar/{idAlumno}")

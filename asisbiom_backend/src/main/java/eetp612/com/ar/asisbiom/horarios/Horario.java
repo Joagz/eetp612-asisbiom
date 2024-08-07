@@ -55,6 +55,6 @@ public class Horario {
     private Dia dia;
     
     @Column(name = "valor_inasistencia")
-    private Integer valorInasistencia;
+    private float valorInasistencia;
 
 }
