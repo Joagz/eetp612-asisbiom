@@ -24,9 +24,7 @@ public class StatsController {
         Float min = puntaje.get(0);
 
         if (positiveOnly && min < 0) {
-            List<Float> positivePuntaje = new ArrayList<>();
-            puntaje.forEach(p -> positivePuntaje.add(p - min));
-            return positivePuntaje;
+            return service.getPuntajePositivo();
         } else
             return puntaje;
     }

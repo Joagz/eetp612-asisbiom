@@ -247,21 +247,18 @@ public class StatsService {
             List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
 
             if (horarios.isEmpty()) {
-                System.out.println("Horarios is empty");
                 continue;
             }
 
             List<Asistencia> asistencias = asistenciaRepository.findByAlumno(alumno);
 
             if (asistencias.isEmpty()) {
-                System.out.println("Asistencias is empty");
                 continue;
             }
 
             int cantidadAsistencias = asistencias.size();
 
             if (diasHabiles == 0) {
-                System.out.println("Días Hábiles = 0");
                 return null;
             }
 
@@ -271,8 +268,8 @@ public class StatsService {
                     LocalTime horarioEntrada = asistencia.getHorarioEntrada();
                     LocalTime horarioEsperado = horario.getHorarioEntrada();
 
-                    Integer horarioEntradaInt = (horarioEntrada.getHour() * 60 + horarioEntrada.getMinute());
-                    Integer horarioEsperadoInt = (horarioEsperado.getHour() * 60 + horarioEsperado.getMinute());
+                    Integer horarioEntradaInt = (horarioEntrada.getMinute());
+                    Integer horarioEsperadoInt = (horarioEsperado.getMinute());
 
                     suma += (horarioEsperadoInt - horarioEntradaInt);
                 }
@@ -284,18 +281,29 @@ public class StatsService {
 
         return puntaje;
     }
-
-    public List<Float> curvaLorenz() {
+    
+    public List<Float> getPuntajePositivo()
+    {
         List<Float> puntaje = getPuntaje();
+        List<Float> positivePuntaje = new ArrayList<>();
+        
+        Collections.sort(puntaje);
+
+        Float min = puntaje.get(0);
+
+        puntaje.forEach(p -> positivePuntaje.add(p - min));
+
+        return positivePuntaje;
+    }
+    
+    public List<Float> curvaLorenz() {
+        List<Float> puntaje = getPuntajePositivo();
         List<Float> suma = new ArrayList<>();
         List<Float> puntos = new ArrayList<>();
-
+        
         if (puntaje.isEmpty()) {
             return null;
         }
-
-        // Sort the puntaje list to compute the Lorenz curve properly
-        Collections.sort(puntaje);
 
         // Compute cumulative sums
         Float acumulado = 0f;
@@ -323,6 +331,7 @@ public class StatsService {
         List<Float> lorenz = curvaLorenz();
         List<Float> giniSum = new ArrayList<>();
         float gini = 0f;
+        
         if(lorenz.isEmpty()) return -1f;
 
         for (int i = 0; i < lorenz.size(); i++) {
@@ -331,16 +340,12 @@ public class StatsService {
             giniSum.add(x - lorenz.get(i));
         }
 
-        System.out.println(giniSum);
-
         float deltaX = 1f/(float)giniSum.size();
 
         for(int j = 0; j < giniSum.size(); j++)
         {
             gini+=giniSum.get(j);
         }
-
-        System.out.println(gini);
 
         gini = gini*deltaX;
         
