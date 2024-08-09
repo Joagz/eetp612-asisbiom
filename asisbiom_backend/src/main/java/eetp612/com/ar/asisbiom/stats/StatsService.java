@@ -2,6 +2,7 @@ package eetp612.com.ar.asisbiom.stats;
 
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -230,10 +231,10 @@ public class StatsService {
     }
 
     // Retorna un listado de el puntaje de cada alumno por día
-    public List<Long> getPuntaje() {
+    public List<Float> getPuntaje() {
         List<Alumno> alumnos = alumnoRepository.findAll();
         List<Stats> foundDiasHabiles = repository.findByTipo(StatsConfigs.DIAS_HABILES);
-        List<Long> puntaje = new ArrayList<>();
+        List<Float> puntaje = new ArrayList<>();
 
         if (foundDiasHabiles.isEmpty()) {
             return null;
@@ -241,30 +242,31 @@ public class StatsService {
 
         Long diasHabiles = foundDiasHabiles.get(0).getValor();
 
-        for (Dia dia : Dia.values()) {
-            for (Alumno alumno : alumnos) {
-                List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(), dia);
+        for (Alumno alumno : alumnos) {
+            Float suma = 0f;
+            List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
 
-                if (horarios.isEmpty()) {
-                    continue;
-                }
+            if (horarios.isEmpty()) {
+                System.out.println("Horarios is empty");
+                continue;
+            }
 
-                Horario horario = horarios.get(0);
+            List<Asistencia> asistencias = asistenciaRepository.findByAlumno(alumno);
 
-                List<Asistencia> asistencias = asistenciaRepository.findByAlumno(alumno);
+            if (asistencias.isEmpty()) {
+                System.out.println("Asistencias is empty");
+                continue;
+            }
 
-                if (asistencias.isEmpty()) {
-                    continue;
-                }
+            int cantidadAsistencias = asistencias.size();
 
-                int cantidadAsistencias = asistencias.size();
+            if (diasHabiles == 0) {
+                System.out.println("Días Hábiles = 0");
+                return null;
+            }
 
-                if (diasHabiles == 0)
-                    return null;
-
-                Long deltaX = (cantidadAsistencias / diasHabiles);
-                Long suma = 0l;
-
+            Float deltaX = (cantidadAsistencias / (float) diasHabiles);
+            for (Horario horario : horarios) {
                 for (Asistencia asistencia : asistencias) {
                     LocalTime horarioEntrada = asistencia.getHorarioEntrada();
                     LocalTime horarioEsperado = horario.getHorarioEntrada();
@@ -274,14 +276,76 @@ public class StatsService {
 
                     suma += (horarioEsperadoInt - horarioEntradaInt);
                 }
-
-                suma = suma * deltaX;
-
-                puntaje.add(suma);
             }
+
+            suma = suma * deltaX;
+            puntaje.add(suma);
         }
 
         return puntaje;
+    }
+
+    public List<Float> curvaLorenz() {
+        List<Float> puntaje = getPuntaje();
+        List<Float> suma = new ArrayList<>();
+        List<Float> puntos = new ArrayList<>();
+
+        if (puntaje.isEmpty()) {
+            return null;
+        }
+
+        // Sort the puntaje list to compute the Lorenz curve properly
+        Collections.sort(puntaje);
+
+        // Compute cumulative sums
+        Float acumulado = 0f;
+        Float total = 0f;
+        for (Float score : puntaje) {
+            acumulado += score;
+            suma.add(acumulado);
+        }
+
+        total = suma.get(suma.size() - 1);
+
+        if (total == 0) {
+            return null;
+        }
+
+        // Normalize cumulative sums
+        for (Float sum : suma) {
+            puntos.add(sum / total);
+        }
+
+        return puntos;
+    }
+
+    public Float indiceGini() {
+        List<Float> lorenz = curvaLorenz();
+        List<Float> giniSum = new ArrayList<>();
+        float gini = 0f;
+        if(lorenz.isEmpty()) return -1f;
+
+        for (int i = 0; i < lorenz.size(); i++) {
+            float x = (float) i / (float) lorenz.size();
+
+            giniSum.add(x - lorenz.get(i));
+        }
+
+        System.out.println(giniSum);
+
+        float deltaX = 1f/(float)giniSum.size();
+
+        for(int j = 0; j < giniSum.size(); j++)
+        {
+            gini+=giniSum.get(j);
+        }
+
+        System.out.println(gini);
+
+        gini = gini*deltaX;
+        
+        return 2*gini;
+
     }
 
 }

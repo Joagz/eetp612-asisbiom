@@ -11,9 +11,9 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.stream.Collectors;
 
-import org.apache.poi.hpsf.Array;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +36,7 @@ import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.cursos.CursoRepository;
 import eetp612.com.ar.asisbiom.docentes.Roles;
 import eetp612.com.ar.asisbiom.general.DateUtils;
+import eetp612.com.ar.asisbiom.general.Dia;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 import eetp612.com.ar.asisbiom.mqtt.MqttMessage;
@@ -296,7 +297,6 @@ public class AlumnoController {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         List<User> usersFound = userRepository.findByEmail(auth.getPrincipal().toString());
-        // TODO: ver si el usuario que se encuentra tiene este curso a cargo
 
         User user = usersFound.get(0);
 
@@ -385,6 +385,70 @@ public class AlumnoController {
             return ResponseEntity.ok().body(found.get(0));
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PostMapping("/_testing/init_asistencias")
+    public ResponseEntity<?> initAsistencias() {
+
+        List<Alumno> alumnos = alumnoRepository.findAll();
+
+        for (Alumno alumno : alumnos) {
+            System.out.println("procesando alumno "+alumno.getNombreCompleto());
+            List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
+            List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
+
+            if (found.isEmpty() || horarios.isEmpty())
+                continue;
+
+            ConteoAsistencia conteoAsistencia = found.get(0);
+
+            conteoAsistencia.setInasistencias1(10f);
+            conteoAsistencia.setDiasHabiles(90l);
+
+            int tardanzas = 0;
+            Random random = new Random();
+            Dia dia = Dia.LUNES;
+            Horario horario = null;
+
+            horarios.sort((o1, o2) -> o1.getDia().compareTo(o2.getDia()));
+            horario = horarios.get(0);
+
+            LocalDate fecha = LocalDate.now();
+
+
+            // creamos las asistencias
+            for (int i = 0; i <= 80; i++) {
+                Asistencia asistencia = new Asistencia();
+                asistencia.setAlumno(alumno);
+                asistencia.setDia(dia);
+                asistencia.setRetirado(false);
+                asistencia.setHorarioEntrada(horario.getHorarioEntrada().minusMinutes(random.nextInt(20)));
+                asistencia.setHorarioRetiro(horario.getHorarioSalida());
+                asistencia.setFecha(fecha);
+                asistencia.setAsistencia(true);
+
+                fecha = fecha.plusDays(1);
+
+                if (dia.ordinal() == Dia.VIERNES.ordinal()) {
+                    dia = Dia.LUNES;
+                } else {
+                    dia = Dia.values()[dia.ordinal() + 1];
+                }
+
+                if (random.nextInt(10) == 1 && tardanzas < 10) {
+                    tardanzas++;
+                    asistencia.setTardanza(true);
+                    asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10))); 
+                }
+
+                asistenciaRepository.save(asistencia);
+            }
+
+            conteoAsistencia.setTardanzas(tardanzas);
+            conteoRepository.save(conteoAsistencia);
+        }
+
+        return ResponseEntity.ok().body("Creado con éxito");
     }
 
 }
