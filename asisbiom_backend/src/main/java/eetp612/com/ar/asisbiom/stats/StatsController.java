@@ -1,6 +1,5 @@
 package eetp612.com.ar.asisbiom.stats;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +15,11 @@ public class StatsController {
 
     @Autowired
     private StatsService service;
+
+    @GetMapping("finger")
+    private Integer getLastFinger() {
+        return service.addNextFinger();
+    }
 
     @GetMapping("puntaje")
     private List<Float> getPuntaje(

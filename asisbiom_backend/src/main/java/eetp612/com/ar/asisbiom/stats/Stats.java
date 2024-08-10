@@ -15,14 +15,14 @@ public class Stats {
     @Id
     private String tipo;
 
-    private Long valor;
+    private int valor;
 
     public Stats() {
     }
 
     public Stats(String tipo) {
         this.tipo = tipo;
-        this.valor = 0l;
+        this.valor = 0;
     }
     
 }

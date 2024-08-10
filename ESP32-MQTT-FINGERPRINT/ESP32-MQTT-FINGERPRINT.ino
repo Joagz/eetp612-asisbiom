@@ -31,50 +31,85 @@ void sendErrMsg(int code, int student_id)
   send_mqtt_message_out(message);
 }
 
-int enrollFingerprint(int id, Adafruit_Fingerprint finger) {
+uint8_t getFingerprintEnroll(int id) {
 
   int p = -1;
-
+  Serial.print("Waiting for valid finger to enroll as #"); Serial.println(id);
   sendMsg(MQTT_ACTION_REGISTER, id);
-
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
-
-    if (p != FINGERPRINT_OK) {
-      sendErrMsg(MQTT_ACTION_REGISTER, id);
-      return false;
+    switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.print(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
     }
   }
 
   // OK success!
 
   p = finger.image2Tz(1);
-
-  if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_REGISTER, id);
-    return false;
+  switch (p) {
+    case FINGERPRINT_OK:
+      Serial.println("Image converted");
+      break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    default:
+      Serial.println("Unknown error");
+      return p;
   }
-
   sendMsg(MQTT_ACTION_REMOVE_FINGER, id);
 
+  Serial.println("Remove finger");
+  delay(2000);
   p = 0;
-
   while (p != FINGERPRINT_NOFINGER) {
     p = finger.getImage();
   }
-
+  Serial.print("ID "); Serial.println(id);
   p = -1;
-
   sendMsg(MQTT_ACTION_PUT_FINGER, id);
-
+  Serial.println("Place same finger again");
   while (p != FINGERPRINT_OK) {
     p = finger.getImage();
     switch (p) {
-      case FINGERPRINT_OK:
-        break;
-      default:
-        sendErrMsg(MQTT_ACTION_REGISTER, id);
-        return false;
+    case FINGERPRINT_OK:
+      Serial.println("Image taken");
+      break;
+    case FINGERPRINT_NOFINGER:
+      Serial.print(".");
+      break;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      break;
+    case FINGERPRINT_IMAGEFAIL:
+      Serial.println("Imaging error");
+      break;
+    default:
+      Serial.println("Unknown error");
+      break;
     }
   }
 
@@ -83,27 +118,62 @@ int enrollFingerprint(int id, Adafruit_Fingerprint finger) {
   p = finger.image2Tz(2);
   switch (p) {
     case FINGERPRINT_OK:
+      Serial.println("Image converted");
       break;
+    case FINGERPRINT_IMAGEMESS:
+      Serial.println("Image too messy");
+      return p;
+    case FINGERPRINT_PACKETRECIEVEERR:
+      Serial.println("Communication error");
+      return p;
+    case FINGERPRINT_FEATUREFAIL:
+      Serial.println("Could not find fingerprint features");
+      return p;
+    case FINGERPRINT_INVALIDIMAGE:
+      sendMsg(MQTT_ERROR_REGISTER_FAILED, id);
+      return p;
     default:
-      sendErrMsg(MQTT_ACTION_REGISTER, id);
-      return false;
+      sendMsg(MQTT_ERROR_REGISTER_FAILED, id);
+      return p;
   }
 
+  // OK converted!
+  Serial.print("Creating model for #");  Serial.println(id);
 
   p = finger.createModel();
-  if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_REGISTER, id);
-    return false;
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Prints matched!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_ENROLLMISMATCH) {
+    Serial.println("Fingerprints did not match");
+    return p;
+  } else {
+    sendMsg(MQTT_ERROR_REGISTER_FAILED, id);
+    Serial.println("Unknown error");
+    return p;
   }
 
+  Serial.print("ID "); Serial.println(id);
   p = finger.storeModel(id);
-
-  if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_REGISTER, id);
-    return false;
+  if (p == FINGERPRINT_OK) {
+    Serial.println("Stored!");
+  } else if (p == FINGERPRINT_PACKETRECIEVEERR) {
+    Serial.println("Communication error");
+    return p;
+  } else if (p == FINGERPRINT_BADLOCATION) {
+    Serial.println("Could not store in that location");
+    return p;
+  } else if (p == FINGERPRINT_FLASHERR) {
+    Serial.println("Error writing to flash");
+    return p;
+  } else {
+    sendMsg(MQTT_ERROR_REGISTER_FAILED, id);
+    return p;
   }
-
   sendMsg(MQTT_ACTION_REGISTER_COMPLETE, id);
+
   return true;
 }
 
@@ -111,8 +181,7 @@ int getFingerprintID(Adafruit_Fingerprint finger) {
   uint8_t p = finger.getImage();
 
   if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_AUTH, 0);
-    return false;
+    return -1;
   }
 
   // OK success!
@@ -120,16 +189,14 @@ int getFingerprintID(Adafruit_Fingerprint finger) {
   p = finger.image2Tz();
 
   if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_AUTH, 0);
-    return false;
+    return -1;
   }
 
   // OK converted!
   p = finger.fingerSearch();
 
   if (p != FINGERPRINT_OK) {
-    sendErrMsg(MQTT_ACTION_AUTH, 0);
-    return false;
+    return -1;
   }
 
   return finger.fingerID;
@@ -180,28 +247,41 @@ void send_mqtt_message_out(mqtt_message message)
 
   client.publish(MQTT_TOPIC_SENSOR_OUT, hex_message);
 }
-
 void initMqttClient()
 {
-  Serial.println("Inicializando cliente MQTT");
-  client.setServer(mqttServer, mqttPort);
-  client.setCallback(callback_for_idinfo);
+    Serial.println("Inicializando cliente MQTT");
+    client.setServer(mqttServer, mqttPort);
+    client.setCallback(callback_for_idinfo);
 
-  while (!client.connected())
-  {
-    if (client.connect("ESP32Client", mqttUser, mqttPassword))
+    // Define last will message parameters
+    const char* willTopic = "lastWillTopic";
+    const char* willMessage = "Client disconnected unexpectedly";
+    int willQoS = 0;
+    bool willRetain = false;
+
+    while (!client.connected())
     {
-      break;
+        Serial.print("Conectando a MQTT...");
+        if (client.connect("ESP32Client", mqttUser, mqttPassword, willTopic, willQoS, willRetain, willMessage, true))
+        {
+            Serial.println("Conectado.");
+            client.subscribe(MQTT_TOPIC_SENSOR_IN, 0);
+        }
+        else
+        {
+            Serial.print("Error de conexión, rc=");
+            Serial.print(client.state());
+            Serial.println(" Intentando de nuevo en 5 segundos.");
+            delay(5000); 
+        }
     }
-  }
-
-  client.subscribe(MQTT_TOPIC_SENSOR_IN);
 }
+
 
 void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
 {
   mqtt_message message;
-  int id;
+  int id = false;
 
   uint32_t mid = 0, sid = 0, aid = 0, stid = 0;
 
@@ -233,25 +313,24 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
       case MQTT_ACTION_REGISTER:
       
 #ifdef FINGERPRINT_SENSOR_CONN
-        while (!enrollFingerprint(message.student_id, finger))
+        while (!getFingerprintEnroll(message.student_id))
         {
           delay(5000);
         }
 #endif
         break;
       case MQTT_ACTION_CONFIRM:
-      sendMsg(MQTT_ACTION_CONFIRM, message.student_id);
+        Serial.println("CONFIRMANDO RETIRO");
+      
+        sendMsg(MQTT_ACTION_CONFIRM, message.student_id);
 
-#ifdef FINGERPRINT_SENSOR_CONN
-        id = getFingerprintID(finger);
-
-        if (id < 0) {
-          sendErrMsg(MQTT_ACTION_CONFIRM, message.student_id);
-          return;
+        while((id=getFingerprintID(finger))==false)
+        {
+          Serial.println("coloque su dedo");
         }
-#endif
-        // delay(6000);
+        
         sendMsg(MQTT_ACTION_CONFIRMATION_COMPLETE, message.student_id);
+        
         break;
       case MQTT_ACTION_PING:
         sendMsg(MQTT_ACTION_PING, 0);
@@ -358,20 +437,23 @@ void setup()
 
 void loop()
 {
-
+  if(client.state() != MQTT_CONNECTED)
+    initMqttClient();
+    
   client.loop();
  
   // AUTH LOOP
 #ifdef FINGERPRINT_SENSOR_CONN
   int id = getFingerprintID(finger);
 
-  if (id < 0)
-    return;
-  mqtt_message message;
-  message.message_id = 0;
-  message.action = MQTT_ACTION_AUTH;
-  message.student_id = id;
-  message.sensor_id = SENSOR_ID;
-  send_mqtt_message_out(message);
+  if (id > 0) { 
+    Serial.println(id);
+    mqtt_message message;
+    message.message_id = 0;
+    message.action = MQTT_ACTION_AUTH;
+    message.student_id = id;
+    message.sensor_id = SENSOR_ID;
+    send_mqtt_message_out(message);
+  }
 #endif
 }

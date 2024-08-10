@@ -10,7 +10,6 @@ public class MqttMessageHandler implements MessageHandler {
     public void handleMessage(Message<?> message) throws MessagingException {
         try {
             MqttUtils.addToCounter();
-
             MqttUtils.addToMessageStack(MqttUtils.parseMessage(message.getPayload().toString()));
         } catch (Exception e) {
             e.printStackTrace();

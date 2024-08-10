@@ -17,7 +17,6 @@ import {
   Typography,
 } from "@mui/material";
 import { useMemo, useState } from "react";
-import { MqttDataPacket, SensorActions } from "@/hooks";
 import { useRouter } from "next/router";
 import { useApi } from "@/hooks/useApi";
 
@@ -104,7 +103,7 @@ const registrar = () => {
                 dni: data.dni,
                 curso: data.curso,
                 correoElectronico: data.correoElectronico,
-                telefono: data.telefono,
+                telefono: data.telefono
               },
               method: "POST",
             }).then((alumnoApiRes: any) => {

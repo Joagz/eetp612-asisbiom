@@ -1,14 +1,11 @@
-import { MainLayoutFixedHeight, Overline, Paragraph } from "@/components";
-import { useApi } from "@/hooks";
-import { Done, Warning } from "@mui/icons-material";
-import { Button, Chip, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
+import { AlertDialog, MainLayoutFixedHeight, Overline, Paragraph } from "@/components";
+import { SensorActions, useApi } from "@/hooks";
+import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
-import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
 const Autorizar = () => {
-    const router = useRouter();
     const params = useSearchParams();
     const [correo, setCorreo] = useState<string>("");
     const [message, setMessage] = useState<{ status: Boolean, msg: string }>();
@@ -30,19 +27,25 @@ const Autorizar = () => {
 
     function submitevent(data: any) {
         useApi<any[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/${data.email}` }).then(
-            res => {
-                if (res.data.length == 0) {
+            userRes => {
+                if (userRes.data.length == 0) {
                     setMessage({ status: false, msg: `El usuario con E-mail "${data.email}" no fue encontrado.` })
                     return;
                 }
-                setMessage({ status: true, msg: 'Docente autorizado con éxito' })
+                console.log(userRes.data)
 
-                useApi({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/editrole/${data.email}?role=${data.cargo}`, method: "PUT" }).then(res => console.log(res.data));
+                useApi({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/editrole/${data.email}?role=${data.cargo}`, method: "PUT" }).then(res => {
+                    if (userRes.data[0].fingerId == null) {
+                        setMessage({ status: true, msg: 'Si da click a "Aceptar", el sensor esperará la huella del usuario para registrarla.' })
+                        setOpenMessage(true)
+                    }
+                });
+
             }
         )
-
-        router.replace("/docentes");
     }
+
+    const [openMessage, setOpenMessage] = useState(false);
 
     return (
         <MainLayoutFixedHeight title="Autorizar Docente">
@@ -51,8 +54,31 @@ const Autorizar = () => {
                 <Paragraph>Al autorizar a un individuo, usted acepta otorgarle permisos en la aplicación de la institución. El cargo que usted elija debe corresponder al cargo del individuo dentro de la misma.</Paragraph>
                 <i>Aclaración: la persona que usted desea autorizar debe estar registrada en la aplicación con el E-mail correspondiente.</i>
 
-                {message &&
-                    <Chip icon={message.status ? <Done /> : <Warning />} color={message.status ? 'success' : 'error'} label={message?.msg}></Chip>}
+                <AlertDialog onAccept={() => {
+                    if (!correo) {
+                        setMessage({ status: true, msg: "Debe haber un correo electrónico..." });
+                        return;
+                    }
+                    // int sensorId, int alumnoId, int action, int messageId
+                    useApi({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/finger` }).then(
+                        res => {
+                            useApi({
+                                url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/send-message`, method: "POST", body: {
+                                    sensorId: 1,
+                                    alumnoId: res.data,
+                                    action: SensorActions.REGISTER
+                                }
+                            }).then(res => {
+                                console.log(res);
+                            });
+                            useApi({
+                                url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/finger-id/${correo}?id=${res.data}`, method: "PUT"
+                            }).then(res => {
+                                console.log(res.data)
+                            })
+                        }
+                    )
+                }} setOpen={setOpenMessage} open={openMessage} message={message?.msg || ""} message_title={"Registrar la huella del usuario"} />
 
                 <TextField
                     {...register("email", { required: true })}

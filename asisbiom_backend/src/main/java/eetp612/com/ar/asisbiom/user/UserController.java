@@ -59,4 +59,20 @@ public class UserController {
         return ResponseEntity.ok().body(userRepository.save(user));
     }
 
+    @PutMapping("/finger-id/{email}")
+    public ResponseEntity<?> editRole(@PathVariable("email") String email, @RequestParam("id") int id) {
+
+        List<User> found = userRepository.findByEmail(email);
+
+        if (found.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        User user = found.get(0);
+
+        user.setFingerId(id);
+
+        return ResponseEntity.ok().body(userRepository.save(user));
+    }
+
 }

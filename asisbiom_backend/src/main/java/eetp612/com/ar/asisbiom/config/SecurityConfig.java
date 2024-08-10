@@ -1,6 +1,8 @@
 package eetp612.com.ar.asisbiom.config;
 
 import jakarta.servlet.http.HttpServletRequest;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -23,19 +25,26 @@ import java.util.Arrays;
 @Configuration
 public class SecurityConfig {
 
+        @Value("${asisbiom.hostname.adminapp}")
+        private String adminAppHost;
+        
+        @Value("${asisbiom.hostname.sensorapp}")
+        private String sensorAppHost;
+
         @Bean
         SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+
+                System.out.println("ADMIN HOST: "+adminAppHost);
+                System.out.println("SENSOR HOST: "+sensorAppHost);
+
                 http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .cors(corsCustomizer -> corsCustomizer
                                                 .configurationSource(new CorsConfigurationSource() {
                                                         @Override
                                                         public CorsConfiguration getCorsConfiguration(
                                                                         HttpServletRequest request) {
-                                                                // TODO: configurar con el endpoint de el front
                                                                 CorsConfiguration config = new CorsConfiguration();
-                                                                config.setAllowedOrigins(Arrays.asList(
-                                                                                "http://localhost:3000",
-                                                                                "http://localhost:3001"));
+                                                                config.setAllowedOrigins(Arrays.asList(adminAppHost, sensorAppHost));
                                                                 config.setAllowedMethods(Arrays.asList("GET", "POST",
                                                                                 "PUT", "DELETE"));
                                                                 config.setAllowCredentials(true);

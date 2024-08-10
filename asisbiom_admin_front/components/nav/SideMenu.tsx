@@ -17,12 +17,16 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
             <NavButton icon={<ArrowRightAltOutlined />} href="/docentes">Listado</NavButton>
             <NavButton icon={<ArrowRightAltOutlined />} href="/docentes/autorizar">Autorizar</NavButton>
           </DropdownBtn>
+          <DropdownBtn icon={<School />} title="Sensor">
+            <NavButton icon={<ArrowRightAltOutlined />} href="/sensor">Listado</NavButton>
+            <NavButton icon={<ArrowRightAltOutlined />} href="/sensor/autorizar">Autorizar</NavButton>
+          </DropdownBtn>
           <NavButton icon={<Notes />} href="/nota/listado">Notas</NavButton>
+          <NavButton icon={<BarChart />} href="/stats">Estadisticas</NavButton>
         </>
       )}
-      <NavButton icon={<BarChart />} href="/stats">Estadisticas</NavButton>
       <NavButton icon={<Info />} href="/info">Acerca de</NavButton>
-      <NavButton icon={<Settings />} href="/config">Configuración</NavButton>
+      {/* <NavButton icon={<Settings />} href="/config">Configuración</NavButton> */}
     </div>
   );
 }

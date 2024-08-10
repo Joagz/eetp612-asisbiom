@@ -6,4 +6,5 @@ public class StatsConfigs {
     public static final String CANTIDAD_ALUMNOS             = "CANTIDAD_ALUMNOS";
     public static final String CANTIDAD_PERSONAL            = "CANTIDAD_PERSONAL";
     public static final String DIAS_HABILES                 = "DIAS_HABILES";
+    public static final String NEXT_FINGER                  = "NEXT_FINGER";
 }

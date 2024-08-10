@@ -44,4 +44,6 @@ public class Alumno {
     @Column(name = "dni")
     private String dni;
 
+    @Column(name = "finger_id")
+    private Integer fingerId;
 }

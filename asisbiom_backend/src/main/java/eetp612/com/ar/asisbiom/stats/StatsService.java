@@ -49,11 +49,19 @@ public class StatsService {
     // repository.save(new Stats(StatsConfigs.INFO_DIARIA));
     // }
 
+    public int addNextFinger()
+    {
+        Stats finger = repository.findById(StatsConfigs.NEXT_FINGER).get();
+        finger.setValor(finger.getValor()+1);
+        repository.save(finger);
+        return finger.getValor();
+    }
+
     public void reset() {
         Stats presentesAlumnos = repository.findById(StatsConfigs.CANTIDAD_ALUMNOS_PRESENTES).get();
-        presentesAlumnos.setValor(0l);
+        presentesAlumnos.setValor(0);
         Stats presentesPersonal = repository.findById(StatsConfigs.CANTIDAD_PERSONAL_PRESENTES).get();
-        presentesPersonal.setValor(0l);
+        presentesPersonal.setValor(0);
     }
 
     public void addAlumnoToPresentes() {
@@ -104,7 +112,7 @@ public class StatsService {
                 alumno -> inasistencias
                         .add(alumno.getInasistencias1() + alumno.getInasistencias2() + alumno.getInasistencias3()));
 
-        Long diasHabilesTotales = alumnos.size() * diasHabiles.get(0).getValor();
+        Integer diasHabilesTotales = alumnos.size() * diasHabiles.get(0).getValor();
         Float inasistenciasTotales = 0f;
 
         for (Float j : inasistencias) {
@@ -117,29 +125,29 @@ public class StatsService {
     }
 
     // Calcula el porcentaje de asistencias que fueron puntuales
-    public Long porcentajePuntualidad() {
+    public Integer porcentajePuntualidad() {
         List<Stats> diasHabiles = repository.findByTipo(StatsConfigs.DIAS_HABILES);
         List<Integer> tardanzas = new ArrayList<>();
         List<ConteoAsistencia> alumnos = conteoRepository.findAll();
 
         if (alumnos.isEmpty()) {
-            return 0l;
+            return 0;
         }
 
         if (diasHabiles.isEmpty()) {
-            return -1l;
+            return -1;
         }
 
         alumnos.forEach(alumno -> tardanzas.add(alumno.getTardanzas()));
 
-        Long diasHabilesTotales = alumnos.size() * diasHabiles.get(0).getValor();
+        Integer diasHabilesTotales = alumnos.size() * diasHabiles.get(0).getValor();
         Integer totalTardanzas = 0;
 
         for (Integer tardanza : tardanzas) {
             totalTardanzas += tardanza;
         }
 
-        Long asistenciasPuntuales = diasHabilesTotales - totalTardanzas;
+        Integer asistenciasPuntuales = diasHabilesTotales - totalTardanzas;
 
         return (asistenciasPuntuales * 100) / diasHabilesTotales;
     }
@@ -240,7 +248,7 @@ public class StatsService {
             return null;
         }
 
-        Long diasHabiles = foundDiasHabiles.get(0).getValor();
+        Integer diasHabiles = foundDiasHabiles.get(0).getValor();
 
         for (Alumno alumno : alumnos) {
             Float suma = 0f;

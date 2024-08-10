@@ -52,18 +52,18 @@ enum MqttCodes {
 const SensorById = ({ id }: { id: number }) => {
     const { reload } = useRouter();
     const [alumno, setAlumno] = useState<Alumno>(
-        {
-            id: 1,
-            dni: "48067866",
-            nombreCompleto: "Joaquín Gómez",
-            curso: {
-                curso: 4,
-                division: "A",
-                id: 1
-            },
-            correoElectronico: "joagomez.dev@gmail.com",
-            telefono: "3424680690"
-        }
+        // {
+        //     id: 1,
+        //     dni: "48067866",
+        //     nombreCompleto: "Joaquín Gómez",
+        //     curso: {
+        //         curso: 4,
+        //         division: "A",
+        //         id: 1
+        //     },
+        //     correoElectronico: "joagomez.dev@gmail.com",
+        //     telefono: "3424680690"
+        // }
     );
 
     const [message, setMessage] = useState<string>("Esperando entrada...");
@@ -97,14 +97,15 @@ const SensorById = ({ id }: { id: number }) => {
 
     function retirarAlumno(alumno: number) {
         setRetirado(false);
-        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/confirm-retirar/${id}/${alumno}`, method: "POST" }).then(res => {
-            console.log(res.data);
-        })
+        if (alumno)
+            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/confirm-retirar/${id}/${alumno}`, method: "POST" }).then(res => {
+                console.log(res.data);
+            })
     }
 
 
     useEffect(() => {
-        const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_URL!, options);
+        const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);
 
         client.on("connect", () => {
             console.log("Connected");
@@ -116,42 +117,45 @@ const SensorById = ({ id }: { id: number }) => {
             useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/parse`, body: message.toString(), method: "POST" }).then(res => {
                 switch (res.data.action) {
                     case (MqttCodes.MQTT_ACTION_COMPLETED):
-                        setMessage("Alumno registrado con éxito! Bienvenido/a");
+                        setMessage("Registrado con éxito! Bienvenido/a");
                         setOnAction(true);
                         break;
 
                     case (MqttCodes.MQTT_ACTION_AUTH):
-                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${res.data.alumnoId}` }).then(alumnoRes => {
+                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/finger/${res.data.alumnoId}` }).then(alumnoRes => {
                             setAlumno(alumnoRes.data)
-
-                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/materia/${alumnoRes.data.curso.id}` })
-                                .then(cursoRes => {
-                                    setMaterias(cursoRes.data)
-                                }).catch(err => { setMaterias([]) })
-                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats/${alumnoRes.data.id}` })
-                                .then(statsRes => {
-                                    setStats(statsRes.data[0]);
-                                })
-                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${alumnoRes.data.id}` })
-                                .then(notasRes => {
-                                    setNotas(notasRes.data);
-                                })
-                            useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${res.data.alumnoId}?set=true`, method: "POST" }).then(
-                                assistRes => {
-                                    console.log(assistRes.data)
-                                    setAsistido(assistRes.data.response == "OK")
-                                }
-                            )
+                            if (alumnoRes.data) {
+                                useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/materia/${alumnoRes.data.curso.id}` })
+                                    .then(cursoRes => {
+                                        setMaterias(cursoRes.data)
+                                    }).catch(err => { setMaterias([]) })
+                                useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/stats/${alumnoRes.data.id}` })
+                                    .then(statsRes => {
+                                        setStats(statsRes.data[0]);
+                                    })
+                                useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/nota/${alumnoRes.data.id}` })
+                                    .then(notasRes => {
+                                        setNotas(notasRes.data);
+                                    })
+                                useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/asistir/${res.data.alumnoId}?set=true`, method: "POST" }).then(
+                                    assistRes => {
+                                        console.log(assistRes.data)
+                                        setAsistido(assistRes.data.response == "OK")
+                                    }
+                                )
+                            } else {
+                                setMessage("La huella no coincide con ningún registro")
+                            }
                         })
                         break;
                     case (MqttCodes.MQTT_ACTION_REGISTER):
-                        setMessage("Registrando nuevo alumno con ID " + res.data.alumnoId + ". Coloque su dedo por favor.");
+                        setMessage("Registrando nuevo usuario con ID #" + res.data.alumnoId + ". Coloque su dedo por favor.");
                         setOnAction(true);
                         setShowBtn(false);
                         break;
 
                     case (MqttCodes.MQTT_ACTION_REGISTER_COMPLETE):
-                        setMessage("Alumno registrado con éxito! Bienvenido/a.");
+                        setMessage("Registrado con éxito! Bienvenido/a.");
                         setOnAction(false);
                         setShowBtn(true);
 
@@ -173,19 +177,18 @@ const SensorById = ({ id }: { id: number }) => {
                         return;
 
                     case (MqttCodes.MQTT_ACTION_CONFIRMATION_COMPLETE):
-                        if (alumno) {
-                            console.log("Intentando retirar")
-                            useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/by-id/${res.data.alumnoId}` })
-                                .then(userRes => {
-                                    console.log(userRes.data);
-                                    if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
-                                        setConfirmandoRetiro(true);
-                                    } else {
-                                        setMessage("No se pudo retirar al alumno")
-                                        console.log("No se puede retirar")
-                                    }
-                                })
-                        }
+                        console.log("Intentando retirar")
+                        useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/by-id/${res.data.alumnoId}` })
+                            .then(userRes => {
+                                console.log(userRes.data);
+                                if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
+                                    setConfirmandoRetiro(true);
+                                } else {
+                                    setMessage("No se pudo retirar al alumno")
+                                    console.log("No se puede retirar")
+                                }
+                            })
+
 
                         setShowBtn(true);
                         setOnAction(true);
@@ -217,32 +220,35 @@ const SensorById = ({ id }: { id: number }) => {
                     if (!retirar) {
                         setConfirmandoRetiro(false);
                     }
+                    if (alumno) {
+                        console.log("retirando..");
 
-                    console.log("retirando..");
+                        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
 
-                    useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
+                            useApi<any>({
+                                url: `${process.env.NEXT_PUBLIC_API_URL}/api/retiro`, method: 'POST', body: {
+                                    razon: razonRetiro, alumno: alumno.id, profesor: 0
+                                }
+                            }).then(res => {
+                                setRetirado(true);
+                                setMessage("Alumno retirado con éxito");
+                                console.log(res)
+                            }).catch(err => {
+                                setMessage(err.response.data)
+                                setRetirado(false);
+                                console.log("No se puede retirar")
+                            })
 
-                        useApi<any>({
-                            url: `${process.env.NEXT_PUBLIC_API_URL}/api/retiro`, method: 'POST', body: {
-                                razon: razonRetiro, alumno: alumno.id, profesor: 0
-                            }
-                        }).then(res => {
-                            setRetirado(true);
-                            setMessage("Alumno retirado con éxito");
-                            console.log(res)
-                        }).catch(err => {
+                        }
+                        ).catch(err => {
                             setMessage(err.response.data)
                             setRetirado(false);
                             console.log("No se puede retirar")
                         })
-
-                    }
-                    ).catch(err => {
-                        setMessage(err.response.data)
+                    } else {
                         setRetirado(false);
-                        console.log("No se puede retirar")
-                    })
-
+                        setMessage("No hay un alumno autenticado")
+                    }
                     setOnAction(true);
                     setShowBtn(true);
 

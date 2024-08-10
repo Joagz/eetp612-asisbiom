@@ -29,7 +29,7 @@ public class MqttInboundConfiguration {
                                                  "mqtt_sensor_out");
         adapter.setCompletionTimeout(5000);
         adapter.setConverter(new DefaultPahoMessageConverter());
-        adapter.setQos(1);
+        adapter.setQos(0);
         adapter.setOutputChannel(mqttInputChannel());
         return adapter;
     }

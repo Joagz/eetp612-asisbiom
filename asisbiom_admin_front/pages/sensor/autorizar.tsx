@@ -25,7 +25,7 @@ export function AuthorizeSensor() {
         handleSubmit,
     } = useForm();
 
-    function submitevent(data: { device_id: string, device_secret: string }) {
+    function submitevent(data: any) {
         const user: UserDto = {
             email: data.device_id,
             id_role: Roles.SENSOR,

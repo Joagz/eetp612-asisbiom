@@ -102,6 +102,16 @@ public class AlumnoController {
         return null;
     }
 
+    @GetMapping("/finger/{id}")
+    public Alumno findByFingerId(@PathVariable("id") int id) {
+        List<Alumno> found = alumnoRepository.findByFingerId(id);
+
+        if (!found.isEmpty())
+            return found.get(0);
+
+        return null;
+    }
+
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Integer id) {
 
@@ -201,13 +211,16 @@ public class AlumnoController {
             return new ResponseEntity<>("Curso no encontrado.", HttpStatus.BAD_REQUEST);
 
         Alumno alumno = alumnoDto.toAlumno(found.get());
+
+        Integer fingerId = statsService.addNextFinger();
+        alumno.setFingerId(fingerId);
         alumnoRepository.save(alumno);
         conteoRepository.save(new ConteoAsistencia(alumno));
         statsService.addAlumno();
 
         MqttMessage message = new MqttMessage();
         message.setAccion(MqttUtils.integerToByteArray(SensorAction.REGISTER.ordinal()));
-        message.setIdAlumno(MqttUtils.integerToByteArray(alumno.getId()));
+        message.setIdAlumno(MqttUtils.integerToByteArray(fingerId));
         MqttUtils.addToCounter();
         message.setMessageId(MqttUtils.integerToByteArray(MqttUtils.getCounter()));
         message.setSensorId(MqttUtils.integerToByteArray(1)); // por el momento

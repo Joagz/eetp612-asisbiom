@@ -21,4 +21,6 @@ public interface AlumnoRepository extends JpaRepository<Alumno, Integer> {
 
     List<Alumno> findByNombreCompleto(String nombreCompleto);
 
+    List<Alumno> findByFingerId(Integer fingerId);
+
 }
