@@ -19,13 +19,12 @@ Para ejecutar el proyecto necesitarás:
 Antes de empezar asegurate de tener instalado React y Next:
 ```shell
 npm install next@latest react@latest react-dom@latest
-
 ```
 A continuación, ejecute el siguiente comando dentro de la carpeta raíz:
 ```shell
-cd ./asisbiom_frontend \
-npm install \
-cd ./asisbiom_admin_front \
+cd ./asisbiom_frontend 
+npm install 
+cd ./asisbiom_admin_front 
 npm install
 ```
 En ```asisbiom_backend/src/main/resources/application.properties``` encontrarás lo siguiente:
@@ -68,15 +67,27 @@ mvn install && mvn compile && mvn package
 ```
 Para la interfaz del sensor:
 ```shell
-cd ./asisbiom_frontend \
-npm run build \
+cd ./asisbiom_frontend
+npm run build
 npm start
 ```
 para la interfaz de administración:
 ```shell
-cd ./asisbiom_admin_front \
-npm run build \
+cd ./asisbiom_admin_front
+npm run build
 npm start
 ```
 
+# Cambiando configuraciones
+Cuando queremos correr el programa en una red local y que los dispositivos se
+comuniquen correctamente, necesitaremos configurar la IP o Host del servidor.
 
+Para configurar la IP donde se configura el servidor, ejecute:
+
+```shell
+./install [DIRECCION_IP_SERVIDOR]
+```
+
+DIRECCION_IP_SERVIDOR es la dirección IP del servidor donde se ejecuten los programas.
+
+(Si utiliza un servidor con Ubuntu Server, ejecute ```hostname -I``` y utilice la IP que le proporciona).
