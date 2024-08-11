@@ -1,4 +1,4 @@
-import { ArrowRightAltOutlined, BarChart, Face, Home, Info, Notes, School, Settings } from "@mui/icons-material";
+import { ArrowRightAltOutlined, BarChart, Face, Home, Info, Notes, School, Sensors, Settings } from "@mui/icons-material";
 import { DropdownBtn, NavButton } from "../buttons";
 
 export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
@@ -17,7 +17,7 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
             <NavButton icon={<ArrowRightAltOutlined />} href="/docentes">Listado</NavButton>
             <NavButton icon={<ArrowRightAltOutlined />} href="/docentes/autorizar">Autorizar</NavButton>
           </DropdownBtn>
-          <DropdownBtn icon={<School />} title="Sensor">
+          <DropdownBtn icon={<Sensors />} title="Sensor">
             <NavButton icon={<ArrowRightAltOutlined />} href="/sensor">Listado</NavButton>
             <NavButton icon={<ArrowRightAltOutlined />} href="/sensor/autorizar">Autorizar</NavButton>
           </DropdownBtn>

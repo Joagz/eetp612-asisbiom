@@ -38,6 +38,19 @@ public class UserController {
         return ResponseEntity.notFound().build();
     }
 
+    @GetMapping("/finger/{id}")
+    public ResponseEntity<?> findByFingerId(@PathVariable("id") int id) {
+        List<User> found = userRepository.findByFingerId(id);
+        
+        if(!found.isEmpty())
+        {
+            return ResponseEntity.ok().body(found.get(0));
+        }
+
+        return ResponseEntity.notFound().build();
+    }
+
+
     @GetMapping("/{email}")
     public List<User> findByEmail(@PathVariable("email") String email) {
         return userRepository.findByEmail(email);

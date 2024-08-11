@@ -6,9 +6,11 @@ import DialogContent from '@mui/material/DialogContent';
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 
-export function AlertDialog({ message_title, message, onAccept, setOpen, open }: { open: boolean, setOpen: (open: boolean) => void, message: string, message_title: string, onAccept: () => void }) {
+export function AlertDialog({ message_title, message, onAccept, onCancel, setOpen, open }: { open: boolean, setOpen: (open: boolean) => void, message: string, message_title: string, onAccept: () => void, onCancel?: () => void }) {
 
     const handleClose = () => {
+
+        if (onCancel) onCancel();
         setOpen(false);
     };
 

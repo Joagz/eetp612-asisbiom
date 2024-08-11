@@ -41,31 +41,40 @@ public class AuthController {
             return ResponseEntity.badRequest().body("El correo electrónico está en uso.");
         }
 
-        if (!isSensor)
+        if (!isSensor) {
+            if (user.dni().length() != DNI_LENGTH) {
+                return ResponseEntity.badRequest().body("El DNI debe tener 8 caracteres");
+            }
             if (!userRepository.findByPhone(user.phone()).isEmpty()) {
                 return ResponseEntity.badRequest().body("El teléfono está en uso.");
             }
-
-        if (!isSensor && !Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
-            return ResponseEntity.badRequest().body("Correo electrónico no válido.");
+            if (!Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
+                return ResponseEntity.badRequest().body("Correo electrónico no válido.");
+            }
         }
 
         if (isSensor && Pattern.compile(EMAIL_REGEX_PATTERN).matcher(user.email()).matches()) {
             return ResponseEntity.badRequest().body("El sensor no puede usar un correo como ID.");
         }
 
-        if (user.dni().length() != DNI_LENGTH) {
-            return ResponseEntity.badRequest().body("El DNI debe tener 8 caracteres");
-        }
+        User toSave = null;
 
-        User toSave = new User(
-                encoder.encode(user.pwd()),
-                Roles.USUARIO,
-                user.email().toLowerCase(),
-                user.phone(),
-                user.dni(),
-                user.nombre_completo());
-
+        if (isSensor)
+            toSave = new User(
+                    encoder.encode(user.pwd()),
+                    Roles.SENSOR,
+                    user.email().toLowerCase(),
+                    user.phone(),
+                    user.dni(),
+                    user.nombre_completo());
+        else
+            toSave = new User(
+                    encoder.encode(user.pwd()),
+                    Roles.USUARIO,
+                    user.email().toLowerCase(),
+                    user.phone(),
+                    user.dni(),
+                    user.nombre_completo());
         return ResponseEntity.ok().body(userRepository.save(toSave));
     }
 

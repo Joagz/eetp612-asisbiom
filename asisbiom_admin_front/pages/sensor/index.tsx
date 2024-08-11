@@ -16,14 +16,14 @@ interface User {
 }
 
 const homeDocentes = () => {
-  const [usuarios, setDocentes] = useState<User[]>([]);
+  const [usuarios, setUsuarios] = useState<User[]>([]);
 
 
   useMemo(() => {
     useApi<User[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user` })
       .then(res => {
-        console.log(res.data);
-        setDocentes(res.data.filter(k => k.role == "SENSOR"));
+        setUsuarios(res.data.filter(k => k.role == "SENSOR"));
+        console.log(res.data.filter(k => k.role == "SENSOR"))
       })
   }, [])
 
@@ -34,21 +34,19 @@ const homeDocentes = () => {
       <Paragraph>Listado de dispositivos autorizados</Paragraph>
       <div className="flex flex-col gap-4 p-8 w-full">
 
-        {usuarios.map(usuario => {
-          if (usuario.nombreCompleto) return (
-            <Card className="w-full p-2" key={usuario.id}>
-              <CardContent>
+        {usuarios.map(usuario =>
+
+          <Card className="w-full p-2" key={usuario.id}>
+            <CardContent>
               <Typography variant="h6">{usuario.email}</Typography>
               <Typography>{usuario.role}</Typography>
-              </CardContent>
-              <CardActions className="flex gap-4">
-                <Button color="primary" startIcon={<Edit />}>Editar</Button>
-                <Button color="warning" href={`/docentes/autorizar?correo=${usuario.email}&cargo=${usuario.role}`} startIcon={<Person />}>Cambiar cargo</Button>
-                <Button color="error" startIcon={<DeleteForever />}>Borrar</Button>
-              </CardActions>
-            </Card>)
+            </CardContent>
+            <CardActions className="flex gap-4">
+              <Button color="error" startIcon={<DeleteForever />}>Borrar</Button>
+            </CardActions>
+          </Card>)
+
         }
-        )}
       </div>
     </MainLayoutFixedHeight>
   );

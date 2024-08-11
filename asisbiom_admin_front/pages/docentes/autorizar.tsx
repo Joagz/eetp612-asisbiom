@@ -2,6 +2,7 @@ import { AlertDialog, MainLayoutFixedHeight, Overline, Paragraph } from "@/compo
 import { SensorActions, useApi } from "@/hooks";
 import { Button, FormControl, InputLabel, MenuItem, Select, TextField, Typography } from "@mui/material";
 import { useSearchParams } from "next/navigation";
+import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
@@ -9,7 +10,7 @@ const Autorizar = () => {
     const params = useSearchParams();
     const [correo, setCorreo] = useState<string>("");
     const [message, setMessage] = useState<{ status: Boolean, msg: string }>();
-
+    const { replace } = useRouter();
 
     const {
         register,
@@ -32,12 +33,13 @@ const Autorizar = () => {
                     setMessage({ status: false, msg: `El usuario con E-mail "${data.email}" no fue encontrado.` })
                     return;
                 }
-                console.log(userRes.data)
 
                 useApi({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/editrole/${data.email}?role=${data.cargo}`, method: "PUT" }).then(res => {
                     if (userRes.data[0].fingerId == null) {
                         setMessage({ status: true, msg: 'Si da click a "Aceptar", el sensor esperará la huella del usuario para registrarla.' })
                         setOpenMessage(true)
+                    } else {
+                        replace("/docentes");
                     }
                 });
 
@@ -54,7 +56,7 @@ const Autorizar = () => {
                 <Paragraph>Al autorizar a un individuo, usted acepta otorgarle permisos en la aplicación de la institución. El cargo que usted elija debe corresponder al cargo del individuo dentro de la misma.</Paragraph>
                 <i>Aclaración: la persona que usted desea autorizar debe estar registrada en la aplicación con el E-mail correspondiente.</i>
 
-                <AlertDialog onAccept={() => {
+                <AlertDialog onCancel={() => { replace("/docentes") }} onAccept={() => {
                     if (!correo) {
                         setMessage({ status: true, msg: "Debe haber un correo electrónico..." });
                         return;

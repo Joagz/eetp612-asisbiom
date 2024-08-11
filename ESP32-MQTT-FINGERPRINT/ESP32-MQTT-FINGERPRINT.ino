@@ -281,7 +281,7 @@ void initMqttClient()
 void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
 {
   mqtt_message message;
-  int id = false;
+  int id = -1;
 
   uint32_t mid = 0, sid = 0, aid = 0, stid = 0;
 
@@ -315,7 +315,6 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
 #ifdef FINGERPRINT_SENSOR_CONN
         while (!getFingerprintEnroll(message.student_id))
         {
-          delay(5000);
         }
 #endif
         break;
@@ -323,13 +322,14 @@ void callback_for_idinfo(char *topic, byte *payload, unsigned int length)
         Serial.println("CONFIRMANDO RETIRO");
       
         sendMsg(MQTT_ACTION_CONFIRM, message.student_id);
-
-        while((id=getFingerprintID(finger))==false)
+        
+        while((id=getFingerprintID(finger))<0)
         {
           Serial.println("coloque su dedo");
         }
         
-        sendMsg(MQTT_ACTION_CONFIRMATION_COMPLETE, message.student_id);
+        Serial.println(id);
+        sendMsg(MQTT_ACTION_CONFIRMATION_COMPLETE, id);
         
         break;
       case MQTT_ACTION_PING:

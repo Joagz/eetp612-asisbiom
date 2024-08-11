@@ -11,12 +11,12 @@ export function ForbiddenPage() {
     return (
       <MainLayout title="Acceso Prohido">
         <div className="gap-4 absolute h-full w-full flex flex-col justify-center items-center">
-          <Title>Lo sentimos... no tienes acceso a "{forbidden_url}"</Title>
+          <Title>Lo sentimos... no tienes acceso a "{forbidden_url as unknown as string}"</Title>
           <Overline>
             Si cree que esto es un error, por favor contáctese con la
             institución.
           </Overline>
-          <Button href={rollback} variant="contained">
+          <Button href={rollback as unknown as string} variant="contained">
             OK
           </Button>
         </div>

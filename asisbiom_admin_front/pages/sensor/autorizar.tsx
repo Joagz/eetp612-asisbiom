@@ -2,18 +2,20 @@ import { MainLayoutFixedHeight, Paragraph, Title } from "@/components";
 import { useApi } from "@/hooks";
 import Roles from "@/interface/Roles";
 import { SubdirectoryArrowRight, Warning } from "@mui/icons-material";
-import { Button, Paper, TextField, Typography } from "@mui/material";
+import { Button, Chip, Paper, TextField, Typography } from "@mui/material";
 import Link from "next/link";
 import router from "next/router";
+import { useState } from "react";
 import { FieldValues, Form, FormSubmitHandler, useForm } from "react-hook-form";
 
 
 
 interface UserDto {
-    pwd: string,
-    email: string,
-    phone: string
-    id_role: string,
+    pwd: string;
+    email: string;
+    phone: string;
+    dni: string;
+    nombre_completo: string;
 }
 
 export function AuthorizeSensor() {
@@ -24,20 +26,28 @@ export function AuthorizeSensor() {
         control,
         handleSubmit,
     } = useForm();
+    const [error, setError] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     function submitevent(data: any) {
         const user: UserDto = {
             email: data.device_id,
-            id_role: Roles.SENSOR,
             phone: "",
-            pwd: data.device_secret
+            pwd: data.device_secret,
+            dni: "",
+            nombre_completo: ""
         }
 
         useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/auth/v1/register?is_sensor=true`, body: user, method: "POST" }).then(
-            res => console.log(res)
-        ).catch(err => console.log(err))
+            res => {
+                console.log(res);
+                router.replace("/sensor");
+            }
+        ).catch(err => {
+            setErrorMessage(err.response.data);
+            setError(true);
+        })
 
-        router.replace("/sensor");
     }
 
 
@@ -47,6 +57,7 @@ export function AuthorizeSensor() {
             <div className="w-full md:w-2/3 lg:w-1/2 flex flex-col gap-4">
 
                 <Title className="text-xl mb-2">Autorizar nuevo sensor</Title>
+                {error && <Chip label={errorMessage} color="error" variant="filled" />}
                 <Paragraph>Al autorizar un nuevo sensor, estará creando un perfil para un dispositivo. Ésto le dará acceso a los datos de la aplicación.</Paragraph>
                 <div className="flex w-full justify-around my-4 gap-4">
                     <Paper className="flex-1">

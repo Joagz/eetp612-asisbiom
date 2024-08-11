@@ -149,25 +149,25 @@ const SensorById = ({ id }: { id: number }) => {
                         })
                         break;
                     case (MqttCodes.MQTT_ACTION_REGISTER):
-                        setMessage("Registrando nuevo usuario con ID #" + res.data.alumnoId + ". Coloque su dedo por favor.");
+                        setMessage("Registrando nuevo usuario con ID #" + res.data.alumnoId + ". Coloque su dedo por favor");
                         setOnAction(true);
                         setShowBtn(false);
                         break;
 
                     case (MqttCodes.MQTT_ACTION_REGISTER_COMPLETE):
-                        setMessage("Registrado con éxito! Bienvenido/a.");
+                        setMessage("Registrado con éxito! Bienvenido/a");
                         setOnAction(false);
                         setShowBtn(true);
 
                         break;
 
                     case (MqttCodes.MQTT_ACTION_PUT_FINGER):
-                        setMessage("Por favor coloque el mismo dedo nuevamente.");
+                        setMessage("Por favor coloque el mismo dedo nuevamente");
                         setOnAction(true);
                         break;
 
                     case (MqttCodes.MQTT_ACTION_REMOVE_FINGER):
-                        setMessage("Retire el dedo del sensor.");
+                        setMessage("Retire el dedo del sensor");
                         setOnAction(true);
                         return;
 
@@ -177,16 +177,17 @@ const SensorById = ({ id }: { id: number }) => {
                         return;
 
                     case (MqttCodes.MQTT_ACTION_CONFIRMATION_COMPLETE):
-                        console.log("Intentando retirar")
-                        useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/by-id/${res.data.alumnoId}` })
+                        useApi<User>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/user/finger/${res.data.alumnoId}` })
                             .then(userRes => {
                                 console.log(userRes.data);
                                 if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
                                     setConfirmandoRetiro(true);
+                                    setMessage("Alumno retirado")
                                 } else {
-                                    setMessage("No se pudo retirar al alumno")
-                                    console.log("No se puede retirar")
+                                    setMessage("El ROL del usuario no tiene permiso para retirar")
                                 }
+                            }).catch(err => {
+                                setMessage("Acceso Restringido, usuario no válido")
                             })
 
 
@@ -195,7 +196,7 @@ const SensorById = ({ id }: { id: number }) => {
                         break;
 
                     case (MqttCodes.MQTT_ERROR_REGISTER_FAILED):
-                        setMessage("Error al registrar, intentando nuevamente en 5 segundos.")
+                        setMessage("Error al registrar, intentando nuevamente")
                         break;
                 }
 
@@ -234,7 +235,7 @@ const SensorById = ({ id }: { id: number }) => {
                                 setMessage("Alumno retirado con éxito");
                                 console.log(res)
                             }).catch(err => {
-                                setMessage(err.response.data)
+                                setMessage(err.response.data || "No se puede retirar")
                                 setRetirado(false);
                                 console.log("No se puede retirar")
                             })
