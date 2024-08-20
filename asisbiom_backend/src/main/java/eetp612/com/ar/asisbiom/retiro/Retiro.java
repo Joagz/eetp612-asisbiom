@@ -1,6 +1,6 @@
 package eetp612.com.ar.asisbiom.retiro;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 
 import eetp612.com.ar.asisbiom.alumnos.Alumno;
 import eetp612.com.ar.asisbiom.user.User;
@@ -10,6 +10,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -28,12 +29,14 @@ public class Retiro {
     private String razon;
 
     @Nullable
-    private LocalTime fecha;
+    private LocalDate fecha;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "alumno")
     private Alumno alumno;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "profesor")
     private User profesor;
 
 }

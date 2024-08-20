@@ -1,6 +1,6 @@
 package eetp612.com.ar.asisbiom.retiro;
 
-import java.time.LocalTime;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -49,25 +49,26 @@ public class RetiroController {
         return ResponseEntity.ok().body(repository.findByAlumno(found.get()));
     }
 
-    @PostMapping
-    ResponseEntity<?> create(@RequestBody RetiroDto dto) {
+    @PostMapping("/{idAlumno}/{idProfesor}/{razon}")
+    ResponseEntity<?> create(@PathVariable("razon") String razon, @PathVariable("idAlumno") int idAlumno, @PathVariable("idProfesor") int idProfesor) {
 
-        Optional<Alumno> foundAlumno = alumnoRepository.findById(dto.alumno());
-        Optional<User> foundProfesor = userRepository.findById(dto.profesor());
+        Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
+        Optional<User> foundProfesor = userRepository.findById(idProfesor);
+     
         Retiro retiro = new Retiro();
 
-        if (!foundAlumno.isPresent()) {
+        if (foundAlumno.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
 
-        if(foundProfesor.isPresent())
-        {
-            retiro.setProfesor(foundProfesor.get()); 
+        if (foundProfesor.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
 
-        retiro.setFecha(LocalTime.now());
+        retiro.setProfesor(foundProfesor.get());
+        retiro.setFecha(LocalDate.now());
         retiro.setAlumno(foundAlumno.get());
-        retiro.setRazon(dto.razon());
+        retiro.setRazon(razon);
 
         return ResponseEntity.ok().body(repository.save(retiro));
     }

@@ -1,5 +1,16 @@
 package eetp612.com.ar.asisbiom.retiro;
 
-public record RetiroDto(String razon, int profesor, int alumno) {
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+
+@Getter
+@Setter
+@ToString
+public class RetiroDto {
+
+    private String razon;
+    private int profesor;
+    private int alumno;
 
 }

@@ -51,20 +51,7 @@ enum MqttCodes {
 
 const SensorById = ({ id }: { id: number }) => {
     const { reload } = useRouter();
-    const [alumno, setAlumno] = useState<Alumno>(
-        // {
-        //     id: 1,
-        //     dni: "48067866",
-        //     nombreCompleto: "Joaquín Gómez",
-        //     curso: {
-        //         curso: 4,
-        //         division: "A",
-        //         id: 1
-        //     },
-        //     correoElectronico: "joagomez.dev@gmail.com",
-        //     telefono: "3424680690"
-        // }
-    );
+    const [alumno, setAlumno] = useState<Alumno>();
 
     const [message, setMessage] = useState<string>("Esperando entrada...");
 
@@ -182,7 +169,7 @@ const SensorById = ({ id }: { id: number }) => {
                                 console.log(userRes.data);
                                 if ([Roles.PRECEPTOR, Roles.DIRECTIVO, Roles.SECRETARIO, Roles.PROFESOR, Roles.DEVELOPER].includes(userRes.data.role)) {
                                     setConfirmandoRetiro(true);
-                                    setMessage("Alumno retirado")
+                                    setProfesor(userRes.data);
                                 } else {
                                     setMessage("El ROL del usuario no tiene permiso para retirar")
                                 }
@@ -213,32 +200,31 @@ const SensorById = ({ id }: { id: number }) => {
 
     const [razonRetiro, setRazonRetiro] = useState<string>();
     const [confirmandoRetiro, setConfirmandoRetiro] = useState<boolean>(false);
+    const [profesor, setProfesor] = useState<User>();
 
     return (
         <PrincipalLayout disableFooter title={`Sensor ${id}`}>
             <div className='flex h-screen py-5 w-full justify-center items-center flex-col'>
-                <FormDialog setRazonRetiro={setRazonRetiro} setOpen={setConfirmandoRetiro} open={confirmandoRetiro} handleClose={function (retirar: boolean): void {
+                <FormDialog setRazonRetiro={setRazonRetiro} setOpen={setConfirmandoRetiro} open={confirmandoRetiro} handleClose={function (retirar: boolean, razon: string): void {
                     if (!retirar) {
                         setConfirmandoRetiro(false);
                     }
                     if (alumno) {
-                        console.log("retirando..");
-
                         useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/retirar/${alumno.id}`, method: "POST" }).then(retirarRes => {
-
                             useApi<any>({
-                                url: `${process.env.NEXT_PUBLIC_API_URL}/api/retiro`, method: 'POST', body: {
-                                    razon: razonRetiro, alumno: alumno.id, profesor: 0
-                                }
-                            }).then(res => {
-                                setRetirado(true);
-                                setMessage("Alumno retirado con éxito");
-                                console.log(res)
-                            }).catch(err => {
-                                setMessage(err.response.data || "No se puede retirar")
-                                setRetirado(false);
-                                console.log("No se puede retirar")
+                                url: `${process.env.NEXT_PUBLIC_API_URL}/api/retiro/${alumno.id}/${profesor?.id}/${razon}`,
+                                method: 'POST',
                             })
+                                .then(res => {
+                                    setRetirado(true);
+                                    setMessage("Alumno retirado con éxito");
+                                    console.log(res)
+                                }).catch(err => {
+                                    setMessage(err.response.data || "No se puede retirar")
+                                    setRetirado(false);
+                                    console.log({ razon: razon, alumno: alumno.id, profesor_id: profesor?.id })
+                                    console.log("No se puede retirar")
+                                })
 
                         }
                         ).catch(err => {
@@ -350,14 +336,15 @@ const SensorById = ({ id }: { id: number }) => {
 }
 
 function FormDialog({ setRazonRetiro, open, setOpen, handleClose }:
-    { setRazonRetiro: any, setOpen: any, open: boolean, handleClose: (retirar: boolean) => void }) {
+    { setRazonRetiro: any, setOpen: any, open: boolean, handleClose: (retirar: boolean, razon: string) => void }) {
 
     const { control, register, handleSubmit, formState: { errors } } = useForm();
 
     function onSubmit(data: any) {
         setRazonRetiro(data.razon);
         setOpen(false);
-        handleClose(true);
+        console.log(data)
+        handleClose(true, data.razon);
     }
 
     return (
@@ -388,7 +375,7 @@ function FormDialog({ setRazonRetiro, open, setOpen, handleClose }:
                 <DialogActions>
                     <Button onClick={() => {
                         setOpen(false)
-                        handleClose(false)
+                        handleClose(false, "")
                     }}>Cancelar</Button>
                     <Button type="submit">Retirar</Button>
                 </DialogActions>

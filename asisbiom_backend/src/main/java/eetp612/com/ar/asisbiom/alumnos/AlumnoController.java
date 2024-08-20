@@ -7,6 +7,7 @@ package eetp612.com.ar.asisbiom.alumnos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -269,7 +270,7 @@ public class AlumnoController {
     }
 
     @PostMapping("/retirar/{idAlumno}")
-    public ResponseEntity<?> retirar(Authentication authentication, @PathVariable("idAlumno") Integer idAlumno) {
+    public ResponseEntity<?> retirar(@PathVariable("idAlumno") Integer idAlumno) {
 
         Optional<Alumno> foundAlumno = alumnoRepository.findById(idAlumno);
 
@@ -282,22 +283,25 @@ public class AlumnoController {
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
         asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null)
                 .collect(Collectors.toList());
-        List<Horario> horarioDeHoy = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
+                
+        List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
                 DateUtils.getDay());
 
-        if (asistencias.isEmpty()) {
-            return ResponseEntity.status(400)
-                    .body("Este alumno no tiene asistencias hoy, no se retiró.");
+        Horario horario = null;
+
+        for(Horario h : horarios)
+        {
+            System.err.println(h);
+            if(h.getHorarioEntrada().isBefore(LocalTime.now()) && h.getHorarioSalida().isAfter(LocalTime.now()))
+            {
+                horario = h;
+            }
         }
 
-        if (horarioDeHoy.isEmpty()) {
+        if(horario == null)
+        {
             return ResponseEntity.status(400)
-                    .body("No hay horarios hoy para este alumno, no se retiró.");
-        }
-
-        if (LocalTime.now().isAfter(horarioDeHoy.get(0).getHorarioSalida())) {
-            return ResponseEntity.status(400)
-                    .body("El horario se salida es anterior al actual, no se retiró.");
+            .body("No hay horarios disponibles para el alumno. No se pudo retirar.");
         }
 
         mqttService.retirar(foundAlumno.get(), asistencias.get(0));
@@ -406,7 +410,7 @@ public class AlumnoController {
         List<Alumno> alumnos = alumnoRepository.findAll();
 
         for (Alumno alumno : alumnos) {
-            System.out.println("procesando alumno "+alumno.getNombreCompleto());
+            System.out.println("procesando alumno " + alumno.getNombreCompleto());
             List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
             List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
 
@@ -427,7 +431,6 @@ public class AlumnoController {
             horario = horarios.get(0);
 
             LocalDate fecha = LocalDate.now();
-
 
             // creamos las asistencias
             for (int i = 0; i <= 80; i++) {
@@ -451,7 +454,7 @@ public class AlumnoController {
                 if (random.nextInt(10) == 1 && tardanzas < 10) {
                     tardanzas++;
                     asistencia.setTardanza(true);
-                    asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10))); 
+                    asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10)));
                 }
 
                 asistenciaRepository.save(asistencia);
