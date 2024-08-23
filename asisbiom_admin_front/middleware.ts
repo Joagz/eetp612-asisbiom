@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
       if (jwt) {
         const jwtValue = jwt.value;
         const decoded: { roles: string } = parseJwt(jwtValue);
-
+      
         // Check if user has permission for the current URL
         const hasPermission = permissions.some((permission) =>
           request.nextUrl.pathname.startsWith(permission.url) &&

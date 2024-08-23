@@ -65,7 +65,9 @@ public class MqttController {
         }
 
         Stack<MqttMessage> messages = MqttUtils.getMessageStack();
-
+        if (messages.isEmpty()) {
+            return ResponseEntity.ok().body(null);
+        }
         MqttMessage message = messages.pop();
 
         while (MqttUtils.fromByteArray(message.getSensorId()) != id) {
@@ -101,7 +103,8 @@ public class MqttController {
     }
 
     @PostMapping("/confirm-retirar/{sensor_id}/{alumno_id}")
-    public ResponseEntity<?> confirmRetirar(@PathVariable("sensor_id") int sensor_id, @PathVariable("alumno_id") int alumno_id) {
+    public ResponseEntity<?> confirmRetirar(@PathVariable("sensor_id") int sensor_id,
+            @PathVariable("alumno_id") int alumno_id) {
         try {
 
             MqttMessage finalMessage = new MqttMessage();

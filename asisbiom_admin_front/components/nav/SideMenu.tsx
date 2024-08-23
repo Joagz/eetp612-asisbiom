@@ -1,4 +1,4 @@
-import { ArrowRightAltOutlined, BarChart, Face, Home, Info, Notes, School, Sensors, Settings } from "@mui/icons-material";
+import { ArrowRightAltOutlined, BarChart, Call, Face, Help, HelpCenter, Home, Info, LiveHelp, Notes, School, Sensors, Settings } from "@mui/icons-material";
 import { DropdownBtn, NavButton } from "../buttons";
 
 export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
@@ -23,8 +23,10 @@ export function SideMenu({ isLoggedIn }: { isLoggedIn: boolean }) {
           </DropdownBtn>
           <NavButton icon={<Notes />} href="/nota/listado">Notas</NavButton>
           <NavButton icon={<BarChart />} href="/stats">Estadisticas</NavButton>
+          <NavButton icon={<Call />} href="/alumnos/reportes">Reportes recibidos</NavButton>
         </>
       )}
+      <NavButton icon={<Help />} href="/reportar">Reportes y ayuda</NavButton>
       <NavButton icon={<Info />} href="/info">Acerca de</NavButton>
       {/* <NavButton icon={<Settings />} href="/config">Configuración</NavButton> */}
     </div>

@@ -94,6 +94,8 @@ const SensorById = ({ id }: { id: number }) => {
     useEffect(() => {
         const client = mqtt.connect(process.env.NEXT_PUBLIC_MQTT_SERVER_URI!, options);
 
+        useApi({ url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/last-message/${id}` }).then(res => console.log(res.data))
+
         client.on("connect", () => {
             console.log("Connected");
             client.subscribe("mqtt_sensor_out");
