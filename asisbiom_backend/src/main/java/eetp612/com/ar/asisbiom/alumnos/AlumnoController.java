@@ -115,8 +115,13 @@ public class AlumnoController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable("id") Integer id) {
+        Optional<Alumno> alumno;
+        if ((alumno = alumnoRepository.findById(id)).isPresent()) {
+            alumnoRepository.delete(alumno.get());
+            return ResponseEntity.ok().body("Eliminado correctamente");
+        }
 
-        return ResponseEntity.ok().body("Eliminado correctamente");
+        return ResponseEntity.notFound().build();
     }
 
     @GetMapping("/stats")
@@ -283,25 +288,22 @@ public class AlumnoController {
         List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
         asistencias.stream().filter(asistencia -> asistencia.getHorarioRetiro() == null)
                 .collect(Collectors.toList());
-                
+
         List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
                 DateUtils.getDay());
 
         Horario horario = null;
 
-        for(Horario h : horarios)
-        {
+        for (Horario h : horarios) {
             System.err.println(h);
-            if(h.getHorarioEntrada().isBefore(LocalTime.now()) && h.getHorarioSalida().isAfter(LocalTime.now()))
-            {
+            if (h.getHorarioEntrada().isBefore(LocalTime.now()) && h.getHorarioSalida().isAfter(LocalTime.now())) {
                 horario = h;
             }
         }
 
-        if(horario == null)
-        {
+        if (horario == null) {
             return ResponseEntity.status(400)
-            .body("No hay horarios disponibles para el alumno. No se pudo retirar.");
+                    .body("No hay horarios disponibles para el alumno. No se pudo retirar.");
         }
 
         mqttService.retirar(foundAlumno.get(), asistencias.get(0));

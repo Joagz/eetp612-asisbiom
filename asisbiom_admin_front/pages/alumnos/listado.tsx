@@ -15,11 +15,17 @@ import {
   InputLabel,
   FormControl,
   IconButton,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  DialogContentText,
 } from "@mui/material";
 import { MainLayout } from "@/components";
 import axios from "axios";
 import { useApi } from "@/hooks/useApi";
-import { Edit, EditNote, NoteAdd, Visibility } from "@mui/icons-material";
+import { Delete, Edit, EditNote, NoteAdd, Visibility } from "@mui/icons-material";
+import { useRouter } from "next/router";
 
 type _alumno_filter = {
   nombre: string;
@@ -67,7 +73,7 @@ const Listado = () => {
       });
   }, []);
 
-  useEffect(() => {
+  function changeDatosFiltrados() {
     setDatosFiltrados(
       datos.filter(
         (data) =>
@@ -77,7 +83,11 @@ const Listado = () => {
           data.dni.toLowerCase().includes(filtroDni.toLowerCase())
       )
     );
-  }, [datos, filtroNombre, filtroCurso, filtroDivision, filtroDni]);
+  }
+
+  useEffect(() => {
+    changeDatosFiltrados();
+  }, [datos, filtroCurso, filtroDivision]);
 
   return (
     <MainLayout title="Alumnos - Listado">
@@ -89,6 +99,11 @@ const Listado = () => {
             label="Nombre y Apellido"
             variant="outlined"
             value={filtroNombre}
+            onKeyPressCapture={(e: any) => {
+              if (e.key === 'Enter') {
+                changeDatosFiltrados();
+              }
+            }}
             onChange={(e) => {
               setFiltroNombre(e.target.value);
             }}
@@ -99,6 +114,10 @@ const Listado = () => {
             label="DNI"
             variant="outlined"
             value={filtroDni}
+            onKeyPress={(e: any) => {
+              if (e.key === 'Enter')
+                changeDatosFiltrados();
+            }}
             onChange={(e) => {
               setFiltroDni(e.target.value);
             }}
@@ -194,8 +213,9 @@ const Listado = () => {
                   <TableCell>{fila.tardanzas}</TableCell>
                   <TableCell>{fila.retiros}</TableCell>
                   <TableCell>
-                  <IconButton href={`/nota/alumno/${fila.id}`} className="hover:text-yellow-600" title="Nueva Nota"><EditNote /></IconButton>
-                  <IconButton href={`/alumnos/${fila.id}`} className="hover:text-blue-600" title="Más información"><Visibility /></IconButton>
+                    <IconButton href={`/nota/alumno/${fila.id}`} className="hover:text-yellow-600" title="Nueva Nota"><EditNote /></IconButton>
+                    <IconButton href={`/alumnos/${fila.id}`} className="hover:text-blue-600" title="Más información"><Visibility /></IconButton>
+                    <EliminarAlumno idAlumno={fila.id} />
                   </TableCell>
                 </TableRow>
               ))}
@@ -206,5 +226,52 @@ const Listado = () => {
     </MainLayout>
   );
 };
+
+function EliminarAlumno({ idAlumno }: { idAlumno: number }) {
+  const [open, setOpen] = React.useState(false);
+  const { reload } = useRouter();
+  const handleClickOpen = () => {
+    setOpen(true);
+  };
+
+  const handleClose = () => {
+    setOpen(false);
+  };
+  const handleElimination = () => {
+    useApi<any>({ method: "DELETE", url: `${process.env.NEXT_PUBLIC_API_URL}/api/alumno/${idAlumno}` })
+      .then(res => { console.log(res.data) })
+    reload();
+    setOpen(false);
+  };
+
+  return (
+    <React.Fragment>
+      <IconButton onClick={handleClickOpen} className="hover:text-red-600" title="Eliminar"><Delete /></IconButton>
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="alert-dialog-title"
+        aria-describedby="alert-dialog-description"
+      >
+        <DialogTitle id="alert-dialog-title">
+          {"Borrar alumno?"}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText id="alert-dialog-description">
+            Confirme la eliminación del alumno. ESTA ACCIÓN ES PERMANENTE Y ELIMINARÁ LA
+            HUELLA DIGITAL DEL ALUMNO DEL REGISTRO
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button color="inherit" onClick={handleClose}>CANCELAR</Button>
+          <Button color="error" onClick={handleElimination} autoFocus>
+            CONFIRMAR
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </React.Fragment>
+  );
+}
+
 
 export default Listado;
