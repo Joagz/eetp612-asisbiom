@@ -19,6 +19,7 @@
   - [Distribución de puntualidad](#distribución-de-puntualidad)
   - [Cómo medir la puntualidad en una escuela](#cómo-medir-la-puntualidad-en-una-escuela)
   - [Índice de Gini](#índice-de-gini)
+- [Distribución normal de puntualidad](#distribución-normal-de-puntualidad)
 - [Implementación técnica](#implementación-técnica)
   - [Tiempo de recopilación de datos](#tiempo-de-recopilación-de-datos)
   - [Autorización y acceso a la información](#autorización-y-acceso-a-la-información)
@@ -174,12 +175,12 @@ $$
 
 si evaluamos la suma con $n = \{ 1, 2, 3, ..., n \}$ nos dará una lista $S$ de números corespondiente a la suma acumulada hasta el alumno $n$ de los valores de $I_n$
 
-| Alumno     | Índice de puntualidad   |
-|------------|-------------------------|
-| 1          | $I_1$                   |
-| 2          | $I_2$                   |
-| ...        | ...                     |
-| $k$        | $I_k$                   |
+| Alumno | Índice de puntualidad |
+| ------ | --------------------- |
+| 1      | $I_1$                 |
+| 2      | $I_2$                 |
+| ...    | ...                   |
+| $k$    | $I_k$                 |
 
 Donde $I$ es el Índice de puntualidad y $A$ es el alumno $n$, evaluando la suma:
 
@@ -259,6 +260,54 @@ La interpretación de éste resultado nos puede dar una pista. Como se menciona,
 
 ![image 7](./images/7.png) 
 (Se aproximó el valor por debajo).
+
+# Distribución normal de puntualidad
+
+La distribución normal de una variable aleatoria, como en este caso, la puntualidad o diferencia de horario de llegada de los alumnos, es muy común para este tipo de datos los cuales si 
+bien presentan una aleatoriedad considerable aún conservan una cierta distribución uniforme.
+
+La distribución normal se representa mediante una función de densidad de probabilidad que llamaremos $f$. Las propiedades de esta función de densidad de probabilidad son:
+
+$$
+\int_{-\infin}^{\infin}{f(x)\space dx}=1
+$$
+
+La distribución normal de una variable aleatoria $X$ es un miembro de la familia de funciones
+
+$$
+f(x) = \frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)²/2\sigma^2}
+$$
+
+Donde la letra griega $\sigma$ (sigma) representa la desviación estandar y $\mu$ (mu) es el valor promedio de la variable. Lo que nos interesa analizar a nosotros es la distribución de la puntualidad de los alumnos, por lo que tomaremos $\mu = diferencia 
+\ promedio \ en \ el \ horario \ de \ llegada$. La desviación estándar puede calcularse de la siguiente manera: si tenemos un _set_ de datos de la altura de masculinos cuyo valor promedio es $\mu = 175cm$ y queremos calcular cuánto "varían" las alturas, es normal tomar $a_i - \mu$ donde $a_i$ es la altura de la persona $i$. En este caso el valor puede ser negativo o positivo, si queremos calcular la media aritmética ($\mu = \sum_{i=1}^N{a_i})$ con nuestros valores de desviación, el resultado sería incorrecto ya que las alturas serían negativas y positivas en algunos casos, por lo que éste no nos reflejaría esa "variación" que buscamos. Para ello tomamos la media cuadrática, lo que nos va a asegurar que los valores de $a_i - \mu$ sean siempre positivos. Según la definición de media cuadrática, la desviación estándar estaría dada por:
+
+$$
+\sigma = \sqrt{\frac{1}{N}\sum_{i=1}^N{(a_i-\mu)^2}}
+$$
+
+Utilizando notación integral:
+
+$$
+\sigma = \sqrt{\int_{-\infin}^{\infin}{(x-\mu)²f(x)\space dx}}
+$$
+
+donde
+
+$$
+\mu = \int_{-\infin}^{\infin}{xf(x)\space dx}
+$$
+
+Donde $f$ es la función de densidad de probabilidad. Con la notación integral lo que hacemos es multiplicar el cuadrado de la variación de la variable respecto al promedio por la probabilidad de esa variable. En la notación sumatoria el término ${1/N}$ nos indica que cada punto tiene la misma probabilidad (una entre $N$), pero en la notación integral contamos con la función de densidad de probabilidad definida. El valor promedio viene dado por la suma del producto del valor de la variable analizada y la probabilidad de ésta de ocurrir.
+
+La gráfica de una función de densidad de probabilidad tiene forma de "campana" donde el valor medio es $\max{f(x)} = f(\mu)$, es decir que la función está centrada en $\mu$. El area bajo la curva de $f(x)$ indica la probabilidad de que $X$ variable suceda, es decir, si tenemos una función de densidad de probabilidad $f(h)$ donde $h$ es la diferencia en el horario de llegada de los alumnos, si tenemos dos valores $h_1$ y $h_2$, la probabilidad de que un alumno llegue entre el horario $h_1$ y $h_2$ horarios se denota $P(h_1 < x < h_2)$:
+
+$$
+P(h_1<x<h_2) = \int_{h1}^{h2}{f(h)\space dh}
+$$
+
+![image 8](./images/8.png) 
+
+Podemos ver que la función está mayormente del lado negativo de la abcisa, esto debido a que la mayoría de los alumnos llega temprano. A su vez comprobamos que $\max{f(x)} = f(\mu)$ donde $\mu < 0$, es decir, en promedio los alumnos llegan temprano.
 
 # Implementación técnica
 
