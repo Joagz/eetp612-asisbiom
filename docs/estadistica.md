@@ -18,9 +18,10 @@
 - [Ordenamiento de alumnos por horario de llegada](#ordenamiento-de-alumnos-por-horario-de-llegada)
   - [Distribución de puntualidad](#distribución-de-puntualidad)
   - [Cómo medir la puntualidad en una escuela](#cómo-medir-la-puntualidad-en-una-escuela)
-  - [Índice de Gini](#índice-de-gini)
 - [Distribución normal de puntualidad](#distribución-normal-de-puntualidad)
+- [Índice de Gini](#índice-de-gini)
 - [Implementación técnica](#implementación-técnica)
+  - [Tiempo de ejecución](#tiempo-de-ejecución)
   - [Tiempo de recopilación de datos](#tiempo-de-recopilación-de-datos)
   - [Autorización y acceso a la información](#autorización-y-acceso-a-la-información)
 - [Aclaraciones](#aclaraciones)
@@ -224,9 +225,55 @@ Podemos calcular la "desigualdad" existente entre los datos computados y una dis
 
 ## Cómo medir la puntualidad en una escuela
 
-Es importante dentro de una institución la puntualidad de sus alumnos. Para analizar estos datos podemos hacer uso de varias técnicas. Anteriormente se observó la distribución de la diferencia en los horarios de llegada de los alumnos. Por si solo esto nos dice el porcentaje de alumnos que llega a un porcentaje del horario de llegada, pero no nos vale para definir la puntualidad de la escuela. Para ello vamos a necesitar varios datos, la curva de Lorenz, el índice de Gini y por último, los horarios de llegada reales de los alumnos, o al menos la diferencia del horario de llegada y el real.
+Es importante dentro de una institución la puntualidad de sus alumnos. Para analizar estos datos podemos hacer uso de varias técnicas. Anteriormente se observó la distribución de la diferencia en los horarios de llegada de los alumnos. Por si solo esto nos dice el porcentaje de alumnos que llega a un porcentaje del horario de llegada, pero no nos vale para definir la puntualidad de la escuela. 
 
-## Índice de Gini
+Para realizar otras mediciones sobre la puntualidad, la distribución o desigualdad en la puntualidad, vamos a hacer uso del cálculo estadístico.
+
+# Distribución normal de puntualidad
+
+La distribución normal de una variable aleatoria, como en este caso, la puntualidad o diferencia de horario de llegada de los alumnos, es muy común para este tipo de datos los cuales si 
+bien presentan una aleatoriedad considerable aún conservan una cierta distribución uniforme.
+
+La distribución normal se representa mediante una función de densidad de probabilidad que llamaremos $f$. Las propiedades de esta función de densidad de probabilidad son:
+
+$$
+\int_{-\infty}^{\infty}{f(x)\space dx}=1
+$$
+
+La distribución normal de una variable aleatoria $X$ es un miembro de la familia de funciones
+
+$$
+f(x) = \frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)²/2\sigma^2}
+$$
+
+Donde la letra griega $\sigma$ (sigma) representa la desviación estandar y $\mu$ (mu) es el valor promedio de la variable. Lo que nos interesa analizar a nosotros es la distribución de la puntualidad de los alumnos, por lo que tomaremos $\mu = diferencia 
+\ promedio \ en \ el \ horario \ de \ llegada$. La desviación estandar nos indica qué tan dispersos están los datos con respecto al promedio, a continuación se realiza una explicación práctica.
+
+Si tenemos un set de datos de la altura de personas del sexo masculino cuyo valor promedio es $\bar{a} = 175cm$ y queremos calcular cuánto "varían" las alturas, es normal tomar $\bar{a}-a_i$ donde $a_i$ es la altura de la persona $i$. Hay dos posibilidades, o $\bar{a}-a_i < 0$ o $\bar{a}-a_i > 0$, si queremos calcular la media aritmética ($\bar{a} = \sum_{i=1}^N{a_i})$ con nuestros valores de desviación, el resultado sería incorrecto ya que las alturas serían negativas y positivas en algunos casos, por lo que éste no nos reflejaría la "variación" que buscamos. Para ello tomamos la media cuadrática, lo que nos va a asegurar que los valores de $a_i - \mu$ sean siempre positivos. Según la definición de media cuadrática, la desviación estándar estaría dada por:
+
+$$
+\sigma = \sqrt{\frac{1}{N-1}\sum_{i=1}^N{(\bar{a}-a_i)^2}}
+$$
+
+Donde $\bar{a}=\frac{1}{N}\sum_{i=1}^N{a_i}$ es la **media muestral**. Se introduce $N-1$ en el denominador para evitar el sesgo en la estimación de la varianza. Si tenemos una función de probabilidad $f$ entonces podemos hacer uso del cálculo diferencial.
+
+$$
+\sigma = \sqrt{\int_{-\infty}^{\infty}{(x-\mu)²f(x)\space dx}}
+$$
+
+donde $\mu = \int_{-\infty}^{\infty}{xf(x)\space dx}$ es la **media poblacional** y $f$ es la función de densidad de probabilidad. Con la notación integral lo que hacemos es multiplicar el cuadrado de la variación de la variable respecto al promedio por la probabilidad de esa variable. En la notación sumatoria se suman valores discretos, el término ${1/N}$ nos indica que cada punto tiene la misma probabilidad de ocurrir (una entre $N$), pero en la notación integral contamos con la función de densidad de probabilidad definida que agrega un "peso" a la variable. El valor promedio viene dado por la suma del producto del valor de la variable analizada y la probabilidad de ésta de ocurrir.
+
+La gráfica de una función de densidad de probabilidad tiene forma de "campana" donde el valor medio es $\max{f(x)} = f(\mu)$, es decir que la función está centrada en $\mu$. El area bajo la curva de $f(x)$ indica la probabilidad de que $X$ variable suceda, es decir, si tenemos una función de densidad de probabilidad $f(h)$ donde $h$ es la diferencia en el horario de llegada de los alumnos, si tenemos dos valores $h_1$ y $h_2$, la probabilidad de que un alumno llegue entre el horario $h_1$ y $h_2$ horarios se denota $P(h_1 < X < h_2)$:
+
+$$
+P(h_1<X<h_2) = \int_{h1}^{h2}{f(h)\space dh}
+$$
+
+![image 8](./images/8.png) 
+
+Podemos ver que la función está mayormente del lado negativo de la abcisa, esto debido a que la mayoría de los alumnos llega temprano. A su vez comprobamos que $\max{f(x)} = f(\mu)$ donde $\mu < 0$, es decir, en promedio los alumnos llegan temprano.
+
+# Índice de Gini
 
 El índice de Gini compara la curva de Lorenz que generamos, con una distribución perfecta, lo que hacemos es hallar el área entre la curva $f(x)$ y $g(x)$:
 
@@ -254,60 +301,14 @@ $$
 G=2\cdot\int_{0}^{1}\left[x-g\left(x\right)\right]dx \approx 0.477773693
 $$
 
-Entonces, el índice de Gini es aproximadamente $0.477773693$.
+Entonces, el índice de Gini es aproximadamente $G=0.477773693$.
 
 La interpretación de éste resultado nos puede dar una pista. Como se menciona, no nos detalla en absoluto si los alumnos son puntuales, pero vamos a suponer que una escuela tiene una diferencia en el horario de llegada, en promedio, de 5 minutos de anticipacion. Ahora, en base a este dato, podemos calcular el índice de Gini, por ejemplo,  $G \approx 0.07$. En este caso se puede decir que la escuela es puntual ya que en promedio los alumnos llegan temprano, y además la distribución de sus horarios de llegada es bastante uniforme (una curva casi recta).
 
 ![image 7](./images/7.png) 
 (Se aproximó el valor por debajo).
 
-# Distribución normal de puntualidad
-
-La distribución normal de una variable aleatoria, como en este caso, la puntualidad o diferencia de horario de llegada de los alumnos, es muy común para este tipo de datos los cuales si 
-bien presentan una aleatoriedad considerable aún conservan una cierta distribución uniforme.
-
-La distribución normal se representa mediante una función de densidad de probabilidad que llamaremos $f$. Las propiedades de esta función de densidad de probabilidad son:
-
-$$
-\int_{-\infin}^{\infin}{f(x)\space dx}=1
-$$
-
-La distribución normal de una variable aleatoria $X$ es un miembro de la familia de funciones
-
-$$
-f(x) = \frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)²/2\sigma^2}
-$$
-
-Donde la letra griega $\sigma$ (sigma) representa la desviación estandar y $\mu$ (mu) es el valor promedio de la variable. Lo que nos interesa analizar a nosotros es la distribución de la puntualidad de los alumnos, por lo que tomaremos $\mu = diferencia 
-\ promedio \ en \ el \ horario \ de \ llegada$. La desviación estándar puede calcularse de la siguiente manera: si tenemos un _set_ de datos de la altura de masculinos cuyo valor promedio es $\mu = 175cm$ y queremos calcular cuánto "varían" las alturas, es normal tomar $a_i - \mu$ donde $a_i$ es la altura de la persona $i$. En este caso el valor puede ser negativo o positivo, si queremos calcular la media aritmética ($\mu = \sum_{i=1}^N{a_i})$ con nuestros valores de desviación, el resultado sería incorrecto ya que las alturas serían negativas y positivas en algunos casos, por lo que éste no nos reflejaría esa "variación" que buscamos. Para ello tomamos la media cuadrática, lo que nos va a asegurar que los valores de $a_i - \mu$ sean siempre positivos. Según la definición de media cuadrática, la desviación estándar estaría dada por:
-
-$$
-\sigma = \sqrt{\frac{1}{N}\sum_{i=1}^N{(a_i-\mu)^2}}
-$$
-
-Utilizando notación integral:
-
-$$
-\sigma = \sqrt{\int_{-\infin}^{\infin}{(x-\mu)²f(x)\space dx}}
-$$
-
-donde
-
-$$
-\mu = \int_{-\infin}^{\infin}{xf(x)\space dx}
-$$
-
-Donde $f$ es la función de densidad de probabilidad. Con la notación integral lo que hacemos es multiplicar el cuadrado de la variación de la variable respecto al promedio por la probabilidad de esa variable. En la notación sumatoria el término ${1/N}$ nos indica que cada punto tiene la misma probabilidad (una entre $N$), pero en la notación integral contamos con la función de densidad de probabilidad definida. El valor promedio viene dado por la suma del producto del valor de la variable analizada y la probabilidad de ésta de ocurrir.
-
-La gráfica de una función de densidad de probabilidad tiene forma de "campana" donde el valor medio es $\max{f(x)} = f(\mu)$, es decir que la función está centrada en $\mu$. El area bajo la curva de $f(x)$ indica la probabilidad de que $X$ variable suceda, es decir, si tenemos una función de densidad de probabilidad $f(h)$ donde $h$ es la diferencia en el horario de llegada de los alumnos, si tenemos dos valores $h_1$ y $h_2$, la probabilidad de que un alumno llegue entre el horario $h_1$ y $h_2$ horarios se denota $P(h_1 < x < h_2)$:
-
-$$
-P(h_1<x<h_2) = \int_{h1}^{h2}{f(h)\space dh}
-$$
-
-![image 8](./images/8.png) 
-
-Podemos ver que la función está mayormente del lado negativo de la abcisa, esto debido a que la mayoría de los alumnos llega temprano. A su vez comprobamos que $\max{f(x)} = f(\mu)$ donde $\mu < 0$, es decir, en promedio los alumnos llegan temprano.
+En resumen, si queremos saber cómo se distribuyen los horarios de llegada de una escuela, el método anterior puede ser útil.
 
 # Implementación técnica
 
@@ -320,17 +321,22 @@ Para la implementación de las funciones dentro de la aplicación habrá una cla
 
 Para implementar funciones matemáticas haremos uso de la clase **Math.java**. Los algoritmos a implementar son bastante sencillos ya que constan de sumatorias. Se proporcionará una representación en formato JSON para que el frontend pueda representar los datos gráficamente.
 
-Cuando el usuario desee consultar estos datos simplemente accederá a un método definido en el controlador **StatsController.java**. Es necesario destacar lo siguiente:
+Cuando el usuario desee consultar estos datos simplemente accederá a un método definido en el controlador **StatsController.java**.
+
+## Tiempo de ejecución
+
+El tiempo de ejecución de los algoritmos se va a realentizar considerablemente según el número de alumnos. Para ejemplificar, si una escuela tiene $a = 500$ alumnos, y transcurrieron $d = 100$ días desde que se recopilaron datos de asistencia. Si cada alumno faltó $f=10$ días en todo el ciclo lectivo, entonces se estima que en la base de datos deben haber $E_a= a\cdot (d-f) = 45000$ Entradas en la tabla `asistencias`. Por ende, la cantidad de datos a procesar crece linealmente, es decir, en el peor de los casos el tiempo de ejecución es _O(n)_. El sistema se ejecuta en _Java_ y debe realizar las operaciones de busqueda en la base de datos, lo que ya crea un tiempo considerable, además de ello, si el servidor estuviera corriendo en una máquina virtual o en un *VPS*, hay que sumar tiempos de respuesta del servidor para las búsquedas. Para los algoritmos mencionados anteriormente lo mejor sería implementar una **memoria caché** (no incluido en el sistema actual).
 
 ## Tiempo de recopilación de datos
 
-Tenemos que tener en cuenta que para poder obtener esta información necesitaremos un período de tiempo en el cual estos datos se consigan. La implementación que se llevará a cabo no procesará lo datos diariamente, sino que fijará una fecha la cual será a 30 días de haber registrado una nueva entrada en el servicio de estadísticas. El servicio de estadísticas estará disponible dentro de la aplicación principal como un panel de control, para poder acceder al servicio deberá entrar al panel con una cuenta de **DIRECTIVO** y habilitarlo. Cabe destacar que no obtendrá los datos hasta pasado un período de 30 días.
+Se debe tener en cuenta que para poder obtener esta información necesitaremos un período de tiempo en el cual estos datos se consigan. La implementación que se llevará a cabo no procesará lo datos diariamente, sino que fijará una fecha la cual será a 30 días de haber registrado una nueva entrada en el servicio de estadísticas. El servicio de estadísticas estará disponible dentro de la aplicación principal como un panel de control, para poder acceder al servicio deberá entrar al panel con una cuenta de **DIRECTIVO** y habilitarlo. Cabe destacar que no obtendrá los datos hasta pasado un período de 30 días.
 
 Los datos a procesar serán acumulados en el período lectivo y serán reiniciados luego del mismo (usted tendrá un registro de los datos que se han conseguido durante ciclos lectivos anteriores, sin embargo no serán modificados una vez que hayan finalizado). El control de los datos es responsabilidad de la aplicación; dentro de éste documento se presentan los métodos que serán utilizados para procesarlos y a los que podrá acceder, además se le proporcionarán datos específicos de cada alumno dentro del ámbito escolar.
 
 ## Autorización y acceso a la información
 
-Ningún cargo menor a **SECRETARIO** o **DIRECTIVO** tendrá acceso a las métricas mencionadas, pero esto no significa que la información no pueda ser compartida, sino que por motivos de cada escuela es posible que solo estos cargos quieran o puedan visualizarlos.
+Ningún cargo menor a **SECRETARIO** o **DIRECTIVO** tendrá acceso a las métricas mencionadas, pero esto no significa que la información no pueda ser compartida, sino que por motivos de cada escuela es posible que solo estos cargos quieran o **puedan** visualizarlos.
 
 # Aclaraciones
-Es necesario aclarar que este documento es informal. Dentro del mismo se presentan distintas formas y conceptos que pueden utilizarse para conocer mejor a las instituciones de las que formamos parte. Además, las ideas comentadas caben dentro del contexto del proyecto como una forma de mejorar la institución educativa; ayudar a recopilar, analizar y comprender su comportamiento; como también facilitar el trabajo de aquellos individuos que trabajan con la información que el actual proyecto utiliza como medio de acción. En la documentación y presentación del proyecto damos a entender los objetivos y los medios para lograrlos, este documento es una rama de la documentación principal dedicada especialmente al manejo de los datos que recibimos y que merece destacarse debido a que es una de las ventajas principales del proyecto.
+Es necesario aclarar que este documento es informal. Dentro del mismo se presentan distintas formas y conceptos que pueden utilizarse para conocer mejor a las instituciones de las que formamos parte. Además, las ideas comentadas caben dentro del contexto del proyecto como una forma de mejorar la institución educativa; ayudar a recopilar, analizar y comprender su comportamiento; facilitar el trabajo de aquellos individuos que trabajen con los datos proporcionados.
+En la documentación y presentación del proyecto damos a entender los objetivos y los medios para lograr los objetivos presentados, este documento es una rama de la documentación principal dedicada especialmente al manejo de los datos que recibimos y que merece un documento aparte debido a que es una de las ventajas principales del proyecto.
