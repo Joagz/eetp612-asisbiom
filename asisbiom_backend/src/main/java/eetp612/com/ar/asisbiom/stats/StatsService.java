@@ -18,6 +18,12 @@ import eetp612.com.ar.asisbiom.general.Dia;
 import eetp612.com.ar.asisbiom.horarios.Horario;
 import eetp612.com.ar.asisbiom.horarios.HorarioRepository;
 
+/**
+ * DistribucionNormal
+ */
+record DistribucionNormal(Double promedio, Double desviacionEstandar) {
+}
+
 @Service
 public class StatsService {
 
@@ -49,10 +55,9 @@ public class StatsService {
     // repository.save(new Stats(StatsConfigs.INFO_DIARIA));
     // }
 
-    public int addNextFinger()
-    {
+    public int addNextFinger() {
         Stats finger = repository.findById(StatsConfigs.NEXT_FINGER).get();
-        finger.setValor(finger.getValor()+1);
+        finger.setValor(finger.getValor() + 1);
         repository.save(finger);
         return finger.getValor();
     }
@@ -89,6 +94,50 @@ public class StatsService {
     }
 
     // ** Estadísticas **
+    public Double promedioPuntualidad() {
+        List<Alumno> alumnos = alumnoRepository.findAll();
+        if (alumnos.isEmpty()) {
+            return 0.0; // Handle empty list case
+        }
+        
+        List<Double> valores = new ArrayList<>();
+    
+        for (Alumno alumno : alumnos) {
+            valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.LUNES));
+            valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.MARTES));
+            valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.MIERCOLES));
+            valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.JUEVES));
+            valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.VIERNES));
+        }
+    
+        Double promedio = valores.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
+    
+        return promedio;
+    }
+    
+    public DistribucionNormal distribucionNormal() {
+        List<Alumno> alumnos = alumnoRepository.findAll();
+        if (alumnos.isEmpty()) {
+            return new DistribucionNormal(0.0, 0.0); // Handle empty list case
+        }
+    
+        Double promedio = promedioPuntualidad();
+        List<Double> sigma = new ArrayList<>();
+    
+        // Calculate the squared differences
+        for (Alumno alumno : alumnos) {
+            sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.LUNES) - promedio, 2));
+            sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.MARTES) - promedio, 2));
+            sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.MIERCOLES) - promedio, 2));
+            sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.JUEVES) - promedio, 2));
+            sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.VIERNES) - promedio, 2));
+        }
+    
+        Double variance = sigma.stream().mapToDouble(Double::doubleValue).sum() / (sigma.size() - 1);
+        Double stddev = Math.sqrt(variance);
+    
+        return new DistribucionNormal(promedio, stddev);
+    }
 
     // Calcula el porcentaje de asistencias dada la cantidad de días hábiles actual
     public Float porcentajeAsistencias() {
@@ -196,6 +245,7 @@ public class StatsService {
         }
         if (minutos.size() == 0)
             return -1;
+
         return suma / minutos.size();
     }
 
@@ -289,12 +339,11 @@ public class StatsService {
 
         return puntaje;
     }
-    
-    public List<Float> getPuntajePositivo()
-    {
+
+    public List<Float> getPuntajePositivo() {
         List<Float> puntaje = getPuntaje();
         List<Float> positivePuntaje = new ArrayList<>();
-        
+
         Collections.sort(puntaje);
 
         Float min = puntaje.get(0);
@@ -303,12 +352,12 @@ public class StatsService {
 
         return positivePuntaje;
     }
-    
+
     public List<Float> curvaLorenz() {
         List<Float> puntaje = getPuntajePositivo();
         List<Float> suma = new ArrayList<>();
         List<Float> puntos = new ArrayList<>();
-        
+
         if (puntaje.isEmpty()) {
             return null;
         }
@@ -339,8 +388,9 @@ public class StatsService {
         List<Float> lorenz = curvaLorenz();
         List<Float> giniSum = new ArrayList<>();
         float gini = 0f;
-        
-        if(lorenz.isEmpty()) return -1f;
+
+        if (lorenz.isEmpty())
+            return -1f;
 
         for (int i = 0; i < lorenz.size(); i++) {
             float x = (float) i / (float) lorenz.size();
@@ -348,16 +398,15 @@ public class StatsService {
             giniSum.add(x - lorenz.get(i));
         }
 
-        float deltaX = 1f/(float)giniSum.size();
+        float deltaX = 1f / (float) giniSum.size();
 
-        for(int j = 0; j < giniSum.size(); j++)
-        {
-            gini+=giniSum.get(j);
+        for (int j = 0; j < giniSum.size(); j++) {
+            gini += giniSum.get(j);
         }
 
-        gini = gini*deltaX;
-        
-        return 2*gini;
+        gini = gini * deltaX;
+
+        return 2 * gini;
 
     }
 

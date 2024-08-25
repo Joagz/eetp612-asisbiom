@@ -33,29 +33,29 @@ public class StatsController {
             return puntaje;
     }
 
-    @GetMapping("/asistencias/promedio")
-    public ResponseEntity<?> porcentajeAsistencias()
-    {
+    @GetMapping("/asistencias/porcentaje")
+    public ResponseEntity<?> porcentajeAsistencias() {
         return ResponseEntity.ok().body(service.porcentajeAsistencias());
     }
 
-    @GetMapping("/puntualidad/promedio")
-    public ResponseEntity<?> porcentajePuntualidad()
-    {
+    @GetMapping("/puntualidad/porcentaje")
+    public ResponseEntity<?> porcentajePuntualidad() {
         return ResponseEntity.ok().body(service.porcentajePuntualidad());
     }
 
+    @GetMapping("/distribucion-normal")
+    public ResponseEntity<?> promedioPuntualidad() {
+        return ResponseEntity.ok().body(service.distribucionNormal());
+    }
+
     @GetMapping("/lorenz")
-    public List<Float> lorenz()
-    {
+    public List<Float> lorenz() {
         return service.curvaLorenz();
     }
 
     @GetMapping("/gini")
-    public Float gini()
-    {
+    public Float gini() {
         return service.indiceGini();
     }
-
 
 }

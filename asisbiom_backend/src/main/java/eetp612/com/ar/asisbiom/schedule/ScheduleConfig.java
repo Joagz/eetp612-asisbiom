@@ -58,7 +58,7 @@ public class ScheduleConfig {
 
     private String defaultNotificationForAbsentStudentStreak(Alumno s, int dias) {
         return "El alumno " + s.getNombreCompleto() + ", DNI " + s.getDni() + " estuvo austente" + dias
-                + " dias. Haga click para ver más.";
+                + " dias.";
     }
 
     // Procesar notificaciones programadas
@@ -68,7 +68,7 @@ public class ScheduleConfig {
         // Enviar notificaciones predeterminadas a roles mayores a preceptor
         List<User> usuarios = userRepository.findAll().stream()
                 .filter(user -> !user.getRole().equals(Roles.SENSOR)
-                        && (user.getRole().ordinal() > Roles.PRECEPTOR.ordinal()))
+                        && (user.getRole().ordinal() >= Roles.PRECEPTOR.ordinal()))
                 .collect(Collectors.toList());
 
         // Enviar notificación de alumno ausente (en racha)

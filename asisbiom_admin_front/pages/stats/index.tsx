@@ -1,11 +1,11 @@
 import { MainLayoutFixedHeight, Overline, Paragraph, Title } from "@/components"
 import { useApi } from "@/hooks";
 import Alumno from "@/interface/Alumno";
-import { FileDownload, PictureAsPdf } from "@mui/icons-material"
-import { Button, Card, Divider, Paper, Typography } from "@mui/material"
+import { PictureAsPdf } from "@mui/icons-material"
+import { Button, Card, Divider, Input, Paper, Slider, Typography } from "@mui/material"
 import { DataGrid, GridColDef, GridRowsProp } from "@mui/x-data-grid";
 import { useMemo, useState } from "react";
-import { Legend, Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
+import { CartesianGrid, Legend, Line, LineChart, ReferenceLine, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 
 const pdfName: string = "Extraccion_de_datos_y_estadisticas.pdf";
 
@@ -23,6 +23,10 @@ const Stats = () => {
     const [rows, setRows] = useState<GridRowsProp>();
     const [porcentajeAsistencias, setPorcentajeAsistencias] = useState<number>(0);
     const [porcentajePuntualidad, setPorcentajePuntualidad] = useState<number>(0);
+    const [distribucionNormal, setDistribucionNormal] = useState<{
+        promedio: number,
+        desviacionEstandar: number
+    }>();
     const [indiceGini, setIndiceGini] = useState<number>(0);
 
     useMemo(() => {
@@ -35,27 +39,28 @@ const Stats = () => {
                 setSortedData(res.data.sort((a, b) => a - b).map((data, index) => { return { name: alumnos[index].nombreCompleto, puntaje: data } }));
                 setRows(res.data.map((data, index) => { return { id: index, Alumno: alumnos[index].nombreCompleto, Puntaje: data } }))
             })
-        useApi<number>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/asistencias/promedio` }).then(res => setPorcentajeAsistencias(res.data));
-        useApi<number>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/puntualidad/promedio` }).then(res => setPorcentajePuntualidad(res.data));
+        useApi<number>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/asistencias/porcentaje` }).then(res => setPorcentajeAsistencias(res.data));
+        useApi<number>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/puntualidad/porcentaje` }).then(res => setPorcentajePuntualidad(res.data));
+        useApi<any>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/distribucion-normal` }).then(res => setDistribucionNormal(res.data));
         useApi<number>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/gini` }).then(res => setIndiceGini(res.data));
         useApi<number[]>({ url: `${process.env.NEXT_PUBLIC_API_URL}/stats/lorenz` }).then(res => {
             const curvaData = res.data;
             const numAlumnos = alumnos.length;
-        
+
             setCurva(curvaData.map((data, index) => {
                 // Compute igualdad as a normalized index value from 0 to 1
                 const igualdad = (numAlumnos > 1) ? index / (numAlumnos - 1) : 0;
-        
-                return { 
-                    id: index, 
-                    Alumno: alumnos[index].nombreCompleto, 
-                    curva: data, 
-                    igualdad: igualdad 
+
+                return {
+                    id: index,
+                    Alumno: alumnos[index].nombreCompleto,
+                    curva: data,
+                    igualdad: igualdad
                 };
             }));
         });
-        
-        
+
+
     }, []);
 
 
@@ -70,12 +75,12 @@ const Stats = () => {
                     <Overline>porcentaje de asistencias:</Overline>
                     <Overline>{porcentajeAsistencias}%</Overline>
                 </div>
-                <Divider/>                
+                <Divider />
                 <div className="flex w-full justify-between">
                     <Overline>porcentaje de puntualidad:</Overline>
                     <Overline>{porcentajePuntualidad}%</Overline>
                 </div>
-                <Divider/>                
+                <Divider />
                 <Overline>Índice de puntualidad</Overline>
                 <Typography variant="caption">Ordenados de menor a mayor</Typography>
                 {rows &&
@@ -89,7 +94,22 @@ const Stats = () => {
                         rows={rows} columns={columns}></DataGrid>
                 }
                 <br />
-                <Divider/>                
+                <Divider />
+                {
+                    distribucionNormal &&
+                    <>
+                        <Overline>Distribución Normal</Overline>
+                        <DistribucionNormal median={distribucionNormal.promedio} stddev={distribucionNormal.desviacionEstandar} />
+                        <div className="flex w-full justify-between">
+                            <Overline>valor promedio:</Overline>
+                            <Overline>{distribucionNormal.promedio}</Overline>
+                        </div>
+                        <div className="flex w-full justify-between">
+                            <Overline>desviación estándar:</Overline>
+                            <Overline>{distribucionNormal.desviacionEstandar}</Overline>
+                        </div>
+                    </>
+                }
                 <Overline>Gráfica del índice de puntualidad</Overline>
                 <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                     <LineChart
@@ -112,10 +132,9 @@ const Stats = () => {
 
                 </ResponsiveContainer>
                 <br />
-                <Divider/>                
+                <Divider />
                 <Overline>Gráfica ordenada</Overline>
                 <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
-
                     <LineChart
                         width={500}
                         height={500}
@@ -134,7 +153,7 @@ const Stats = () => {
                         <Line type="basis" dataKey="puntaje" dot={false} stroke="#1133ff" />
                     </LineChart>
                 </ResponsiveContainer>
-                <Divider/>                
+                <Divider />
                 <Overline>Desigualdad de puntaje</Overline>
                 <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                     <LineChart
@@ -160,12 +179,78 @@ const Stats = () => {
                     <Overline>Indice de Gini:</Overline>
                     <Overline>{indiceGini}</Overline>
                 </div>
-                <Divider/>                
+                <Divider />
             </Card>
 
 
         </MainLayoutFixedHeight>
     )
 }
+export const DistribucionNormal: React.FC<{ median: number, stddev: number }> = ({ median, stddev }) => {
+
+    const [lengthSlider, setLengthSlider] = useState(30);
+
+    // Create a range of x values centered around the median
+    const data = Array.from({ length: lengthSlider }, (_, index) => {
+        const x = index - lengthSlider / 2 - Math.abs(median); // Center x values around 0
+        return {
+            x: x,
+            y: Math.pow(Math.E, -Math.pow(x - median, 2) / (2 * Math.pow(stddev, 2))) / (stddev * Math.sqrt(2 * Math.PI)),
+        };
+    });
+
+    return (<>
+        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
+            <LineChart
+                width={500}
+                height={500}
+                data={data}
+                margin={{
+                    top: 30,
+                    right: 30,
+                    left: 30,
+                    bottom: 30,
+                }}
+            >
+                <Tooltip />
+                <YAxis
+                    tick={false}
+                    dataKey="y"
+                    domain={['auto', 'auto']}
+                    type="number"
+                    interval={0}
+                    label={{
+                        value: `% de llegada`,
+                        style: { textAnchor: 'middle' },
+                        angle: -90,
+                        position: 'left',
+                        offset: 0,
+                    }}
+                    allowDataOverflow={true}
+                    strokeWidth={0}
+                />
+
+                <XAxis
+                    dataKey="x"
+                    domain={['auto', 'auto']}
+                    interval={0}
+                    type="number"
+                    label={{
+                        key: 'xAxisLabel',
+                        value: 'Diferencia de llegada (minutos)',
+                        position: 'bottom',
+                    }}
+                    allowDataOverflow={true}
+                    strokeWidth={1}
+                />
+                <ReferenceLine x={0} stroke="gray" strokeWidth={1.5} strokeOpacity={0.65} />
+                <Line strokeWidth={2} data={data} dot={false} type="monotone" dataKey="y" stroke="#1133ff" />
+            </LineChart>
+        </ResponsiveContainer>
+        <Slider min={10} max={100} aria-label="Volume" value={lengthSlider} onChange={(e: any) => setLengthSlider(e.target.value)} />
+    </>
+    );
+};
+
 
 export default Stats
