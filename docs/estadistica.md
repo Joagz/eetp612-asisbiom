@@ -247,7 +247,7 @@ f(x) = \frac{1}{\sigma \sqrt{2\pi}}e^{-(x-\mu)²/2\sigma^2}
 $$
 
 donde la letra griega $\sigma$ (sigma) representa la desviación estandar y $\mu$ (mu) es el valor promedio de la variable. Lo que nos interesa analizar a nosotros es la distribución de la puntualidad de los alumnos, por lo que tomaremos $\mu = diferencia 
-\ promedio \ en \ el \ horario \ de \ llegada$. La desviación estandar $\sigma$ nos indica que tan dispersos están los datos con respecto al promedio, a continuación se realiza una explicación práctica.
+\ promedio \ en \ el \ horario \ de \ llegada$. La desviación estandar $\sigma$ nos indica qué tan dispersos están los datos con respecto al promedio, a continuación se realiza una explicación práctica.
 
 Si tenemos un set de datos de la altura de personas del sexo masculino cuyo valor promedio es $\bar{a} = 175cm$ y queremos calcular cuánto "varían" las alturas, es normal tomar $\bar{a}-a_i$ donde $a_i$ es la altura de la persona $i$. Hay dos posibilidades, o $\bar{a}-a_i < 0$ o $\bar{a}-a_i > 0$, si queremos calcular la media aritmética $\sigma = \sum_{i=1}^N{{(\bar{a}-a_i)}}$ el resultado sería incorrecto ya que algunos valores de $a_i$ estarían por encima de la media, resultando en términos negativos, por lo que éste no nos reflejaría la "variación" que buscamos. Para ello tomamos la media cuadrática, lo que nos va a asegurar que los valores de $\bar{a} - a_i$ sean siempre positivos. Según la definición de media cuadrática, la desviación estándar estaría dada por:
 
@@ -258,7 +258,7 @@ $$
 donde $\bar{a}=\frac{1}{N}\sum_{i=1}^N{a_i}$ es la **media muestral**. Se introduce $N-1$ en el denominador para evitar el sesgo en la estimación de la varianza. Si tenemos una función de probabilidad $f$ entonces podemos hacer uso del cálculo diferencial.
 
 $$
-\sigma = \sqrt{\int_{-\infty}^{\infty}{(x-\mu)²f(x)\space dx}}
+\sigma = \sqrt{\int_{-\infty}^{\infty}{(x-\mu)^2f(x)\space dx}}
 $$
 
 donde $\mu = \int_{-\infty}^{\infty}{xf(x)\space dx}$ es la **media poblacional** y $f$ es la función de densidad de probabilidad. Con la notación integral lo que hacemos es multiplicar el cuadrado de la variación de la variable respecto al promedio por la probabilidad de esa variable. En la notación sumatoria se realiza una sumatoria discreta, el término ${1/N}$ nos indica que cada punto tiene la misma probabilidad de ocurrir (una entre $N$), pero en la notación integral contamos con la función de densidad de probabilidad definida que agrega un "peso" a la variable. El valor promedio viene dado por la integral definida en el intervalo donde $f > 0$, del producto entre valor de la variable analizada y la probabilidad ligada a la misma.
