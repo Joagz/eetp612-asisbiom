@@ -22,7 +22,6 @@
 - [Índice de Gini](#índice-de-gini)
 - [Implementación técnica](#implementación-técnica)
   - [Tiempo de ejecución](#tiempo-de-ejecución)
-  - [Tiempo de recopilación de datos](#tiempo-de-recopilación-de-datos)
   - [Autorización y acceso a la información](#autorización-y-acceso-a-la-información)
 - [Aclaraciones](#aclaraciones)
 
@@ -327,15 +326,9 @@ Cuando el usuario desee consultar estos datos simplemente accederá a un método
 
 El tiempo de ejecución de los algoritmos se va a realentizar considerablemente según el número de alumnos. Para ejemplificar, si una escuela tiene $a = 500$ alumnos, y transcurrieron $d = 100$ días desde que se recopilaron datos de asistencia. Si cada alumno faltó $f=10$ días en todo el ciclo lectivo, entonces se estima que en la base de datos deben haber $E_a= a\cdot (d-f) = 45000$ Entradas en la tabla `asistencias`. Por ende, la cantidad de datos a procesar crece linealmente, es decir, en el peor de los casos el tiempo de ejecución es _O(n)_. El sistema se ejecuta en _Java_ y debe realizar las operaciones de busqueda en la base de datos, lo que ya crea un tiempo considerable, además de ello, si el servidor estuviera corriendo en una máquina virtual o en un *VPS*, hay que sumar tiempos de respuesta del servidor para las búsquedas. Para los algoritmos mencionados anteriormente lo mejor sería implementar una **memoria caché** (no incluido en el sistema actual).
 
-## Tiempo de recopilación de datos
-
-Se debe tener en cuenta que para poder obtener esta información necesitaremos un período de tiempo en el cual estos datos se consigan. La implementación que se llevará a cabo no procesará lo datos diariamente, sino que fijará una fecha la cual será a 30 días de haber registrado una nueva entrada en el servicio de estadísticas. El servicio de estadísticas estará disponible dentro de la aplicación principal como un panel de control, para poder acceder al servicio deberá entrar al panel con una cuenta de **DIRECTIVO** y habilitarlo. Cabe destacar que no obtendrá los datos hasta pasado un período de 30 días.
-
-Los datos a procesar serán acumulados en el período lectivo y serán reiniciados luego del mismo (usted tendrá un registro de los datos que se han conseguido durante ciclos lectivos anteriores, sin embargo no serán modificados una vez que hayan finalizado). El control de los datos es responsabilidad de la aplicación; dentro de éste documento se presentan los métodos que serán utilizados para procesarlos y a los que podrá acceder, además se le proporcionarán datos específicos de cada alumno dentro del ámbito escolar.
-
 ## Autorización y acceso a la información
 
-Ningún cargo menor a **SECRETARIO** o **DIRECTIVO** tendrá acceso a las métricas mencionadas, pero esto no significa que la información no pueda ser compartida, sino que por motivos de cada escuela es posible que solo estos cargos quieran o **puedan** visualizarlos.
+Ningún cargo menor a **SECRETARIO** o **DIRECTIVO** tendrá acceso a las métricas mencionadas, pero esto no significa que la información no pueda ser compartida, sino que por motivos de cada escuela es posible que solo estos cargos quieran o puedan visualizarlos.
 
 # Aclaraciones
 Es necesario aclarar que este documento es informal. Dentro del mismo se presentan distintas formas y conceptos que pueden utilizarse para conocer mejor a las instituciones de las que formamos parte. Además, las ideas comentadas caben dentro del contexto del proyecto como una forma de mejorar la institución educativa; ayudar a recopilar, analizar y comprender su comportamiento; facilitar el trabajo de aquellos individuos que trabajen con los datos proporcionados.
