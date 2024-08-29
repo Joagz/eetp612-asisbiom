@@ -1,12 +1,6 @@
-
-/*
- * Autor: Joaquín Gómez 
- * EETP N.612 "Eudocio de los Santos Giménez", Coronda, Santa Fe
- */
-package eetp612.com.ar.asisbiom.asistencias;
+package eetp612.com.ar.asisbiom.faltasjustificadas;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -28,9 +22,8 @@ import lombok.ToString;
 @Data
 @ToString
 @Entity
-@Table(name = "asistencias")
-public class Asistencia {
-
+@Table(name = "faltas_justificadas")
+public class FaltaJustificada {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -39,36 +32,14 @@ public class Asistencia {
     @JoinColumn(name = "alumno_id")
     private Alumno alumno;
 
-    @Column(name = "asistencia")
-    private boolean asistencia;
-
-    @JsonFormat(pattern = "HH:mm:ss")
-    @Column(name = "horario_entrada")
-    private LocalTime horarioEntrada;
-
-    @JsonFormat(pattern = "HH:mm:ss")
-    @Column(name = "horario_retiro")
-    private LocalTime horarioRetiro;
-
     @JsonFormat(pattern = "yyyy-MM-dd")
     @Column(name = "fecha")
     private LocalDate fecha;
 
-    @Column(name = "tardanza")
-    private Boolean tardanza;
-
-    @Column(name = "retirado")
-    private Boolean retirado;
-
-    @Column(name = "razon_retiro")
-    private String razonRetiro;
-
-    @Column(name = "dia")
     private Dia dia;
 
-    @Column(name = "enabled")
-    private boolean enabled;
+    private String razon;
 
-    private Clase clase;
+    private float valor;
 
 }

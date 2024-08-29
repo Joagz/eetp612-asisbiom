@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,9 @@ record InnerConteoAsistencia(
 @RestController
 @RequestMapping("/api/estadistica")
 public class ConteoController {
+
+    @Value("${asisbiom.datapath}")
+    private String datapath;
 
     String[] RESUME_FILE_HEADERS = {
             "Nombre Completo",
@@ -206,13 +210,7 @@ public class ConteoController {
 
     @GetMapping("/descarga/{cursoId}")
     public ResponseEntity<?> getFileFromCursoAndDivisionEntity(@PathVariable Integer cursoId) throws IOException {
-        // Depende de la plataforma donde ejecutemos
-
-        // Windows
-        // File csv = new File("\\temp\\estadistica.csv");
-
-        // Linux
-        File csv = new File("\\home\\{usr}\\tmp\\estadistica.csv");
+        File csv = new File(datapath + "\\estadistica.csv");
 
         try (PrintWriter pw = new PrintWriter(csv)) {
 

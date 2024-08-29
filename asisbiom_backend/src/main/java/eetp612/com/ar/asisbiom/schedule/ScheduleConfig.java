@@ -2,7 +2,6 @@ package eetp612.com.ar.asisbiom.schedule;
 
 import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 

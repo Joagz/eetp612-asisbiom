@@ -30,6 +30,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import eetp612.com.ar.asisbiom.asistencias.Asistencia;
 import eetp612.com.ar.asisbiom.asistencias.AsistenciaRepository;
+import eetp612.com.ar.asisbiom.asistencias.Clase;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoAsistencia;
 import eetp612.com.ar.asisbiom.conteoasistencias.ConteoRepository;
 import eetp612.com.ar.asisbiom.cursos.Curso;
@@ -407,35 +408,45 @@ public class AlumnoController {
 
     @PostMapping("/_testing/init_asistencias")
     public ResponseEntity<?> initAsistencias() {
-
+    
         List<Alumno> alumnos = alumnoRepository.findAll();
-
+    
         for (Alumno alumno : alumnos) {
-            System.out.println("procesando alumno " + alumno.getNombreCompleto());
+            System.out.println("Procesando alumno " + alumno.getNombreCompleto());
             List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
             List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
-
+    
             if (found.isEmpty() || horarios.isEmpty())
                 continue;
-
+    
             ConteoAsistencia conteoAsistencia = found.get(0);
-
+    
             conteoAsistencia.setInasistencias1(10f);
             conteoAsistencia.setDiasHabiles(90l);
-
+    
             int tardanzas = 0;
             Random random = new Random();
             Dia dia = Dia.LUNES;
-            Horario horario = null;
-
+            Horario horario = horarios.get(0);
+    
             horarios.sort((o1, o2) -> o1.getDia().compareTo(o2.getDia()));
-            horario = horarios.get(0);
-
-            LocalDate fecha = LocalDate.now();
-
-            // creamos las asistencias
+    
+            LocalDate fecha = LocalDate.now().minusMonths(4);
+    
+            int inasistenciasParaGenerar = 10;  // Número total de inasistencias a generar
+            int inasistenciasGeneradas = 0;     // Contador de inasistencias generadas
+    
             for (int i = 0; i <= 80; i++) {
+                // Aleatoriamente decidir si se debe generar una inasistencia en lugar de una asistencia
+                if (inasistenciasGeneradas < inasistenciasParaGenerar && random.nextInt(10) == 1) {
+                    // Generar una inasistencia
+                    inasistenciasGeneradas++;
+                    fecha = fecha.plusDays(1); // Avanzar un día, porque este día es una inasistencia
+                    continue; // Ir al siguiente día sin crear una asistencia
+                }
+    
                 Asistencia asistencia = new Asistencia();
+                asistencia.setClase(Clase.CATEDRA);
                 asistencia.setAlumno(alumno);
                 asistencia.setDia(dia);
                 asistencia.setRetirado(false);
@@ -443,29 +454,30 @@ public class AlumnoController {
                 asistencia.setHorarioRetiro(horario.getHorarioSalida());
                 asistencia.setFecha(fecha);
                 asistencia.setAsistencia(true);
-
+                asistencia.setTardanza(false);
+    
                 fecha = fecha.plusDays(1);
-
+    
                 if (dia.ordinal() == Dia.VIERNES.ordinal()) {
                     dia = Dia.LUNES;
                 } else {
                     dia = Dia.values()[dia.ordinal() + 1];
                 }
-
+    
                 if (random.nextInt(10) == 1 && tardanzas < 10) {
                     tardanzas++;
                     asistencia.setTardanza(true);
                     asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10)));
                 }
-
+    
                 asistenciaRepository.save(asistencia);
             }
-
+    
             conteoAsistencia.setTardanzas(tardanzas);
             conteoRepository.save(conteoAsistencia);
         }
-
+    
         return ResponseEntity.ok().body("Creado con éxito");
     }
-
+    
 }

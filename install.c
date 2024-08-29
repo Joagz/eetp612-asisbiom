@@ -8,9 +8,9 @@ const static char *application_properties = "./asisbiom_backend/src/main/resourc
 
 int main(int argc, char *argv[])
 {
-  if (argc < 2)
+  if (argc < 3)
   {
-    printf("Por favor introduzca la IP o Hostname para configurarlo\n");
+    printf("Por favor introduzca la IP o Hostname para configurarlo y la RUTA COMPLETA para los datos\n");
     return -1;
   }
 
@@ -49,11 +49,11 @@ int main(int argc, char *argv[])
 
   printf("Escribiendo %s...\n", application_properties);
 
-  const char *buffer = "spring.application.name=asisbiom\nserver.port=8089\nspringdoc.api-docs.path=/api-docs\n# spring.sql.init.mode=always\n# spring.jpa.defer-datasource-initialization=true\n# spring.jpa.hibernate.ddl-auto=create\nspring.datasource.driver-class-name=com.mysql.jdbc.Driver\nspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect\nspring.datasource.url=jdbc:mysql://localhost:3306/asisbiom_db\nspring.datasource.username=root\nspring.datasource.password=1234\n# spring.jpa.show-sql: true\n# spring.datasource.url=jdbc:h2:mem:asisbiom_db\n# spring.jpa.database-platform=org.hibernate.dialect.H2Dialect\n# spring.datasource.username=root\n# spring.datasource.password=1234\n# spring.datasource.driver-class-name=org.h2.Driver\nasisbiom.hostnames.mqtt=tcp://localhost:1887\nasisbiom.hostname.adminapp=http://%s:3001\nasisbiom.hostname.sensorapp=http://%s:3000";
+  const char *buffer = "spring.application.name=asisbiom\nserver.port=8089\nspringdoc.api-docs.path=/api-docs\n# spring.sql.init.mode=always\n# spring.jpa.defer-datasource-initialization=true\n# spring.jpa.hibernate.ddl-auto=create\nspring.datasource.driver-class-name=com.mysql.jdbc.Driver\nspring.jpa.database-platform=org.hibernate.dialect.MySQLDialect\nspring.datasource.url=jdbc:mysql://localhost:3306/asisbiom_db\nspring.datasource.username=root\nspring.datasource.password=1234\n# spring.jpa.show-sql: true\n# spring.datasource.url=jdbc:h2:mem:asisbiom_db\n# spring.jpa.database-platform=org.hibernate.dialect.H2Dialect\n# spring.datasource.username=root\n# spring.datasource.password=1234\n# spring.datasource.driver-class-name=org.h2.Driver\nasisbiom.hostnames.mqtt=tcp://localhost:1887\nasisbiom.hostname.adminapp=http://%s:3001\nasisbiom.hostname.sensorapp=http://%s:3000\nasisbiom.datapath=%s";
  
   char *new_buffer = (char *)calloc(sizeof(char), 1024);
 
-  int k = sprintf(new_buffer, buffer, arg, arg);
+  int k = sprintf(new_buffer, buffer, arg, arg, argv[2]);
   fwrite(new_buffer, sizeof(char), k, fp);
 
   free(new_buffer);

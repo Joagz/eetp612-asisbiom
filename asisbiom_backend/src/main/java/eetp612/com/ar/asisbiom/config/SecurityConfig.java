@@ -27,15 +27,15 @@ public class SecurityConfig {
 
         @Value("${asisbiom.hostname.adminapp}")
         private String adminAppHost;
-        
+
         @Value("${asisbiom.hostname.sensorapp}")
         private String sensorAppHost;
 
         @Bean
         SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
 
-                System.out.println("ADMIN HOST: "+adminAppHost);
-                System.out.println("SENSOR HOST: "+sensorAppHost);
+                System.out.println("ADMIN HOST: " + adminAppHost);
+                System.out.println("SENSOR HOST: " + sensorAppHost);
 
                 http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                                 .cors(corsCustomizer -> corsCustomizer
@@ -44,7 +44,8 @@ public class SecurityConfig {
                                                         public CorsConfiguration getCorsConfiguration(
                                                                         HttpServletRequest request) {
                                                                 CorsConfiguration config = new CorsConfiguration();
-                                                                config.setAllowedOrigins(Arrays.asList(adminAppHost, sensorAppHost));
+                                                                config.setAllowedOrigins(Arrays.asList(adminAppHost,
+                                                                                sensorAppHost));
                                                                 config.setAllowedMethods(Arrays.asList("GET", "POST",
                                                                                 "PUT", "DELETE"));
                                                                 config.setAllowCredentials(true);
@@ -60,45 +61,45 @@ public class SecurityConfig {
                                                 BasicAuthenticationFilter.class)
                                 .addFilterBefore(new JWTTokenValidatorFilter(),
                                                 BasicAuthenticationFilter.class)
-                                .authorizeHttpRequests(req -> req.requestMatchers(
+                                .authorizeHttpRequests(req -> req.anyRequest().permitAll()
+                                //                 req.requestMatchers(
+                                //                 // Estadistica
+                                //                 "/api/estadistica/cantidades/**").permitAll()
+                                //                 .requestMatchers("/api/estadistica").authenticated()
+                                //                 .requestMatchers("/api/estadistica/_initialize")
+                                //                 .hasAnyAuthority("DEVELOPER")
+                                //                 .requestMatchers("/api/curso/_initialize").hasAnyAuthority("DEVELOPER")
+                                //                 .requestMatchers(HttpMethod.GET, "/api/notification/**").authenticated()
 
-                                                // Estadistica
-                                                "/api/estadistica/cantidades/**").permitAll()
-                                                .requestMatchers("/api/estadistica").authenticated()
-                                                .requestMatchers("/api/estadistica/_initialize")
-                                                .hasAnyAuthority("DEVELOPER")
-                                                .requestMatchers("/api/curso/_initialize").hasAnyAuthority("DEVELOPER")
-                                                .requestMatchers(HttpMethod.GET, "/api/notification/**").authenticated()
+                                //                 // Alumnos
+                                //                 .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
+                                //                 .requestMatchers(HttpMethod.POST, "/api/alumno/**")
 
-                                                // Alumnos
-                                                .requestMatchers(HttpMethod.GET, "/api/alumno/**").authenticated()
-                                                .requestMatchers(HttpMethod.POST, "/api/alumno/**")
+                                //                 .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                //                                 Roles.SECRETARIO.name(),
+                                //                                 Roles.PRECEPTOR.name(), Roles.SENSOR.name())
 
-                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                                                Roles.SECRETARIO.name(),
-                                                                Roles.PRECEPTOR.name(), Roles.SENSOR.name())
+                                //                 .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
+                                //                 .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                //                                 Roles.SECRETARIO.name())
 
-                                                .requestMatchers(HttpMethod.DELETE, "/api/alumno/**")
-                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                                                Roles.SECRETARIO.name())
+                                //                 .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
+                                //                 .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
+                                //                                 Roles.SECRETARIO.name(),
+                                //                                 Roles.PRECEPTOR.name())
 
-                                                .requestMatchers(HttpMethod.PUT, "/api/alumno/**")
-                                                .hasAnyAuthority(Roles.DEVELOPER.name(), Roles.DIRECTIVO.name(),
-                                                                Roles.SECRETARIO.name(),
-                                                                Roles.PRECEPTOR.name())
+                                //                 .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
+                                //                 .requestMatchers("/auth/v1/user").permitAll()
+                                //                 .requestMatchers("/auth/v1/register").permitAll()
 
-                                                .requestMatchers("/auth/v1/jwt-credentials-check").authenticated()
-                                                .requestMatchers("/auth/v1/user").permitAll()
-                                                .requestMatchers("/auth/v1/register").permitAll()
+                                //                 .requestMatchers("/api/pdf/**").permitAll()
+                                //                 .requestMatchers("/api/pdf/private").authenticated()
 
-                                                .requestMatchers("/api/pdf/**").permitAll()
-                                                .requestMatchers("/api/pdf/private").authenticated()
+                                //                 .requestMatchers("/swagger-ui/**").permitAll()
+                                //                 .requestMatchers("/api-docs/**").permitAll()
 
-                                                .requestMatchers("/swagger-ui/**").permitAll()
-                                                .requestMatchers("/api-docs/**").permitAll()
-
-                                                .anyRequest().authenticated()
-                                // TODO: secure requests...
+                                //                 .anyRequest().authenticated()
+                                // // TODO: secure requests...
 
                                 )
                                 .formLogin(form -> form.disable())
