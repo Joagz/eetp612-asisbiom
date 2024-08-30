@@ -19,6 +19,6 @@ public class PlanillaController {
     @GetMapping("/{curso}/{mes}")
     public ResponseEntity<?> getPlanillas(@PathVariable int curso, @PathVariable int mes)
     {
-        return ResponseEntity.ok().body(service.planillaFileModelInit(Mes.values()[mes-1], curso));
+        return ResponseEntity.ok().body(service.nuevaPlanillaMensual(Mes.values()[mes-1], curso));
     }
 }

@@ -1,10 +1,11 @@
 package eetp612.com.ar.asisbiom.planillas;
 
 import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -83,6 +84,15 @@ public class PlanillaService implements IPlanillaService {
         return true;
     }
 
+    private Dia nextDia(Dia dia) {
+        if (dia.ordinal() == Dia.values().length - 1) {
+            dia = Dia.LUNES;
+        } else {
+            dia = Dia.values()[dia.ordinal() + 1];
+        }
+        return dia;
+    }
+
     private String resolveFilename(Curso curso, Mes mes) {
 
         StringBuilder sb = new StringBuilder();
@@ -90,31 +100,29 @@ public class PlanillaService implements IPlanillaService {
         String filename = null;
 
         sb.append("planilla_" + mes.name() + "_" + Year.now().getValue() + "_" + curso.getCurso() + curso.getDivision()
-                + "_NRO_1" + ".csv");
+                + ".csv");
 
         filename = sb.toString();
-
-        Path path = Paths.get(filename);
-        int i = 2;
-
-        while (Files.exists(path)) {
-            if (i > 2) {
-                sb.delete(filename.length() - 4 + String.valueOf(i).length(), filename.length());
-            } else {
-                sb.delete(filename.length() - 4, filename.length());
-            }
-            sb.append(i + ".csv");
-            filename = sb.toString();
-            path = Paths.get(filename);
-            i++;
-        }
 
         return filename;
     }
 
+    public boolean isWithin30MinutesRange(Asistencia asistencia, Horario horario) {
+        LocalTime entradaAsistencia = asistencia.getHorarioEntrada();
+        LocalTime entradaHorario = horario.getHorarioEntrada();
+
+        // Definir el rango de 30 minutos alrededor del horario de entrada
+        LocalTime inicioRango = entradaHorario.minusMinutes(30);
+        LocalTime finRango = entradaHorario.plusMinutes(30);
+
+        // Verificar si el horario de entrada de la asistencia está dentro del rango
+        return (entradaAsistencia.isAfter(inicioRango) || entradaAsistencia.equals(inicioRango)) &&
+                (entradaAsistencia.isBefore(finRango) || entradaAsistencia.equals(finRango));
+    }
+
     public PlanillaFileModel planillaFileModelInit(Mes mes, int cursoId) {
         if (!checkMes(mes)) {
-        return null;
+            return null;
         }
 
         PlanillaFileModel planillaFileModel = new PlanillaFileModel();
@@ -138,6 +146,9 @@ public class PlanillaService implements IPlanillaService {
 
         planillaFileModel.setFilename(datapath + resolveFilename(curso, mes));
         planillaFileModel.setKeys(keys);
+        planillaFileModel.setNAlumnos(alumnos.size());
+        planillaFileModel.setNDias(dias);
+        planillaFileModel.setAlumnos(alumnos);
 
         int indexAlumno = 0;
         int indexDay = 0;
@@ -146,19 +157,28 @@ public class PlanillaService implements IPlanillaService {
         for (Alumno alumno : alumnos) {
             float faltasJMes = 0f;
             float faltasInjMes = 0f;
-            int diaSize = Dia.values().length;
-            Dia dia = Dia.LUNES;
+            YearMonth year = YearMonth.of(Year.now().getValue(), mes.ordinal() + 1);
+            Dia dia = Dia.values()[year.atDay(1).getDayOfWeek().ordinal()];
+
+            System.out.println("EL MES " + mes.name() + " EMPIEZA EL DÍA " + dia.name());
 
             for (indexDay = 0; indexDay < dias; indexDay++) {
-                System.out.println(dia);
                 if (!checkDia(mes, indexDay + 1)) {
                     break; // terminamos el loop si sobrepasamos la fecha del día actual
                 }
 
-                int key = PlanillaKey.AUSENTE; // 0b00000000
+                int key = PlanillaKey.AUSENTE;
                 YearMonth yearMonth = YearMonth.of(Year.now().getValue(), mes.ordinal() + 1);
                 LocalDate dayOfMonth = yearMonth.atDay(indexDay + 1);
                 List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(curso, dia);
+
+                if (dia.equals(Dia.SABADO) || dia.equals(Dia.DOMINGO)) {
+                    System.out.println("DIA NO HABIL");
+                    key = PlanillaKey.NO_HABIL;
+                    dia = nextDia(dia);
+                    keys[indexAlumno][indexDay] = key;
+                    continue;
+                }
 
                 if (horarios.isEmpty()) {
                     break;
@@ -181,8 +201,10 @@ public class PlanillaService implements IPlanillaService {
                 List<Asistencia> foundAsistencia = asistenciaRepository.findByAlumnoAndFecha(alumno, dayOfMonth);
                 foundAsistencia.sort((o1, o2) -> o1.getClase().compareTo(o2.getClase()));
 
-                if (foundAsistencia.size() == horarios.size() && horarios.size() > 1) {
+                if (horarios.size() > 1 && foundAsistencia.size() == horarios.size()) {
                     System.out.println("Found more than 1");
+                    key = PlanillaKey.CON_TALLER;
+
                     int horarioIndex = 0;
                     int offset = 0;
                     for (Asistencia asistencia : foundAsistencia) {
@@ -203,24 +225,53 @@ public class PlanillaService implements IPlanillaService {
                                 faltasJMes += inasistenciaPorTurno * 0.5f;
                         }
 
-                        key += PlanillaKey.PRESENTE << offset;
+                        key = key | (PlanillaKey.PRESENTE << offset);
                         horarioIndex++;
                         offset += 4;
                     }
-                } else if (foundAsistencia.isEmpty()) {
-                    if (horarios.size() > 1) {
-                        System.out.println("Ausente");
-                        key = PlanillaKey.AUSENTE; // ausente los dos turnos
+                }
+
+                if (foundAsistencia.isEmpty()) {
+                    if (!horarios.isEmpty()) {
+                        key = PlanillaKey.AUSENTE; // ausente
+
+                        List<FaltaJustificada> faltas = faltaJustificadaRepository.findByAlumnoAndFecha(alumno,
+                                dayOfMonth);
+                        if (!faltas.isEmpty()) {
+                            int offset = 0;
+                            for (FaltaJustificada f : faltas) {
+                                faltasJMes += f.getValor();
+                                key = key | (PlanillaKey.JUSTIFICADO << offset);
+                            }
+                        } else {
+                            faltasInjMes += inasistenciaPorTurno;
+                        }
                     }
-                } else {
+                }
+
+                if (foundAsistencia.size() == 1) {
 
                     System.out.println("Found 1");
                     int offset = 0;
+                    System.out.println(horarios);
                     for (Horario horario : horarios) {
                         Asistencia asistencia = foundAsistencia.get(0);
                         // si el alumno se retira después del horario de salida, significa que
                         // tenemos que ir al siguiente horario
-                        if (asistencia.getHorarioRetiro().isAfter(horario.getHorarioSalida())) {
+                        if (horarios.size() > 1 && isWithin30MinutesRange(asistencia, horario)) {
+
+                            key = key | PlanillaKey.CON_TALLER;
+                            System.out.println("DOS HORARIOS");
+                            List<FaltaJustificada> faltas = faltaJustificadaRepository.findByAlumnoAndFecha(alumno,
+                                    dayOfMonth);
+                            if (!faltas.isEmpty()) {
+                                for (FaltaJustificada f : faltas) {
+                                    faltasJMes += f.getValor();
+                                    key = key | (PlanillaKey.JUSTIFICADO << offset);
+                                }
+                            }
+
+                            offset += 4;
                             continue;
                         }
 
@@ -229,9 +280,10 @@ public class PlanillaService implements IPlanillaService {
                                 faltasInjMes += inasistenciaPorTurno;
                             else
                                 faltasInjMes += inasistenciaPorTurno * 0.5f;
-
-                            key += PlanillaKey.TARDANZA << offset;
+                            System.out.println("SUMANDO TARDANZA...");
+                            key = key | (PlanillaKey.TARDANZA << offset);
                         }
+
                         if (asistencia.getRetirado()) {
                             if (asistencia.getHorarioRetiro()
                                     .isBefore(horario.getHorarioEntrada().plusMinutes(VALOR_HORA_MINUTO * 4)))
@@ -239,19 +291,14 @@ public class PlanillaService implements IPlanillaService {
                             else
                                 faltasJMes += inasistenciaPorTurno * 0.5f;
                         }
-
-                        key += PlanillaKey.PRESENTE << offset;
+                        key = key | (PlanillaKey.PRESENTE << offset);
                         offset += 4;
                     }
                 }
 
-                System.out.println("<<<<< KEY >>>>>: " + key);
+                System.out.println("<<<<< KEY >>>>>: " + Integer.toBinaryString(key));
 
-                if (dia.ordinal() == diaSize - 1) {
-                    dia = Dia.LUNES;
-                } else {
-                    dia = Dia.values()[dia.ordinal() + 1];
-                }
+                dia = nextDia(dia);
 
                 keys[indexAlumno][indexDay] = key;
             }
@@ -284,6 +331,46 @@ public class PlanillaService implements IPlanillaService {
         return planillaFileModel;
     }
 
+    private String resolveStringForKey(int key) {
+        StringBuilder sb = new StringBuilder();
+        int offset = 0;
+        int maxHorarios = 1;
+        System.err.println("KEY AT 9th bit: " + (key & 0b100000000));
+        if ((key & 0b111100000) == 0b100000000) {
+            maxHorarios = 2;
+        }
+
+        if (key == PlanillaKey.NO_HABIL) {
+            return "-";
+        }
+
+        for (int i = 0; i < maxHorarios; i++) {
+            switch ((key >> offset) & 0b000001111) {
+                case PlanillaKey.AUSENTE:
+                    sb.append("A");
+                    break;
+
+                case PlanillaKey.AUSENTE | PlanillaKey.JUSTIFICADO:
+                    sb.append("A_j");
+                    break;
+
+                case PlanillaKey.PRESENTE:
+                    sb.append("P");
+                    break;
+
+                case PlanillaKey.PRESENTE | PlanillaKey.TARDANZA:
+                    sb.append("P^t");
+                    break;
+                default:
+                    sb.append("-");
+                    break;
+            }
+            offset += 4;
+        }
+
+        return sb.toString();
+    }
+
     @Override
     public Planilla nuevaPlanillaMensual(Mes mes, int cursoId) {
 
@@ -294,7 +381,64 @@ public class PlanillaService implements IPlanillaService {
             return null;
         }
 
-        System.out.println(fileModel);
+        Optional<Curso> curso = cursoRepository.findById(cursoId);
+
+        if (curso.isEmpty()) {
+            return null;
+        }
+
+        File file = new File(fileModel.getFilename());
+
+        try (FileOutputStream outputStream = new FileOutputStream(file)) {
+
+            StringBuilder sb = new StringBuilder();
+            String header = "Alumnos,";
+
+            sb.append(header);
+
+            // inicializar el archivo
+            for (int i = 0; i < fileModel.getNDias(); i++) {
+                sb.append(i + 1 + ",");
+            }
+
+            sb.append("faltasJMes, faltasInjMes, faltasJ, faltasInj\n");
+
+            header = sb.toString();
+
+            outputStream.write(header.getBytes());
+            outputStream.flush();
+
+            int j = 0, k = 0;
+            sb.delete(0, sb.length());
+
+            for (Alumno alumno : fileModel.getAlumnos()) {
+                sb.append(alumno.getNombreCompleto() + ",");
+
+                for (k = 0; k < fileModel.getNDias(); k++) {
+                    sb.append(resolveStringForKey(fileModel.getKeys()[j][k]) + ",");
+                }
+
+                sb.append(fileModel.getInasistenciasMes()[j][0] + ",");
+                sb.append(fileModel.getInasistenciasMes()[j][1] + ",");
+
+                sb.append(fileModel.getInasistenciasAnio()[j][0] + ",");
+                sb.append(fileModel.getInasistenciasAnio()[j][1]);
+
+                outputStream.write(sb.toString().getBytes());
+                outputStream.flush();
+
+                sb.delete(0, sb.length());
+
+                j++;
+            }
+
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+            return null;
+        }
+
+        planilla.setFileNameFull(file.getAbsolutePath());
 
         return planilla;
     }

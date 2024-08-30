@@ -7,6 +7,8 @@ package eetp612.com.ar.asisbiom.alumnos;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.Year;
+import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -406,78 +408,96 @@ public class AlumnoController {
         return ResponseEntity.notFound().build();
     }
 
+    private Dia nextDia(Dia dia) {
+        if (dia.ordinal() == Dia.DOMINGO.ordinal()) {
+            dia = Dia.LUNES;
+        } else {
+            dia = Dia.values()[dia.ordinal() + 1];
+        }
+
+        return dia;
+    }
+
     @PostMapping("/_testing/init_asistencias")
     public ResponseEntity<?> initAsistencias() {
-    
+
         List<Alumno> alumnos = alumnoRepository.findAll();
-    
+
         for (Alumno alumno : alumnos) {
             System.out.println("Procesando alumno " + alumno.getNombreCompleto());
             List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
             List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
-    
+
             if (found.isEmpty() || horarios.isEmpty())
                 continue;
-    
+
             ConteoAsistencia conteoAsistencia = found.get(0);
-    
+
             conteoAsistencia.setInasistencias1(10f);
             conteoAsistencia.setDiasHabiles(90l);
-    
-            int tardanzas = 0;
-            Random random = new Random();
-            Dia dia = Dia.LUNES;
-            Horario horario = horarios.get(0);
-    
-            horarios.sort((o1, o2) -> o1.getDia().compareTo(o2.getDia()));
-    
-            LocalDate fecha = LocalDate.now().minusMonths(4);
-    
-            int inasistenciasParaGenerar = 10;  // Número total de inasistencias a generar
-            int inasistenciasGeneradas = 0;     // Contador de inasistencias generadas
-    
-            for (int i = 0; i <= 80; i++) {
-                // Aleatoriamente decidir si se debe generar una inasistencia en lugar de una asistencia
-                if (inasistenciasGeneradas < inasistenciasParaGenerar && random.nextInt(10) == 1) {
-                    // Generar una inasistencia
-                    inasistenciasGeneradas++;
-                    fecha = fecha.plusDays(1); // Avanzar un día, porque este día es una inasistencia
-                    continue; // Ir al siguiente día sin crear una asistencia
+
+            int monthsToSubstract = 3;
+            for (monthsToSubstract=3; monthsToSubstract > 0; monthsToSubstract--) {
+
+                int tardanzas = 0;
+                Random random = new Random();
+                LocalDate fecha = LocalDate.now().minusMonths(monthsToSubstract);
+                YearMonth year = YearMonth.of(Year.now().getValue(), fecha.getMonth());
+                Dia dia = Dia.values()[year.atDay(fecha.getDayOfMonth()).getDayOfWeek().ordinal()];
+                Horario horario = horarios.get(0);
+                System.out.println("AlumnoController: EL MES " + fecha.getMonth() + " EMPIEZA EL DÍA " + dia.name());
+
+                horarios.sort((o1, o2) -> o1.getDia().compareTo(o2.getDia()));
+
+                int inasistenciasParaGenerar = 10; // Número total de inasistencias a generar
+                int inasistenciasGeneradas = 0; // Contador de inasistencias generadas
+
+                for (int i = 0; i <= year.lengthOfMonth(); i++) {
+                    if (dia.equals(Dia.SABADO) || dia.equals(Dia.DOMINGO)) {
+                        System.out.println("Salteando día sábado o domingo");
+                        dia = nextDia(dia);
+                        fecha = fecha.plusDays(1);
+                        continue;
+                    }
+                    // Aleatoriamente decidir si se debe generar una inasistencia en lugar de una
+                    // asistencia
+                    if (inasistenciasGeneradas < inasistenciasParaGenerar && random.nextInt(10) == 1) {
+                        // Generar una inasistencia
+                        inasistenciasGeneradas++;
+                        fecha = fecha.plusDays(1); // Avanzar un día, porque este día es una inasistencia
+                        dia = nextDia(dia);
+                        continue; // Ir al siguiente día sin crear una asistencia
+                    }
+
+                    Asistencia asistencia = new Asistencia();
+                    asistencia.setClase(Clase.CATEDRA);
+                    asistencia.setAlumno(alumno);
+                    asistencia.setDia(dia);
+                    asistencia.setRetirado(false);
+                    asistencia.setHorarioEntrada(horario.getHorarioEntrada().minusMinutes(random.nextInt(20)));
+                    asistencia.setHorarioRetiro(horario.getHorarioSalida());
+                    asistencia.setFecha(fecha);
+                    asistencia.setAsistencia(true);
+                    asistencia.setTardanza(false);
+
+                    fecha = fecha.plusDays(1);
+
+                    dia = nextDia(dia);
+
+                    if (random.nextInt(10) == 1 && tardanzas < 10) {
+                        tardanzas++;
+                        asistencia.setTardanza(true);
+                        asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10)));
+                    }
+
+                    asistenciaRepository.save(asistencia);
                 }
-    
-                Asistencia asistencia = new Asistencia();
-                asistencia.setClase(Clase.CATEDRA);
-                asistencia.setAlumno(alumno);
-                asistencia.setDia(dia);
-                asistencia.setRetirado(false);
-                asistencia.setHorarioEntrada(horario.getHorarioEntrada().minusMinutes(random.nextInt(20)));
-                asistencia.setHorarioRetiro(horario.getHorarioSalida());
-                asistencia.setFecha(fecha);
-                asistencia.setAsistencia(true);
-                asistencia.setTardanza(false);
-    
-                fecha = fecha.plusDays(1);
-    
-                if (dia.ordinal() == Dia.VIERNES.ordinal()) {
-                    dia = Dia.LUNES;
-                } else {
-                    dia = Dia.values()[dia.ordinal() + 1];
-                }
-    
-                if (random.nextInt(10) == 1 && tardanzas < 10) {
-                    tardanzas++;
-                    asistencia.setTardanza(true);
-                    asistencia.setHorarioEntrada(horario.getHorarioEntrada().plusMinutes(random.nextInt(10)));
-                }
-    
-                asistenciaRepository.save(asistencia);
+
+                conteoAsistencia.setTardanzas(tardanzas);
+                conteoRepository.save(conteoAsistencia);
             }
-    
-            conteoAsistencia.setTardanzas(tardanzas);
-            conteoRepository.save(conteoAsistencia);
         }
-    
         return ResponseEntity.ok().body("Creado con éxito");
     }
-    
+
 }
