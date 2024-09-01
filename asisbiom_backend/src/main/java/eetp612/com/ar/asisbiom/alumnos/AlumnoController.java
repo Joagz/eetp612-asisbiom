@@ -427,17 +427,22 @@ public class AlumnoController {
             System.out.println("Procesando alumno " + alumno.getNombreCompleto());
             List<ConteoAsistencia> found = conteoRepository.findByAlumno(alumno);
             List<Horario> horarios = horarioRepository.findByCurso(alumno.getCurso());
+            ConteoAsistencia conteoAsistencia = null;
 
-            if (found.isEmpty() || horarios.isEmpty())
+            if (horarios.isEmpty()) {
                 continue;
+            }
 
-            ConteoAsistencia conteoAsistencia = found.get(0);
+            if (found.isEmpty()) {
+                conteoAsistencia = conteoRepository.save(new ConteoAsistencia(alumno));
+            } else
+                conteoAsistencia = found.get(0);
 
             conteoAsistencia.setInasistencias1(10f);
             conteoAsistencia.setDiasHabiles(90l);
 
             int monthsToSubstract = 3;
-            for (monthsToSubstract=3; monthsToSubstract > 0; monthsToSubstract--) {
+            for (monthsToSubstract = 3; monthsToSubstract > 0; monthsToSubstract--) {
 
                 int tardanzas = 0;
                 Random random = new Random();
@@ -445,7 +450,8 @@ public class AlumnoController {
                 YearMonth year = YearMonth.of(Year.now().getValue(), fecha.getMonth());
                 Dia dia = Dia.values()[year.atDay(fecha.getDayOfMonth()).getDayOfWeek().ordinal()];
                 Horario horario = horarios.get(0);
-                System.out.println("AlumnoController: EL MES " + fecha.getMonth() + " EMPIEZA EL DÍA " + dia.name());
+                // System.out.println("AlumnoController: EL MES " + fecha.getMonth() + " EMPIEZA
+                // EL DÍA " + dia.name());
 
                 horarios.sort((o1, o2) -> o1.getDia().compareTo(o2.getDia()));
 
@@ -454,7 +460,7 @@ public class AlumnoController {
 
                 for (int i = 0; i <= year.lengthOfMonth(); i++) {
                     if (dia.equals(Dia.SABADO) || dia.equals(Dia.DOMINGO)) {
-                        System.out.println("Salteando día sábado o domingo");
+                        // System.out.println("Salteando día sábado o domingo");
                         dia = nextDia(dia);
                         fecha = fecha.plusDays(1);
                         continue;

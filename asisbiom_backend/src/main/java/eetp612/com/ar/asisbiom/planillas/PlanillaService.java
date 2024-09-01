@@ -234,7 +234,7 @@ public class PlanillaService implements IPlanillaService {
                 if (foundAsistencia.isEmpty()) {
                     if (!horarios.isEmpty()) {
                         key = PlanillaKey.AUSENTE; // ausente
-
+                        System.out.println("no hay asistencias");
                         List<FaltaJustificada> faltas = faltaJustificadaRepository.findByAlumnoAndFecha(alumno,
                                 dayOfMonth);
                         if (!faltas.isEmpty()) {
@@ -250,18 +250,14 @@ public class PlanillaService implements IPlanillaService {
                 }
 
                 if (foundAsistencia.size() == 1) {
-
-                    System.out.println("Found 1");
                     int offset = 0;
                     System.out.println(horarios);
                     for (Horario horario : horarios) {
                         Asistencia asistencia = foundAsistencia.get(0);
-                        // si el alumno se retira después del horario de salida, significa que
-                        // tenemos que ir al siguiente horario
-                        if (horarios.size() > 1 && isWithin30MinutesRange(asistencia, horario)) {
+
+                        if (horarios.size() > 1 && !isWithin30MinutesRange(asistencia, horario)) {
 
                             key = key | PlanillaKey.CON_TALLER;
-                            System.out.println("DOS HORARIOS");
                             List<FaltaJustificada> faltas = faltaJustificadaRepository.findByAlumnoAndFecha(alumno,
                                     dayOfMonth);
                             if (!faltas.isEmpty()) {
@@ -269,6 +265,8 @@ public class PlanillaService implements IPlanillaService {
                                     faltasJMes += f.getValor();
                                     key = key | (PlanillaKey.JUSTIFICADO << offset);
                                 }
+                            } else {
+                                faltasInjMes += horario.getValorInasistencia();
                             }
 
                             offset += 4;
@@ -296,7 +294,7 @@ public class PlanillaService implements IPlanillaService {
                     }
                 }
 
-                System.out.println("<<<<< KEY >>>>>: " + Integer.toBinaryString(key));
+                // System.out.println("<<<<< KEY >>>>>: " + Integer.toBinaryString(key));
 
                 dia = nextDia(dia);
 
@@ -335,8 +333,8 @@ public class PlanillaService implements IPlanillaService {
         StringBuilder sb = new StringBuilder();
         int offset = 0;
         int maxHorarios = 1;
-        System.err.println("KEY AT 9th bit: " + (key & 0b100000000));
-        if ((key & 0b111100000) == 0b100000000) {
+        // System.err.println("KEY AT 9th bit: " + (key & 0b100000000));
+        if ((key & 0b111100000000) == 0b111100000000) {
             maxHorarios = 2;
         }
 
@@ -345,7 +343,7 @@ public class PlanillaService implements IPlanillaService {
         }
 
         for (int i = 0; i < maxHorarios; i++) {
-            switch ((key >> offset) & 0b000001111) {
+            switch ((key >> offset) & 0b000000001111) {
                 case PlanillaKey.AUSENTE:
                     sb.append("A");
                     break;
@@ -423,6 +421,7 @@ public class PlanillaService implements IPlanillaService {
 
                 sb.append(fileModel.getInasistenciasAnio()[j][0] + ",");
                 sb.append(fileModel.getInasistenciasAnio()[j][1]);
+                sb.append("\n");
 
                 outputStream.write(sb.toString().getBytes());
                 outputStream.flush();
