@@ -125,6 +125,19 @@ public class AlumnoController {
 
         return ResponseEntity.notFound().build();
     }
+    @GetMapping("/asistencias/{alumno_id}")
+    public ResponseEntity<?> findAsistencias(@PathVariable("alumno_id") int id) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
+        if(found.isEmpty())
+        {
+            return ResponseEntity.notFound().build();
+        }
+
+        Alumno alumno = found.get();
+        List<Asistencia> asistencias = asistenciaRepository.findByAlumno(alumno);
+        asistencias.sort((o1, o2) -> o1.getFecha().compareTo(o2.getFecha()));
+        return ResponseEntity.ok().body(asistencias);
+    }
 
     @GetMapping("/stats")
     public List<ConteoAsistencia> findAllAndStats() {

@@ -63,6 +63,16 @@ const ListCurso = ({ curso }: { curso: string }) => {
             variant="contained"
             color="success"
             size="large"
+            href={`${process.env.NEXT_PUBLIC_API_URL}/api/planilla/descarga/${data.id}/6`}
+            endIcon={<Download />}
+          >
+            Descargar Planilla del Mes
+          </Button>
+          <Button
+            className="w-fit"
+            variant="contained"
+            color="success"
+            size="large"
             href={`${process.env.NEXT_PUBLIC_API_URL}/api/estadistica/descarga/${data.id}`}
             endIcon={<Download />}
           >

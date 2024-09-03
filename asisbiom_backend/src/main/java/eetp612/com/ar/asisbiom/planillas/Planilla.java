@@ -11,6 +11,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.ToString;
 
@@ -19,6 +20,7 @@ import lombok.ToString;
 @Table(name = "planillas")
 @Entity
 public class Planilla {
+    
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
@@ -29,6 +31,9 @@ public class Planilla {
 
     @Column(name = "filename_full")
     private String fileNameFull;
+    
+    @Transient
+    private String fileName;
 
     private Mes mes;
 

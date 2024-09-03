@@ -144,7 +144,7 @@ public class PlanillaService implements IPlanillaService {
         float inasistenciasMes[][] = new float[alumnos.size()][2];
         float inasistenciasAnio[][] = new float[alumnos.size()][2];
 
-        planillaFileModel.setFilename(datapath + resolveFilename(curso, mes));
+        planillaFileModel.setFilename(resolveFilename(curso, mes));
         planillaFileModel.setKeys(keys);
         planillaFileModel.setNAlumnos(alumnos.size());
         planillaFileModel.setNDias(dias);
@@ -385,7 +385,7 @@ public class PlanillaService implements IPlanillaService {
             return null;
         }
 
-        File file = new File(fileModel.getFilename());
+        File file = new File(datapath + fileModel.getFilename());
 
         try (FileOutputStream outputStream = new FileOutputStream(file)) {
 
@@ -438,7 +438,7 @@ public class PlanillaService implements IPlanillaService {
         }
 
         planilla.setFileNameFull(file.getAbsolutePath());
-
+        planilla.setFileName(fileModel.getFilename());
         return planilla;
     }
 
