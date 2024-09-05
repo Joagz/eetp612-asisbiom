@@ -85,9 +85,10 @@ comuniquen correctamente, necesitaremos configurar la IP o Host del servidor.
 Para configurar la IP donde se configura el servidor, ejecute:
 
 ```shell
-./install [DIRECCION_IP_SERVIDOR]
+./install [DIRECCION_IP_SERVIDOR] [DIRECTORIO_DE_DATOS]
 ```
 
 DIRECCION_IP_SERVIDOR es la dirección IP del servidor donde se ejecuten los programas.
+DIRECTORIO_DE_DATOS es donde se guardarán los archivos generados por la aplicación.
 
-(Si utiliza un servidor con Ubuntu Server, ejecute ```hostname -I``` y utilice la IP que le proporciona).
+(Si utiliza un servidor con Ubuntu Server, ejecute ```hostname -I``` y utilice la IP que le proporciona, para el directorio de datos puede usar cualquier lugar que no requiera permisos especiales).
