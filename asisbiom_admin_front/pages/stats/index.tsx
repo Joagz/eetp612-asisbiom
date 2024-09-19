@@ -48,14 +48,11 @@ const Stats = () => {
             const numAlumnos = alumnos.length;
 
             setCurva(curvaData.map((data, index) => {
-                // Compute igualdad as a normalized index value from 0 to 1
-                const igualdad = (numAlumnos > 1) ? index / (numAlumnos - 1) : 0;
 
                 return {
                     id: index,
                     Alumno: alumnos[index].nombreCompleto,
                     curva: data,
-                    igualdad: igualdad
                 };
             }));
         });
@@ -110,6 +107,8 @@ const Stats = () => {
                         </div>
                     </>
                 }
+                                <br />
+                <Divider />
                 <Overline>Gráfica del índice de puntualidad</Overline>
                 <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
                     <LineChart
@@ -133,29 +132,8 @@ const Stats = () => {
                 </ResponsiveContainer>
                 <br />
                 <Divider />
-                <Overline>Gráfica ordenada</Overline>
-                <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
-                    <LineChart
-                        width={500}
-                        height={500}
-                        data={sortedData}
-                        margin={{
-                            top: 30,
-                            right: 30,
-                            left: 30,
-                            bottom: 30,
-                        }}
-                    >
-                        <XAxis tick={false} dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
-                        <Legend />
-                        <Line type="basis" dataKey="puntaje" dot={false} stroke="#1133ff" />
-                    </LineChart>
-                </ResponsiveContainer>
-                <Divider />
                 <Overline>Desigualdad de puntaje</Overline>
-                <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
+                <ResponsiveContainer width="100%" height="100%" aspect={1}>
                     <LineChart
                         width={500}
                         height={500}
@@ -172,7 +150,6 @@ const Stats = () => {
                         <Tooltip />
                         <Legend />
                         <Line type="basis" dataKey="curva" dot={false} stroke="#1133ff" />
-                        <Line type="monotone" dataKey="igualdad" dot={false} stroke="#ee9221" />
                     </LineChart>
                 </ResponsiveContainer>
                 <div className="flex w-full justify-between">
@@ -200,7 +177,7 @@ export const DistribucionNormal: React.FC<{ median: number, stddev: number }> = 
     });
 
     return (<>
-        <ResponsiveContainer width="100%" height="100%" aspect={1.5}>
+        <ResponsiveContainer aspect={1.5}>
             <LineChart
                 width={500}
                 height={500}
@@ -247,7 +224,7 @@ export const DistribucionNormal: React.FC<{ median: number, stddev: number }> = 
                 <Line strokeWidth={2} data={data} dot={false} type="monotone" dataKey="y" stroke="#1133ff" />
             </LineChart>
         </ResponsiveContainer>
-        <Slider min={10} max={100} aria-label="Volume" value={lengthSlider} onChange={(e: any) => setLengthSlider(e.target.value)} />
+        <Slider min={10} max={5000} defaultValue={1000} aria-label="Volume" value={lengthSlider} onChange={(e: any) => setLengthSlider(e.target.value)} />
     </>
     );
 };

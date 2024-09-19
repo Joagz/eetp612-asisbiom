@@ -20,7 +20,7 @@ import AlumnoStats from "@/interface/AlumnoStats";
 const ListCurso = ({ curso }: { curso: string }) => {
   const [alumnos, setAlumnos] = useState<AlumnoStats[]>([]);
   const [data, setData] = useState<Curso>({} as Curso);
-
+  
   useEffect(() => {
     const year = curso?.slice(0, 1);
     const division = curso?.slice(1, 2);
@@ -63,7 +63,7 @@ const ListCurso = ({ curso }: { curso: string }) => {
             variant="contained"
             color="success"
             size="large"
-            href={`${process.env.NEXT_PUBLIC_API_URL}/api/planilla/descarga/${data.id}/6`}
+            href={`/alumnos/planillas/${data.id}`}
             endIcon={<Download />}
           >
             Descargar Planilla del Mes

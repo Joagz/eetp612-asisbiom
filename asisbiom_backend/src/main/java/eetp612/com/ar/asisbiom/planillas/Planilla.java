@@ -1,5 +1,9 @@
 package eetp612.com.ar.asisbiom.planillas;
 
+import java.time.LocalDate;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import eetp612.com.ar.asisbiom.cursos.Curso;
 import eetp612.com.ar.asisbiom.general.Mes;
 import jakarta.persistence.Column;
@@ -11,7 +15,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.Data;
 import lombok.ToString;
 
@@ -32,9 +35,13 @@ public class Planilla {
     @Column(name = "filename_full")
     private String fileNameFull;
     
-    @Transient
+    @Column(name = "filename")
     private String fileName;
 
     private Mes mes;
+
+    @JsonFormat(pattern = "yyyy-MM-dd")
+    @Column(name = "fecha")
+    private LocalDate fecha;
 
 }

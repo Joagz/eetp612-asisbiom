@@ -99,9 +99,9 @@ public class StatsService {
         if (alumnos.isEmpty()) {
             return 0.0; // Handle empty list case
         }
-        
+
         List<Double> valores = new ArrayList<>();
-    
+
         for (Alumno alumno : alumnos) {
             valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.LUNES));
             valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.MARTES));
@@ -109,21 +109,21 @@ public class StatsService {
             valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.JUEVES));
             valores.add((double) getDiferenciaHorarioPromedio(alumno, Dia.VIERNES));
         }
-    
+
         Double promedio = valores.stream().mapToDouble(Double::doubleValue).average().orElse(0.0);
-    
+
         return promedio;
     }
-    
+
     public DistribucionNormal distribucionNormal() {
         List<Alumno> alumnos = alumnoRepository.findAll();
         if (alumnos.isEmpty()) {
             return new DistribucionNormal(0.0, 0.0); // Handle empty list case
         }
-    
+
         Double promedio = promedioPuntualidad();
         List<Double> sigma = new ArrayList<>();
-    
+
         // Calculate the squared differences
         for (Alumno alumno : alumnos) {
             sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.LUNES) - promedio, 2));
@@ -132,10 +132,10 @@ public class StatsService {
             sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.JUEVES) - promedio, 2));
             sigma.add(Math.pow(getDiferenciaHorarioPromedio(alumno, Dia.VIERNES) - promedio, 2));
         }
-    
+
         Double variance = sigma.stream().mapToDouble(Double::doubleValue).sum() / (sigma.size() - 1);
         Double stddev = Math.sqrt(variance);
-    
+
         return new DistribucionNormal(promedio, stddev);
     }
 
@@ -355,33 +355,33 @@ public class StatsService {
 
     public List<Float> curvaLorenz() {
         List<Float> puntaje = getPuntajePositivo();
-        List<Float> suma = new ArrayList<>();
-        List<Float> puntos = new ArrayList<>();
+        List<Float> cumulativeSums = new ArrayList<>();
+        List<Float> normalizedPoints = new ArrayList<>();
 
         if (puntaje.isEmpty()) {
-            return null;
+            return Collections.emptyList(); // Return an empty list instead of null
         }
 
         // Compute cumulative sums
-        Float acumulado = 0f;
-        Float total = 0f;
+        Float accumulated = 0.0f;
+        Float total = 0.0f;
         for (Float score : puntaje) {
-            acumulado += score;
-            suma.add(acumulado);
+            accumulated += score;
+            cumulativeSums.add(accumulated);
         }
 
-        total = suma.get(suma.size() - 1);
+        total = accumulated;
 
         if (total == 0) {
-            return null;
+            return Collections.emptyList(); // Return an empty list if total is 0
         }
 
         // Normalize cumulative sums
-        for (Float sum : suma) {
-            puntos.add(sum / total);
+        for (Float sum : cumulativeSums) {
+            normalizedPoints.add(sum / total);
         }
 
-        return puntos;
+        return normalizedPoints;
     }
 
     public Float indiceGini() {
@@ -398,7 +398,7 @@ public class StatsService {
             giniSum.add(x - lorenz.get(i));
         }
 
-        float deltaX = 1f / (float) giniSum.size();
+        float deltaX = (float) (1f / (float) giniSum.size());
 
         for (int j = 0; j < giniSum.size(); j++) {
             gini += giniSum.get(j);

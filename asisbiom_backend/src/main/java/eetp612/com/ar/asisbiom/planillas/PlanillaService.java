@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.LocalDate;
 import java.time.Year;
 import java.time.YearMonth;
 import java.util.Comparator;
@@ -160,8 +161,6 @@ public class PlanillaService implements IPlanillaService {
             YearMonth year = YearMonth.of(Year.now().getValue(), mes.ordinal() + 1);
             Dia dia = Dia.values()[year.atDay(1).getDayOfWeek().ordinal()];
 
-            System.out.println("EL MES " + mes.name() + " EMPIEZA EL DÍA " + dia.name());
-
             for (indexDay = 0; indexDay < dias; indexDay++) {
                 if (!checkDia(mes, indexDay + 1)) {
                     break; // terminamos el loop si sobrepasamos la fecha del día actual
@@ -181,8 +180,10 @@ public class PlanillaService implements IPlanillaService {
                 }
 
                 if (horarios.isEmpty()) {
+                    System.out.println("NO HAY HORARIOS");
                     break;
                 }
+
                 // Ordenar los horarios para que el horario de entrada más cercano esté primero.
                 horarios.sort(new Comparator<Horario>() {
                     @Override
@@ -439,6 +440,7 @@ public class PlanillaService implements IPlanillaService {
 
         planilla.setFileNameFull(file.getAbsolutePath());
         planilla.setFileName(fileModel.getFilename());
+	planilla.setFecha(LocalDate.now());
         return planilla;
     }
 
