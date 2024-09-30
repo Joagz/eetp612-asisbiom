@@ -120,15 +120,7 @@ const SensorById = ({ id }: { id: number }) => {
   }
 
   useEffect(() => {
-    // En caso de que un mensaje tipo REGISTER quede en la pila
-    useApi<MqttMessage[]>({
-      url: `${process.env.NEXT_PUBLIC_API_URL}/api/sensor/last-message/${id}`,
-    }).then((res) => {
-      if (res.data[0].action == MqttCodes.MQTT_ACTION_REGISTER) {
-        register_action(res.data);
-      }
-    });
-
+  
     const client = mqtt.connect(
       process.env.NEXT_PUBLIC_MQTT_SERVER_URI!,
       options
