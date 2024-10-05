@@ -3,7 +3,6 @@ import { PrincipalLayout } from "@/components";
 import mqtt from "mqtt";
 import { useApi } from "@/hooks/useApi";
 import Alumno from "@/interface/Alumno";
-import MqttMessage from "@/interface/MqttMessage";
 import User from "@/interface/User";
 import Roles from "@/interface/Roles";
 import { Close, Done, ExitToApp, Warning } from "@mui/icons-material";
@@ -119,8 +118,7 @@ const SensorById = ({ id }: { id: number }) => {
       });
   }
 
-  useEffect(() => {
-  
+  useEffect(() => { 
     const client = mqtt.connect(
       process.env.NEXT_PUBLIC_MQTT_SERVER_URI!,
       options
@@ -138,6 +136,8 @@ const SensorById = ({ id }: { id: number }) => {
         body: message.toString(),
         method: "POST",
       }).then((res) => {
+        console.log(message.toString())
+
         switch (res.data.action) {
           case MqttCodes.MQTT_ACTION_COMPLETED:
             setMessage("Registrado con éxito! Bienvenido/a");
