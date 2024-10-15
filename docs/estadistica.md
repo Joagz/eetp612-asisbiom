@@ -20,6 +20,7 @@
   - [Cómo medir la puntualidad en una escuela](#cómo-medir-la-puntualidad-en-una-escuela)
 - [Distribución normal de puntualidad](#distribución-normal-de-puntualidad)
 - [Índice de Gini](#índice-de-gini)
+- [Segmentación por grupos y probabilidades](#segmentación-por-grupos-y-probabilidades)
 - [Implementación técnica](#implementación-técnica)
   - [Tiempo de ejecución](#tiempo-de-ejecución)
   - [Autorización y acceso a la información](#autorización-y-acceso-a-la-información)
@@ -162,7 +163,7 @@ En base a esto podemos graficar una curva de Lorenz.
 
 Suponemos que tenemos una lista de valores, con alumnos de $1$ al $n$, ordenados en base a $I_n$ de menor a mayor, esto quiere decir que el alumno con el puntaje más bajo es el alumno 1, y así.
 
-![image 1](./images/1.png) 
+![Conjunto de puntos no normalizado](./images/1.png) 
 (los valores de $y_1$ corresponden $I_n$)
 
 En este caso despreciamos valores negativos, suponiendo que todos los alumnos son puntuales o llegan temprano. Si tenemos valores negativos (alumnos que llegaron más tarde), transformaremos los valores de $y_1$ sumando $y_1 - S[1]$, siendo $S$ la lista de valores, solo si el primer valor es negativo.
@@ -208,13 +209,13 @@ luego dividimos la lista obtenida por el valor más alto de $I_n$. Si graficamos
 
 La curva de Lorenz es la representación gráfica de la distribución de una variable de interés, como puede ser la renta o los ingresos, en una población, o en nuestro caso, la diferencia entre el horario de llegada de los alumnos y el horario de llegada estipulado. 
 
-![image 3](./images/3.png) 
+![Conjunto de puntos normalizados](./images/3.png) 
 
 en la imagen representamos la suma como una función de x, donde x es el número de iteraciones en la suma. Podemos graficar los puntos en $0\leq x \leq1$ dividiendo el índice del alumno $x_1$ por  el número de elementos de la lista $n$.
 
 Luego vamos a aproximar estos puntos, modelando una función cúbica.
 
-![image 4](./images/4.png) 
+![Modelado de una función cúbica para la curva de Lorenz](./images/4.png) 
 
 Una curva perfectamente distribuida, es decir, cada alumno entra al mismo horario, se representaría con $f(x)=x$, o sea, una recta con pendiente $1$. Si revisamos la definición anteriormente dada, esto es cierto, ya que si tenemos una lista $l = \{1,1,1,1 ..., 1\}$, el resultado sería $r=\{ 1/n, 2/n, 3/n, ..., n/n \}$. Es decir, una recta a 45 grados. (Véase la figura 5 y 6).
 
@@ -268,7 +269,7 @@ $$
 P(h_1<X<h_2) = \int_{h1}^{h2}{f(h)\space dh}
 $$
 
-![image 8](./images/8.png) 
+![Representación gráfica de la integral dada](./images/8.png) 
 
 Podemos ver que la función está mayormente del lado negativo de la abcisa, esto debido a que la mayoría de los alumnos llega temprano. A su vez comprobamos que $\max{f(x)} = f(\mu)$ donde $\mu < 0$, es decir, en promedio los alumnos llegan temprano.
 
@@ -276,11 +277,11 @@ Podemos ver que la función está mayormente del lado negativo de la abcisa, est
 
 El índice de Gini compara la curva de Lorenz que generamos, con una distribución perfecta, lo que hacemos es hallar el área entre la curva $f(x)$ y $g(x)$:
 
-![image 5](./images/5.png) 
+![Representación gráfica de la desigualdad en la distribución](./images/5.png) 
 
 En esta imagen comparan los ingresos de una población, sin embargo vamos a investigar la desigualdad en los horarios de llegada de los alumnos. Por ejemplo, en una escuela que está bien ordenada, el total de alumnos debería llegar un horario similar, en este caso la curva se va a asemejar a la "línea de igualdad", mientras que en el caso de una escuela que tiene un porcentaje de alumnos que llega muy temprano y otro que llega muy tarde, le corresponde una curva más empinada. Es necesario aclarar que esta curva no mide si una escuela es puntual o no, lo que nos indica es si los alumnos de dicha escuela llegan al mismo tiempo, es decir, si los alumnos llegan siempre tarde la curva será casi recta, y podemos pensar que la escuela tiene una buena puntualidad aunque esto no sea cierto. Por eso debemos comparar todos los datos, incluyendo sobre todo el promedio del horario de llegada, el cuál nos dará una condición para determinar la puntualidad de la escuela.
 
-![image 6](./images/6.png) 
+![Curva de Lorenz en Desmos](./images/6.png) 
 
 Continuando con lo anteriormente dicho, el índice de Gini nos sirve para medir la desigualdad, éste índice tiene un rango entre $0\leq x \leq 1/2$ ya que puede ser a lo más el área de un triángulo rectangulo cuyos catetos son 1 y su hipotenusa es $\sqrt{2}$, o cero.
 
@@ -304,10 +305,48 @@ Entonces, el índice de Gini es aproximadamente $G=0.477773693$.
 
 La interpretación de éste resultado nos puede dar una pista. Como se menciona, no nos detalla en absoluto si los alumnos son puntuales, pero vamos a suponer que una escuela tiene una diferencia en el horario de llegada, en promedio, de 5 minutos de anticipacion. Ahora, en base a este dato, podemos calcular el índice de Gini, por ejemplo,  $G \approx 0.07$. En este caso se puede decir que la escuela es puntual ya que en promedio los alumnos llegan temprano, y además la distribución de sus horarios de llegada es bastante uniforme (una curva casi recta).
 
-![image 7](./images/7.png) 
+![Distribución uniforme de horarios de llegada](./images/7.png) 
 (Se aproximó el valor por debajo).
 
 En resumen, si queremos saber cómo se distribuyen los horarios de llegada de una escuela, el método anterior puede ser útil.
+
+# Segmentación por grupos y probabilidades
+
+Se supone que se desea estudiar el comportamiento de grupos de alumnos. Se comienza aprovechando una de las **ventajas principales de la aplicación**, que es el registro de los datos. Simplemente se busca un conjunto de alumnos que pertenezcan a una cierta característica, por ejemplo:
+
+Se quiere explorar la probabilidad de que un alumno llegue tarde, dado que éste está cursando el segundo año de la escuela. La probabilidad condicional es el tema que se va a tratar, se ha de calcular con la siguiente regla
+
+$$
+P(B|A)=\frac{P(A\cap B)}{P(A)}
+$$
+
+Donde $P(A \cap B) = P(B)\cdot P(A | B)$. Para comprobarlo se usa el mismo razonamiento, se tiene $P(A|B)= \frac{P(A \cup B)}{P(B)}$, de donde se puede despejar $P(A \cup B$).
+
+$P(B|A)$ se denota "Probabilidad de B dado A", es decir, qué probabilidad hay de que B suceda si A es cierto. El siguiente *diagrama de Venn* da una representación gráfica de la situación,
+
+![Diagrama de dos probabilidades A y B](./images/venn.png) 
+
+El diagrama describe dos probabilidades *A* y *B*, la intersección ($Z = A \cap B$) indica la probabilidad de que ámbos eventos pasen (sean o no simultáneos, eso no se indica aquí). La formula anterior es el ratio entre *Z* e *Y*, es decir, informalmente: "si *A* está más «dentro» de *B* entonces la intersección es mayor, por lo tanto la probabilidad de ámbos eventos ocurriendo es mayor. Si se da que la intersección contiene la mayoría de los elementos de *B*, es decir $P(A \cap B) > P(B\setminus A \cap B)$ (o como en el diagrama, $Z > Y$), entonces sucede que *B* es un evento *más dependiente* de *A*, en el caso contrario es *menos dependiente*, y en el caso $A \cap B = \emptyset$ se dice que *B no depende de A*. Por lo que $P(B|A) = P(B)$".
+
+Dada esa introducción, podemos estudiar dos eventos $T = "Evento \space de \space tardanza"$ y $E = "Alumno \space cursa \space segundo \space año"$. Si bien es discutible el hecho de que estos eventos sean independientes entre sí, se tiene que en la realidad puede pasar que un curso llegue tarde de manera habitual, por lo que se estudiarán como si fueran dependientes.
+
+Se quiere hallar $P(T|E) = \frac{P(T)\cdot P(E|T)}{P(E)}$, es decir, la probabilidad de que un alumno llegue tarde *dado que* cursa segundo año. Si en una escuela se tiene una probabilidad total de tardanza (que se puede escribir $\frac{total \space de \space tardanza}{total \space asistencias}$) de $P(T) = 0.3$ y se tiene que $P(E) = \frac{N°\space de \space alumnos\space de \space segundo \space año}{total\space alumnos}$ y es $P(E)=0.15$, se sabe que la probabilidad $P(E|T) = \frac{tardanzas\space  de \space alumnos\space  de\space segundo\space año}{tardanzas\space  totales}$, y se tiene $P(E|T) = 0.18$.
+
+Resumiendo:
+
+$P(T) = 0.3$
+ 
+$P(E)=0.15$
+
+$P(E|T) = 0.18$
+
+Entonces, si calculamos la probabilidad final:
+
+$P(T|E) = \frac{P(T)\cdot P(E|T)}{P(E)} = \frac{0.3\cdot 0.18}{0.15} = 0.36$
+
+Es decir, un 36% de probabilidad de que el alumno llegue tarde si cursa segundo año.
+
+Más ejemplos así pueden darse para cualquier variable (tardanza, asistencia, inasistencia, retiros, etc.) y cualquier segmento o grupo (año, profesor, alumno, etc.).
 
 # Implementación técnica
 
