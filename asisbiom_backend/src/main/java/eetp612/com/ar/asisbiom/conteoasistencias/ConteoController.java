@@ -111,7 +111,6 @@ public class ConteoController {
                     boolean presente = false;
                     boolean tardanza = false;
                     boolean retirado = false;
-                    boolean enabled = false;
 
                     List<Asistencia> asistencias = asistenciaRepository.findByAlumnoAndFecha(alumno, LocalDate.now());
 
@@ -119,12 +118,11 @@ public class ConteoController {
                         Asistencia asistencia = asistencias.get(0);
                         presente = true;
                         tardanza = asistencia.getTardanza();
-                        enabled = asistencia.isEnabled();
                         retirado = asistencia.getRetirado();
                     }
 
                     InnerConteoAsistencia innerConteoAsistencia = new InnerConteoAsistencia(alumno.getId(),
-                            alumno.getNombreCompleto(), tardanza, retirado, presente && enabled,
+                            alumno.getNombreCompleto(), tardanza, retirado, presente,
                             conteoAsistencia.getDiasHabiles(),
                             conteoAsistencia.getInasistencias1(), conteoAsistencia.getInasistencias2(),
                             conteoAsistencia.getInasistencias3());

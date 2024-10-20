@@ -110,6 +110,7 @@ public class MqttService {
         List<Horario> horarios = horarioRepository.findByCursoAndDiaOrderByDiaAsc(alumno.getCurso(),
                 DateUtils.getDay());
         Asistencia newAsistencia = new Asistencia();
+        newAsistencia.setEnabled(true);
         System.out.println(horarios);
         // Si no hay horarios, volver.
         if (horarios.isEmpty()) {

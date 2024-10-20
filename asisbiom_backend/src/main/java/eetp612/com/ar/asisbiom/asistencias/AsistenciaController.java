@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -61,5 +62,15 @@ public class AsistenciaController {
         }
 
         return listado;
+    }
+
+    @GetMapping("/{alumno}")
+    public List<Asistencia> getAsistenciasByAlumno(@PathVariable("alumno") Integer id) {
+        Optional<Alumno> found = alumnoRepository.findById(id);
+        if(!found.isPresent())
+        {
+            return null;
+        }
+        return asistenciaRepository.findByAlumno(found.get());
     }
 }
