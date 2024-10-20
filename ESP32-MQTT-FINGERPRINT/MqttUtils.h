@@ -14,7 +14,7 @@
 
 #define MQTT_TOPIC_SENSOR_IN "mqtt_sensor_in"
 #define MQTT_TOPIC_SENSOR_OUT "mqtt_sensor_out"
-
+#define MQTT_TOPIC_IMAGE_CAPTURE "mqtt_sensor_cam"
 typedef struct {
     uint32_t message_id;
     uint32_t sensor_id;

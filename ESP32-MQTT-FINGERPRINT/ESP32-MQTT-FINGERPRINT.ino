@@ -247,6 +247,19 @@ void send_mqtt_message_out(mqtt_message message)
 
   client.publish(MQTT_TOPIC_SENSOR_OUT, hex_message);
 }
+
+send_mqtt_image_capture(uint32_t id_alumno)
+{
+	char id_alumno_str[4];
+	id_alumno_str[0] = (id_alumno >> 24) & 0xff;
+	id_alumno_str[1] = (id_alumno >> 16) & 0xff;
+	id_alumno_str[2] = (id_alumno >> 8)  & 0xff;
+	id_alumno_str[3] = (id_alumno)	     & 0xff;
+
+	client.publish(MQTT_TOPIC_IMAGE_CAPTURE, id_alumno_str);
+}
+
+
 void initMqttClient()
 {
     Serial.println("Inicializando cliente MQTT");
@@ -454,6 +467,7 @@ void loop()
     message.student_id = id;
     message.sensor_id = SENSOR_ID;
     send_mqtt_message_out(message);
+    send_mqtt_image_capture(id);
   }
 #endif
 }

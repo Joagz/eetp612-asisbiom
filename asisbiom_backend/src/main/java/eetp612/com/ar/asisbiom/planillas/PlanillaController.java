@@ -29,7 +29,6 @@ public class PlanillaController {
 
     @Autowired
     private PlanillaService service;
-
     @Autowired
     private PlanillaRepository repository;
     @Autowired
